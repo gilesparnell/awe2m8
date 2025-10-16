@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Demos - AWE2M8</title>
+    <style>
+        body {
+            background: #000;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00ff00;
+        }
+
+        .logo {
+            font-size: 2em;
+            color: #00ff00;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .demo-section {
+            max-width: 1200px;
+            margin: 80px auto;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .demo-section h2 {
+            font-size: 2.5em;
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .demo-section p {
+            font-size: 1.2em;
+            color: #ccc;
+            margin-bottom: 50px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .demo-card {
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 40px 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+            background: linear-gradient(145deg, #0d0d0d, #1a1a1a);
+        }
+
+        .demo-card h3 {
+            color: #00ff00;
+            font-size: 1.5em;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+        }
+
+        .demo-card p {
+            color: #aaa;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .demo-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .demo-section h2 {
+                font-size: 2em;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="logo">AWE2M8.ai</a>
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <div class="demo-section">
+        <h2>Explore Client Demos</h2>
+        <p>Select a demo to see our AI in action for different use cases</p>
+        
+        <div class="demo-grid">
+            <a href="demos/database-reactivation.html" class="demo-card">
+                <div class="demo-icon">🔄</div>
+                <h3>Database Reactivation</h3>
+                <p>Re-engage dormant leads and convert cold contacts into warm opportunities with intelligent AI follow-up.</p>
+            </a>
+
+            <a href="demos/ecommerce.html" class="demo-card">
+                <div class="demo-icon">🛒</div>
+                <h3>eCommerce</h3>
+                <p>Boost sales with AI-powered shopping assistance, cart recovery, and personalized product recommendations.</p>
+            </a>
+
+            <a href="demos/speed-to-lead.html" class="demo-card">
+                <div class="demo-icon">⚡</div>
+                <h3>Speed to Lead</h3>
+                <p>Capture and respond to leads instantly, reducing response time from hours to seconds.</p>
+            </a>
+
+            <a href="demos/voice-ai.html" class="demo-card">
+                <div class="demo-icon">🎙️</div>
+                <h3>Voice AI</h3>
+                <p>Experience natural voice conversations that qualify leads, book appointments, and answer questions 24/7.</p>
+            </a>
+
+            <a href="demos/document-collection.html" class="demo-card">
+                <div class="demo-icon">📄</div>
+                <h3>Document Collection</h3>
+                <p>Stop chasing clients for paperwork. AI automatically tracks and collects all required documents.</p>
+            </a>
+
+            <a href="demos/reviews-ai.html" class="demo-card">
+                <div class="demo-icon">⭐</div>
+                <h3>Reviews AI</h3>
+                <p>Turn satisfied customers into 5-star reviews on Google, Trustpilot, and more automatically.</p>
+            </a>
+
+            <a href="demos/out-of-hours.html" class="demo-card">
+                <div class="demo-icon">🌙</div>
+                <h3>Out of Hours AI</h3>
+                <p>Never miss a lead. Capture opportunities 24/7 across all time zones while you sleep.</p>
+            </a>
+
+            <a href="demos/ai-receptionist.html" class="demo-card">
+                <div class="demo-icon">📞</div>
+                <h3>AI Receptionist</h3>
+                <p>Professional call handling, routing, and appointment scheduling with a natural AI voice.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
