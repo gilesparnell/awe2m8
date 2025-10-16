@@ -4,130 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Receptionist Demo - AWE2M8</title>
+    <link rel="stylesheet" href="../css/demo-styles.css">
     <style>
-        body {
-            background: #000;
-            font-family: Arial, sans-serif;
-            color: #fff;
-            margin: 0;
-            padding: 0;
+        /* Override for single button - center it */
+        .cta-container {
+            display: block;
         }
-
-        .header {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #00ff00;
-        }
-
-        .logo {
-            font-size: 2em;
+        
+        .stat-link {
             color: #00ff00;
-            font-weight: bold;
             text-decoration: none;
+            border-bottom: 1px dotted #00ff00;
         }
-
-        .back-btn {
-            background: transparent;
-            border: 2px solid #00ff00;
-            color: #00ff00;
-            padding: 10px 25px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: #00ff00;
-            color: #000;
-        }
-
-        .hero {
-            max-width: 1200px;
-            margin: 80px auto;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        .hero h1 {
-            font-size: 3em;
-            color: #00ff00;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .hero p {
-            font-size: 1.3em;
-            color: #ccc;
-            margin-bottom: 50px;
-            line-height: 1.6;
-        }
-
-        .demo-container {
-            max-width: 800px;
-            margin: 60px auto;
-            padding: 40px;
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-            border: 2px solid #00ff00;
-            border-radius: 15px;
-        }
-
-        .orb-placeholder {
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 255, 0, 0.05);
-            border: 2px dashed #00ff00;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .orb-placeholder p {
-            color: #00ff00;
-            font-size: 1.2em;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin: 60px auto;
-            max-width: 1200px;
-            padding: 0 20px;
-        }
-
-        .feature-card {
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .feature-card h3 {
-            color: #00ff00;
-            font-size: 1.3em;
-            margin-bottom: 15px;
-        }
-
-        .feature-card p {
-            color: #aaa;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2em;
-            }
+        
+        .stat-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/logo.png" alt="AWE2M8.ai" style="height: 35px;">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
@@ -138,14 +36,33 @@
     </div>
 
     <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">Talk to Our AI Receptionist</h2>
+        <h2 style="color: #00ff00; text-align: center; margin: 0 0 20px 0; font-size: 1.3em;">How It Works</h2>
+        <p style="color: #ccc; text-align: center; line-height: 1.6; margin: 0;">
+            When someone calls your business, our AI receptionist answers instantly with a personalized greeting. It understands natural speech, asks qualifying questions, and intelligently routes calls to the right person or department. Appointments are booked directly into your calendar, messages are captured accurately, and FAQs are answered instantly—all while maintaining a professional, friendly tone that reflects your brand.
+        </p>
+
+        <div class="section-divider"></div>
+
+        <h2 style="color: #00ff00; text-align: center; margin: 0 0 20px 0; font-size: 1.3em;">Why This Is Critical</h2>
+        <p style="color: #ccc; text-align: center; line-height: 1.6; margin: 0;">
+            Missed calls are missed revenue. Studies show that <a href="https://www.cbsnews.com/news/is-it-time-to-hang-up-on-voicemail/" target="_blank" class="stat-link">80% of callers won't leave a voicemail*</a>, and <a href="https://www.numa.com/blog/22-business-phone-statistics" target="_blank" class="stat-link">67% won't listen to voicemails from business contacts*</a>. Every missed call is a potential customer choosing your competitor instead. An AI receptionist ensures you never miss an opportunity—answering every call instantly, 24/7, while freeing your team to focus on high-value work instead of repetitive phone tasks.
+        </p>
+    </div>
+
+    <div class="demo-container" style="padding: 15px 20px;">
+        <h2 style="color: #00ff00; text-align: center; margin: 0 0 10px 0; font-size: 1.1em;">Talk to Our AI Receptionist</h2>
         
-        <div class="orb-placeholder">
-            <p>🎙️ Assistable.ai Voice Orb Goes Here</p>
+        <div style="display: flex; justify-content: center; align-items: center; margin: 8px 0;">
+            <iframe 
+                src="https://iframes.ai/o/1760625993791x317755806045175800?color=10A37F&icon="
+                allow="microphone"
+                style="width: 100%; max-width: 300px; height: 100px; border: none;"
+                id="assistantFrame"
+            ></iframe>
         </div>
         
-        <p style="text-align: center; color: #aaa; margin-top: 20px;">
-            Call our AI receptionist and experience professional call handling
+        <p style="text-align: center; color: #aaa; margin: 8px 0 0 0; font-size: 0.85em; line-height: 1.3;">
+            This virtual receptionist has been trained on a Hair and Beauty Salon
         </p>
     </div>
 
@@ -163,5 +80,19 @@
             <p>Personalized scripts that match your brand voice and business hours</p>
         </div>
     </div>
+
+    <script>
+        const frame = document.getElementById('assistantFrame');
+        frame.addEventListener('load', () => {
+            navigator.permissions.query({ name: 'microphone' })
+                .then(result => {
+                    if (result.state === 'granted') {
+                        console.log('Microphone access already granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('User will be prompted for microphone access');
+                    }
+                });
+        });
+    </script>
 </body>
 </html>
