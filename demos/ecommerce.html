@@ -117,6 +117,17 @@
             box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
         }
 
+        .orb-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+        }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -178,11 +189,18 @@
     </div>
 
     <div class="cta-container">
-        <a href="https://agentdemo.ai/welcome/hKfVPa3zr7" target="_blank" class="card-link">
-            <div style="font-size: 2.2em; margin-bottom: 8px;">🎙️</div>
-            <h2 style="color: #00ff00; margin: 0 0 5px 0; font-size: 1.2em;">Try it with Voice</h2>
-            <p style="color: #aaa; margin: 0; font-size: 0.85em;">Call our AI assistant</p>
-        </a>
+        <div class="orb-container">
+            <h2 style="color: #00ff00; margin: 0 0 10px 0; font-size: 1.2em;">Try it with Voice</h2>
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                <iframe 
+                    src="https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon="
+                    allow="microphone"
+                    style="width: 100%; height: 200px; border: none;"
+                    id="assistantFrame"
+                ></iframe>
+            </div>
+            <p style="color: #aaa; margin: 10px 0 0 0; font-size: 0.85em;">Click to call our AI</p>
+        </div>
 
         <a href="https://agentdemo.ai/welcome/hKfVPa3zr7" target="_blank" class="card-link">
             <div style="font-size: 2.2em; margin-bottom: 8px;">💬</div>
@@ -205,5 +223,19 @@
             <p>Answer product questions, track orders, and handle returns any time of day</p>
         </div>
     </div>
+
+    <script>
+        const frame = document.getElementById('assistantFrame');
+        frame.addEventListener('load', () => {
+            navigator.permissions.query({ name: 'microphone' })
+                .then(result => {
+                    if (result.state === 'granted') {
+                        console.log('Microphone access already granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('User will be prompted for microphone access');
+                    }
+                });
+        });
+    </script>
 </body>
 </html>
