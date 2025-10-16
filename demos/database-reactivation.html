@@ -73,20 +73,21 @@
             border-radius: 15px;
         }
 
-        .orb-placeholder {
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .card-link {
+            display: block;
+            text-decoration: none;
+            text-align: center;
+            padding: 80px 40px;
             background: rgba(0, 255, 0, 0.05);
-            border: 2px dashed #00ff00;
-            border-radius: 10px;
-            margin: 20px 0;
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            transition: all 0.3s ease;
         }
 
-        .orb-placeholder p {
-            color: #00ff00;
-            font-size: 1.2em;
+        .card-link:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 255, 0, 0.3);
         }
 
         .features {
@@ -127,26 +128,22 @@
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/logo.png" alt="AWE2M8.ai" style="height: 40px;">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero">
         <h1>🔄 Database Reactivation</h1>
-        <p>Wake up your dormant database and turn cold leads into hot opportunities. Our AI automatically re-engages past contacts with personalized outreach that feels natural and timely.</p>
+        <p>Wake up your dormant database and turn cold leads into hot opportunities. Our AI automatically re-engages past contacts with personalized SMS outreach that feels natural and timely.</p>
     </div>
 
     <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">Try the AI Assistant</h2>
-        
-        <div class="orb-placeholder">
-            <p>🎙️ Assistable.ai Voice Orb Goes Here</p>
-        </div>
-        
-        <p style="text-align: center; color: #aaa; margin-top: 20px;">
-            Click the orb and speak naturally to experience how our AI reactivates dormant leads
-        </p>
+        <a href="https://agentdemo.ai/welcome/yhp9RN3qdl" target="_blank" class="card-link">
+            <div style="font-size: 4em; margin-bottom: 20px;">💬</div>
+            <h2 style="color: #00ff00; margin: 0 0 15px 0; font-size: 1.8em;">Launch SMS Demo</h2>
+            <p style="color: #aaa; margin: 0; font-size: 1.1em;">Click to start a text conversation with our AI assistant</p>
+        </a>
     </div>
 
     <div class="features">
