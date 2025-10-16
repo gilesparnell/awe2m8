@@ -69,7 +69,8 @@ body {
 
 .video-container {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    padding-bottom: 56.25%;
+    /* 16:9 aspect ratio */
     height: 0;
     overflow: hidden;
     border-radius: 10px;
@@ -160,7 +161,7 @@ body {
     .hero h1 {
         font-size: 1.8em;
     }
-    
+
     .cta-container {
         grid-template-columns: 1fr;
     }
@@ -261,4 +262,183 @@ body {
         grid-template-columns: 1fr;
         gap: 12px;
     }
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+    min-height: 100vh;
+}
+
+.header-bar {
+    background: #000;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #00ff00;
+}
+
+.header-bar a {
+    color: #00ff00;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.header-bar img {
+    height: 35px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+h1 {
+    color: #fff;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+h2 {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #fff;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 20px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.demo-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.demo-tab {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.demo-tab.active {
+    background: #10b981;
+}
+
+.demo-tab:hover {
+    background: rgba(16, 185, 129, 0.8);
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-download {
+    background: #10b981;
+}
+
+.btn-copy {
+    background: #3b82f6;
+}
+
+.btn-copy.copied {
+    background: #10b981;
+}
+
+.btn-upload {
+    background: #f59e0b;
+}
+
+.tip-box {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tip-box p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+input[type="file"] {
+    display: none;
 }

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews AI Demo - AWE2M8</title>
     <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
@@ -15,39 +17,92 @@
     </div>
 
     <div class="hero hero-compact">
-        <h1>⭐ Reviews AI Assistant</h1>
-        <p>Turn happy customers into 5-star reviews automatically. Our AI reaches out at the perfect moment, guides customers to Google, Trustpilot, or your preferred platform, and increases your review volume by 10x.</p>
+        <h1 id="hero-title">⭐ Reviews AI Assistant</h1>
+        <p id="hero-description">Loading...</p>
     </div>
 
     <div class="three-column-grid">
         <!-- Column 1: How & Why -->
         <div class="column-box">
             <h3>How It Works</h3>
-            <p>Our AI detects when a customer has a positive experience, then automatically sends a personalized request to leave a review. The customer is guided through a simple process that takes less than 30 seconds. Negative feedback is routed privately to prevent public complaints.</p>
-            
+            <p id="how-it-works">Loading...</p>
+
             <h3 style="margin-top: 15px;">Why This Matters</h3>
-            <p>Reviews build credibility and drive SEO rankings. But most businesses struggle to consistently ask for them. Our AI ensures every happy customer is invited to leave a review at the perfect moment—while unhappy customers are given a private channel to share concerns before going public.</p>
+            <p id="why-it-matters">Loading...</p>
         </div>
 
-        <!-- Column 2: Video Placeholder -->
+        <!-- Column 2: Video -->
         <div class="column-box">
             <h2>Watch It In Action</h2>
-            <div class="video-in-column" style="background: #ff0000; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em;">
-                VIDEO PLACEHOLDER
+            <div class="video-in-column" id="video-container">
+                <div
+                    style="background: #ff0000; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em; height: 100%;">
+                    VIDEO PLACEHOLDER
+                </div>
             </div>
         </div>
 
         <!-- Column 3: Try It -->
         <div class="column-box">
             <div class="cta-in-column">
-                <div style="font-size: 2.5em; margin-bottom: 12px;">⭐</div>
-                <h2 style="margin-bottom: 8px;">Try Review Demo</h2>
-                <p style="margin-bottom: 20px;">Click to experience what your customers see when leaving a review</p>
-                <a href="https://agentdemo.ai/welcome/R6rEp4gCwe" target="_blank" class="card-link" style="display: inline-block; padding: 12px 30px;">
+                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">⭐</div>
+                <h2 id="cta-title" style="margin-bottom: 8px;">Try Review Demo</h2>
+                <p id="cta-description" style="margin-bottom: 20px;">Loading...</p>
+                <a id="demo-link" href="#" target="_blank" class="card-link"
+                    style="display: inline-block; padding: 12px 30px;">
                     Try It Now →
                 </a>
             </div>
         </div>
     </div>
+
+    <script>
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.reviewsAI;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+                document.getElementById('cta-emoji').textContent = content.emoji;
+                document.getElementById('cta-title').textContent = content.ctaButtonText;
+                document.getElementById('cta-description').textContent = content.ctaDescription;
+
+                // Update demo link URL
+                if (content.demoUrl && content.demoUrl.trim() !== '') {
+                    document.getElementById('demo-link').href = content.demoUrl;
+                }
+
+                // Update video if URL exists
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+    </script>
 </body>
+
 </html>

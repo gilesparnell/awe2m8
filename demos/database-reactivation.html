@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Reactivation Demo - AWE2M8</title>
     <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
@@ -15,39 +17,90 @@
     </div>
 
     <div class="hero hero-compact">
-        <h1>🔄 Database Reactivation</h1>
-        <p>Wake up your dormant database and turn cold leads into hot opportunities. Our AI automatically re-engages past contacts with personalized SMS outreach that feels natural and timely.</p>
+        <h1 id="hero-title">🔄 Database Reactivation</h1>
+        <p id="hero-description">Loading...</p>
     </div>
 
     <div class="three-column-grid">
         <!-- Column 1: How & Why -->
         <div class="column-box">
             <h3>How It Works</h3>
-            <p>Our AI identifies dormant leads in your database, then sends personalized SMS messages at optimal times. Each message is tailored to the contact's history, with intelligent follow-up until they respond or convert.</p>
-            
+            <p id="how-it-works">Loading...</p>
+
             <h3 style="margin-top: 15px;">Why This Matters</h3>
-            <p>Your database holds hidden revenue. Most businesses ignore past leads, leaving money on the table. Our AI reactivates these contacts automatically, turning cold databases into warm pipelines without any manual effort.</p>
+            <p id="why-it-matters">Loading...</p>
         </div>
 
         <!-- Column 2: Video -->
         <div class="column-box">
             <h2>See It In Action</h2>
-            <div class="video-in-column">
-                <iframe src="https://drive.google.com/file/d/1LDp3Lb6HBBOkq2ywb1wr_voVazzP9jpN/preview" allow="autoplay"></iframe>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/1LDp3Lb6HBBOkq2ywb1wr_voVazzP9jpN/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
 
         <!-- Column 3: CTA -->
         <div class="column-box">
             <div class="cta-in-column">
-                <div style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
-                <h2 style="margin-bottom: 8px;">Launch SMS Demo</h2>
-                <p style="margin-bottom: 20px;">Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'</p>
-                <a href="https://agentdemo.ai/welcome/hKfVPa3zr7" target="_blank" class="card-link" style="display: inline-block; padding: 12px 30px;">
+                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
+                <h2 id="cta-title" style="margin-bottom: 8px;">Launch SMS Demo</h2>
+                <p id="cta-description" style="margin-bottom: 20px;">Loading...</p>
+                <a id="demo-link" href="#" target="_blank" class="card-link"
+                    style="display: inline-block; padding: 12px 30px;">
                     Try It Now →
                 </a>
             </div>
         </div>
     </div>
+
+    <script>
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.databaseReactivation;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+                document.getElementById('cta-emoji').textContent = content.emoji;
+                document.getElementById('cta-title').textContent = content.ctaButtonText;
+                document.getElementById('cta-description').textContent = content.ctaDescription;
+
+                // Update demo link URL
+                if (content.demoUrl && content.demoUrl.trim() !== '') {
+                    document.getElementById('demo-link').href = content.demoUrl;
+                }
+
+                // Update video if URL exists in JSON (overrides hardcoded one)
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+    </script>
 </body>
+
 </html>

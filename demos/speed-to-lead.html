@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,30 +17,18 @@
             padding: 0 20px;
             align-items: start;
         }
-        
+
         .stacked-boxes {
             display: flex;
             flex-direction: column;
             gap: 15px;
             height: 100%;
         }
-        
+
         .stacked-boxes .column-box:first-child {
             flex: 1;
         }
-        
-        /* Horizontal layout for Voice and SMS - FORCE */
-        .horizontal-cta {
-            display: flex !important;
-            flex-direction: row !important;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        
-        .horizontal-cta > div {
-            flex: 1;
-        }
-        
+
         @media (max-width: 1200px) {
             .two-column-grid {
                 grid-template-columns: 1fr;
@@ -47,6 +36,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
@@ -56,8 +46,8 @@
     </div>
 
     <div class="hero hero-compact">
-        <h1>⚡ Speed to Lead</h1>
-        <p>Strike while the iron is hot. Respond to new leads in seconds, not hours. Our AI ensures you're the first to engage, dramatically increasing your conversion rates.</p>
+        <h1 id="hero-title">⚡ Speed to Lead</h1>
+        <p id="hero-description">Loading...</p>
     </div>
 
     <div class="two-column-grid">
@@ -65,32 +55,27 @@
         <div class="stacked-boxes">
             <!-- How & Why Box -->
             <div class="column-box">
-                <h3>Instant Engagement</h3>
-                <p>Respond to leads within seconds of form submission or inquiry</p>
-                
-                <h3 style="margin-top: 15px;">Lead Qualification</h3>
-                <p>AI asks the right questions to qualify leads before they reach your sales team</p>
-                
-                <h3 style="margin-top: 15px;">Appointment Booking</h3>
-                <p>Schedule qualified prospects directly into your calendar automatically</p>
+                <h3>How It Works</h3>
+                <p id="how-it-works">Loading...</p>
+
+                <h3 style="margin-top: 15px;">Why This Matters</h3>
+                <p id="why-it-matters">Loading...</p>
             </div>
 
             <!-- Try Our AI Box -->
             <div class="column-box">
                 <h2 style="margin-bottom: 12px; font-size: 1em; text-align: center;">Experience Instant Response</h2>
-                
-                <div class="column-box">
-                    <div class="cta-in-column">
-                    <div style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
-                    <h2 style="margin-bottom: 8px;">Launch SMS Demo</h2>
-                    <p style="margin-bottom: 20px;">Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'</p>
-                    <a href="https://agentdemo.ai/welcome/hKfVPa3zr7" target="_blank" class="card-link" style="display: inline-block; padding: 12px 30px;">
-                    Try It Now →
+
+                <div class="cta-in-column">
+                    <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">⚡</div>
+                    <h2 id="cta-title" style="margin-bottom: 8px;">Launch SMS Demo</h2>
+                    <p id="cta-description" style="margin-bottom: 20px;">Loading...</p>
+                    <a id="demo-link" href="#" target="_blank" class="card-link"
+                        style="display: inline-block; padding: 12px 30px;">
+                        Try It Now →
                     </a>
                 </div>
-            </div>
 
-                
                 <p style="text-align: center; color: #aaa; margin-top: 20px;">
                     See how fast our AI responds and qualifies leads in real-time
                 </p>
@@ -100,10 +85,60 @@
         <!-- Right Column: Video -->
         <div class="column-box">
             <h2>Watch It In Action</h2>
-            <div class="video-in-column">
-                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"></iframe>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </div>
+
+    <script>
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.speedToLead;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+                document.getElementById('cta-emoji').textContent = content.emoji;
+                document.getElementById('cta-title').textContent = content.ctaButtonText;
+                document.getElementById('cta-description').textContent = content.ctaDescription;
+
+                // Update demo link URL
+                if (content.demoUrl && content.demoUrl.trim() !== '') {
+                    document.getElementById('demo-link').href = content.demoUrl;
+                }
+
+                // Update video if URL exists in JSON (overrides hardcoded one)
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+    </script>
 </body>
+
 </html>

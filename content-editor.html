@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWE2M8 Content Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+      min-height: 100vh;
+    }
+
+    .header-bar {
+      background: #000;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #00ff00;
+    }
+
+    .header-bar a {
+      color: #00ff00;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header-bar img {
+      height: 35px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    h1 {
+      color: #fff;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #fff;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .demo-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .demo-tab {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .demo-tab.active {
+      background: #10b981;
+    }
+
+    .demo-tab:hover {
+      background: rgba(16, 185, 129, 0.8);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-download {
+      background: #10b981;
+    }
+
+    .btn-copy {
+      background: #3b82f6;
+    }
+
+    .btn-copy.copied {
+      background: #10b981;
+    }
+
+    .btn-upload {
+      background: #f59e0b;
+    }
+
+    .tip-box {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .tip-box p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header-bar">
+    <a href="https://awe2m8.ai">
+      <img src="images/logo.png" alt="AWE2M8.ai" onerror="this.style.display='none'">
+    </a>
+    <a href="index.html">← Back to Demos</a>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h1>📝 Content Editor</h1>
+      <p>Edit all your demo page content in one place</p>
+    </div>
+
+    <div class="card">
+      <h3>Select Demo to Edit:</h3>
+      <div class="demo-tabs" id="demoTabs"></div>
+    </div>
+
+    <div class="card" id="editorForm"></div>
+
+    <div class="card">
+      <div class="actions">
+        <button class="btn btn-download" onclick="downloadJSON()">
+          📥 Download content.json
+        </button>
+        <button class="btn btn-copy" id="copyBtn" onclick="copyJSON()">
+          📋 Copy JSON
+        </button>
+        <label class="btn btn-upload">
+          📤 Upload JSON
+          <input type="file" accept=".json" onchange="uploadJSON(event)">
+        </label>
+      </div>
+      <div class="tip-box">
+        <p>💡 <strong>Tip:</strong> After downloading, save the content.json file to your project's root directory or a
+          /content folder, then update your HTML pages to load from it.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let contentData = {
+      voiceAI: {
+        title: "Voice AI Technology",
+        emoji: "🎙️",
+        heroDescription: "Experience conversations that feel natural and human. Our voice AI understands context, handles objections, and adapts to each caller's unique needs in real-time.",
+        howItWorks: "Our voice AI answers calls instantly with natural-sounding speech. It understands caller intent, responds intelligently to questions, and handles complex conversations without scripts. The AI adapts its tone and approach based on the caller's needs, creating genuinely helpful interactions.",
+        whyItMatters: "Traditional IVR systems frustrate callers and lose customers. Voice AI delivers human-quality conversations at scale, ensuring every caller gets immediate, personalized help. This means higher satisfaction, more conversions, and lower support costs.",
+        ctaButtonText: "Talk to Our AI",
+        ctaDescription: "Click the orb to start a natural voice conversation",
+        iframeUrl: "https://iframes.ai/o/1760606282083x472026348977127400?color=10A37F&icon=",
+        videoUrl: ""
+      },
+      aiReceptionist: {
+        title: "AI Receptionist",
+        emoji: "📞",
+        heroDescription: "Your perfect front desk, powered by AI. Greet callers professionally, route to the right department, schedule appointments, answer FAQs, and take messages—all with a warm, natural voice that represents your brand flawlessly.",
+        howItWorks: "When someone calls your business, our AI receptionist answers instantly with a personalized greeting. It understands natural speech, asks qualifying questions, and intelligently routes calls to the right person or department. Appointments are booked directly into your calendar, messages are captured accurately, and FAQs are answered instantly—all while maintaining a professional, friendly tone that reflects your brand.",
+        whyItMatters: "Missed calls are missed revenue. Studies show that 80% of callers won't leave a voicemail, and 67% won't listen to voicemails from business contacts. Every missed call is a potential customer choosing your competitor instead. An AI receptionist ensures you never miss an opportunity—answering every call instantly, 24/7.",
+        ctaButtonText: "Talk to Our AI",
+        ctaDescription: "This receptionist is trained on a Hair & Beauty Salon",
+        iframeUrl: "https://iframes.ai/o/1760625993791x317755806045175800?color=10A37F&icon=",
+        videoUrl: "https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview"
+      },
+      reviewsAI: {
+        title: "Reviews AI Assistant",
+        emoji: "⭐",
+        heroDescription: "Turn happy customers into 5-star reviews automatically. Our AI reaches out at the perfect moment, guides customers to Google, Trustpilot, or your preferred platform, and increases your review volume by 10x.",
+        howItWorks: "Our AI detects when a customer has a positive experience, then automatically sends a personalized request to leave a review. The customer is guided through a simple process that takes less than 30 seconds. Negative feedback is routed privately to prevent public complaints.",
+        whyItMatters: "Reviews build credibility and drive SEO rankings. But most businesses struggle to consistently ask for them. Our AI ensures every happy customer is invited to leave a review at the perfect moment—while unhappy customers are given a private channel to share concerns before going public.",
+        ctaButtonText: "Try Review Demo",
+        ctaDescription: "Click to experience what your customers see when leaving a review",
+        demoUrl: "https://agentdemo.ai/welcome/R6rEp4gCwe",
+        videoUrl: ""
+      },
+      databaseReactivation: {
+        title: "Database Reactivation",
+        emoji: "💬",
+        heroDescription: "Wake up dormant customers and reignite relationships automatically. Our AI reaches out with personalized messages that feel human, re-engaging past customers and bringing them back to your business.",
+        howItWorks: "Our AI analyzes your customer database, identifies inactive contacts, and sends personalized SMS or email campaigns that spark conversations. It adapts messaging based on customer history, handles replies naturally, and nurtures leads back into your sales funnel—all on autopilot.",
+        whyItMatters: "Your database is sitting on untapped revenue. Studies show it costs 5x more to acquire new customers than to retain existing ones. Reactivation campaigns can recover 10-30% of dormant customers, but most businesses lack the time or resources to do it manually. AI makes it effortless and scalable.",
+        ctaButtonText: "Launch SMS Demo",
+        ctaDescription: "Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'",
+        demoUrl: "https://agentdemo.ai/welcome/hKfVPa3zr7",
+        videoUrl: ""
+      },
+      documentCollection: {
+        title: "Document Collection AI",
+        emoji: "📄",
+        heroDescription: "Collect documents, forms, and signatures effortlessly. Our AI guides customers through the submission process, sends reminders, and ensures nothing falls through the cracks—eliminating manual follow-ups.",
+        howItWorks: "Our AI sends personalized requests for documents via SMS or email, guiding recipients step-by-step through the upload process. It automatically follows up with reminders, confirms receipt, and alerts your team when documents arrive. The system integrates with your existing workflows for seamless processing.",
+        whyItMatters: "Chasing documents wastes countless hours and delays critical processes. Late submissions cost time and money, while manual follow-ups drain resources. Document Collection AI ensures 90%+ completion rates while freeing your team to focus on higher-value work.",
+        ctaButtonText: "Try Document Demo",
+        ctaDescription: "Experience how customers submit documents",
+        demoUrl: "",
+        videoUrl: ""
+      },
+      ecommerce: {
+        title: "E-commerce AI Assistant",
+        emoji: "🛒",
+        heroDescription: "Your 24/7 shopping assistant that converts browsers into buyers. Answer product questions, recommend items, handle objections, and guide customers through checkout—all with natural, helpful conversations.",
+        howItWorks: "Our AI engages shoppers in real-time across your website, SMS, and social channels. It understands product inventory, answers detailed questions, suggests complementary items, and overcomes purchase hesitations. When customers abandon carts, the AI follows up with personalized messages to recover sales.",
+        whyItMatters: "Over 70% of shopping carts are abandoned, and most shoppers leave with unanswered questions. Live chat agents are expensive and can't scale. E-commerce AI provides instant, personalized support at any volume—increasing conversion rates by 20-40% while reducing support costs.",
+        ctaButtonText: "Shop with AI",
+        ctaDescription: "Chat with our AI shopping assistant",
+        iframeUrl: "https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon=",
+        demoUrl: "https://agentdemo.ai/welcome/GrBY6PgnTQ",
+        videoUrl: "https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview"
+      },
+      outOfHours: {
+        title: "Out of Hours AI",
+        emoji: "🌙",
+        heroDescription: "Never miss an opportunity, even when you're closed. Our AI handles after-hours inquiries, qualifies leads, books appointments, and ensures urgent matters get immediate attention—so you wake up to warm leads, not missed opportunities.",
+        howItWorks: "When customers reach out after business hours, our AI responds instantly via phone, SMS, or chat. It answers FAQs, captures lead information, schedules appointments for the next available time, and escalates urgent matters to on-call staff. Everything syncs to your CRM automatically.",
+        whyItMatters: "Customers don't wait for business hours—they choose whoever responds first. Studies show 78% of customers buy from the first responder. Out of Hours AI ensures you're always first, capturing leads that would otherwise go to competitors while your team sleeps.",
+        ctaButtonText: "Try After Hours Demo",
+        ctaDescription: "See how AI handles late-night inquiries",
+        demoUrl: "",
+        videoUrl: ""
+      },
+      speedToLead: {
+        title: "Speed to Lead AI",
+        emoji: "⚡",
+        heroDescription: "Strike while the iron is hot. Our AI contacts new leads within seconds of inquiry, qualifying them instantly and booking appointments before competitors even know they exist—turning speed into your competitive advantage.",
+        howItWorks: "The moment a lead comes in from your website, ads, or any source, our AI instantly reaches out via SMS or call. It qualifies the lead with smart questions, answers their initial questions, and books them directly into your calendar—all within 60 seconds of their first inquiry.",
+        whyItMatters: "Response time is everything. Leads contacted within 5 minutes are 100x more likely to convert than those contacted after 30 minutes. Yet most businesses take hours or days to respond. Speed to Lead AI ensures you're always first, dramatically increasing conversion rates and ROI on marketing spend.",
+        ctaButtonText: "See Speed Demo",
+        ctaDescription: "Experience instant lead response",
+        demoUrl: "",
+        videoUrl: ""
+      }
+    };
+
+    const demoNames = {
+      voiceAI: 'Voice AI',
+      aiReceptionist: 'AI Receptionist',
+      reviewsAI: 'Reviews AI',
+      databaseReactivation: 'Database Reactivation',
+      documentCollection: 'Document Collection',
+      ecommerce: 'E-commerce',
+      outOfHours: 'Out of Hours',
+      speedToLead: 'Speed to Lead'
+    };
+
+    let activeDemo = 'voiceAI';
+
+    function init() {
+      renderTabs();
+      renderForm();
+    }
+
+    function renderTabs() {
+      const tabsContainer = document.getElementById('demoTabs');
+      tabsContainer.innerHTML = '';
+
+      Object.keys(contentData).forEach(key => {
+        const button = document.createElement('button');
+        button.className = 'demo-tab' + (key === activeDemo ? ' active' : '');
+        button.textContent = demoNames[key];
+        button.onclick = () => switchDemo(key);
+        tabsContainer.appendChild(button);
+      });
+    }
+
+    function switchDemo(demoKey) {
+      activeDemo = demoKey;
+      renderTabs();
+      renderForm();
+    }
+
+    function renderForm() {
+      const form = document.getElementById('editorForm');
+      const content = contentData[activeDemo];
+
+      let html = `<h2>${content.emoji} ${content.title}</h2>`;
+
+      Object.entries(content).forEach(([field, value]) => {
+        const label = field.replace(/([A-Z])/g, ' $1').trim();
+
+        if (field === 'howItWorks' || field === 'whyItMatters' || field === 'heroDescription') {
+          html += `
+                        <label for="${field}">${label}:</label>
+                        <textarea id="${field}" data-field="${field}">${value}</textarea>
+                    `;
+        } else {
+          html += `
+                        <label for="${field}">${label}:</label>
+                        <input type="text" id="${field}" data-field="${field}" value="${value}">
+                    `;
+        }
+      });
+
+      form.innerHTML = html;
+
+      // Add event listeners
+      form.querySelectorAll('input, textarea').forEach(el => {
+        el.addEventListener('input', (e) => {
+          const field = e.target.dataset.field;
+          contentData[activeDemo][field] = e.target.value;
+        });
+      });
+    }
+
+    function downloadJSON() {
+      const dataStr = JSON.stringify(contentData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'content.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function copyJSON() {
+      const dataStr = JSON.stringify(contentData, null, 2);
+      navigator.clipboard.writeText(dataStr).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy JSON';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function uploadJSON(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const json = JSON.parse(e.target.result);
+            contentData = json;
+            renderForm();
+            alert('JSON uploaded successfully!');
+          } catch (error) {
+            alert('Invalid JSON file. Please check the file and try again.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    // Initialize on page load
+    init();
+  </script>
+</body>
+
+</html>
