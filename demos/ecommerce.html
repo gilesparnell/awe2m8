@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,18 +17,18 @@
             padding: 0 20px;
             align-items: start;
         }
-        
+
         .stacked-boxes {
             display: flex;
             flex-direction: column;
             gap: 15px;
             height: 100%;
         }
-        
+
         .stacked-boxes .column-box:first-child {
             flex: 1;
         }
-        
+
         /* Horizontal layout for Voice and SMS - FORCE */
         .horizontal-cta {
             display: flex !important;
@@ -35,11 +36,11 @@
             gap: 15px;
             margin-top: 10px;
         }
-        
-        .horizontal-cta > div {
+
+        .horizontal-cta>div {
             flex: 1;
         }
-        
+
         @media (max-width: 1200px) {
             .two-column-grid {
                 grid-template-columns: 1fr;
@@ -47,8 +48,9 @@
         }
     </style>
 </head>
+
 <body>
-   <div class="header">
+    <div class="header">
         <a href="https://awe2m8.ai" class="logo">
             <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
         </a>
@@ -56,8 +58,8 @@
     </div>
 
     <div class="hero hero-compact">
-        <h1>🛒 eCommerce AI Assistant</h1>
-        <p>Transform browsers into buyers with an AI shopping assistant that guides customers, answers questions, and recovers abandoned carts in real-time.</p>
+        <h1 id="hero-title">🛒 eCommerce AI Assistant</h1>
+        <p id="hero-description">Loading...</p>
     </div>
 
     <div class="two-column-grid">
@@ -66,34 +68,31 @@
             <!-- How & Why Box -->
             <div class="column-box">
                 <h3>How It Works</h3>
-                <p>Our AI assistant engages shoppers in real-time through voice or text. It answers product questions, makes recommendations based on preferences, and guides customers through checkout. When carts are abandoned, it automatically follows up with personalized recovery messages.</p>
-                
+                <p id="how-it-works">Loading...</p>
+
                 <h3 style="margin-top: 15px;">Why This Matters</h3>
-                <p>Cart abandonment costs eCommerce businesses billions annually. Real-time assistance increases conversion rates by up to 30% while reducing support costs. Every shopper gets instant help, leading to higher sales and happier customers.</p>
+                <p id="why-it-matters">Loading...</p>
             </div>
 
             <!-- Try Our AI Box -->
             <div class="column-box">
                 <h2 style="margin-bottom: 12px; font-size: 1em; text-align: center;">Try Our AI</h2>
-                
+
                 <div class="horizontal-cta">
                     <!-- Voice Orb - LEFT -->
                     <div style="text-align: center;">
                         <h3 style="font-size: 0.85em; margin-bottom: 6px;">Voice</h3>
                         <div style="display: flex; justify-content: center; align-items: center;">
-                            <iframe 
-                                src="https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon="
-                                allow="microphone"
-                                style="width: 100%; height: 100px; border: none;"
-                                id="assistantFrame"
-                            ></iframe>
+                            <iframe id="voice-iframe" src="" allow="microphone"
+                                style="width: 100%; height: 100px; border: none;"></iframe>
                         </div>
                     </div>
 
                     <!-- SMS Button - RIGHT -->
                     <div style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
                         <h3 style="font-size: 0.85em; margin-bottom: 8px;">SMS</h3>
-                        <a href="https://agentdemo.ai/welcome/GrBY6PgnTQ" target="_blank" class="card-link" style="display: inline-block; padding: 10px 20px; font-size: 0.85em;">
+                        <a id="sms-link" href="#" target="_blank" class="card-link"
+                            style="display: inline-block; padding: 10px 20px; font-size: 0.85em;">
                             Try SMS →
                         </a>
                     </div>
@@ -104,15 +103,65 @@
         <!-- Right Column: Video -->
         <div class="column-box">
             <h2>Watch It In Action</h2>
-            <div class="video-in-column">
-                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"></iframe>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        const frame = document.getElementById('assistantFrame');
-        frame.addEventListener('load', () => {
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.ecommerce;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+
+                // Update voice iframe URL
+                if (content.iframeUrl && content.iframeUrl.trim() !== '') {
+                    document.getElementById('voice-iframe').src = content.iframeUrl;
+                }
+
+                // Update SMS link URL
+                if (content.demoUrl && content.demoUrl.trim() !== '') {
+                    document.getElementById('sms-link').href = content.demoUrl;
+                }
+
+                // Update video if URL exists in JSON (overrides hardcoded one)
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+
+        // Microphone permission handling for voice iframe
+        const voiceFrame = document.getElementById('voice-iframe');
+        voiceFrame.addEventListener('load', () => {
             navigator.permissions.query({ name: 'microphone' })
                 .then(result => {
                     if (result.state === 'granted') {
@@ -124,4 +173,5 @@
         });
     </script>
 </body>
+
 </html>

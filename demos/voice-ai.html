@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice AI Demo - AWE2M8</title>
     <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
@@ -15,48 +17,91 @@
     </div>
 
     <div class="hero hero-compact">
-        <h1>🎙️ Voice AI Technology</h1>
-        <p>Experience conversations that feel natural and human. Our voice AI understands context, handles objections, and adapts to each caller's unique needs in real-time.</p>
+        <h1 id="hero-title">🎙️ Voice AI Technology</h1>
+        <p id="hero-description">Loading...</p>
     </div>
 
     <div class="three-column-grid">
         <!-- Column 1: How & Why -->
         <div class="column-box">
             <h3>How It Works</h3>
-            <p>Our voice AI answers calls instantly with natural-sounding speech. It understands caller intent, responds intelligently to questions, and handles complex conversations without scripts. The AI adapts its tone and approach based on the caller's needs, creating genuinely helpful interactions.</p>
-            
+            <p id="how-it-works">Loading...</p>
+
             <h3 style="margin-top: 15px;">Why This Matters</h3>
-            <p>Traditional IVR systems frustrate callers and lose customers. Voice AI delivers human-quality conversations at scale, ensuring every caller gets immediate, personalized help. This means higher satisfaction, more conversions, and lower support costs.</p>
+            <p id="why-it-matters">Loading...</p>
         </div>
 
-        <!-- Column 2: Video Placeholder -->
+        <!-- Column 2: Video -->
         <div class="column-box">
             <h2>See It In Action</h2>
-            <div class="video-in-column">
-                <iframe src="https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview" allow="autoplay"></iframe>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
 
         <!-- Column 3: Try It -->
         <div class="column-box">
             <div class="cta-in-column">
-                <div style="font-size: 2.5em; margin-bottom: 12px;">🎙️</div>
-                <h2 style="margin-bottom: 15px;">Talk to Our AI</h2>
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
-                    <iframe 
-                        src="https://iframes.ai/o/1760606282083x472026348977127400?color=10A37F&icon="
-                        allow="microphone"
-                        style="width: 100%; max-width: 300px; height: 150px; border: none;"
-                        id="assistantFrame"
-                    ></iframe>
+                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">🎙️</div>
+                <h2 id="cta-title" style="margin-bottom: 15px;">Talk to Our AI</h2>
+                <div
+                    style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                    <iframe id="demo-iframe" src="" allow="microphone"
+                        style="width: 100%; max-width: 300px; height: 150px; border: none;"></iframe>
                 </div>
-                <p style="margin: 0; font-size: 0.85em;">Click the orb to start a natural voice conversation</p>
+                <p id="cta-description" style="margin: 0; font-size: 0.85em;">Loading...</p>
             </div>
         </div>
     </div>
 
     <script>
-        const frame = document.getElementById('assistantFrame');
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.voiceAI;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+                document.getElementById('cta-emoji').textContent = content.emoji;
+                document.getElementById('cta-title').textContent = content.ctaButtonText;
+                document.getElementById('cta-description').textContent = content.ctaDescription;
+
+                // Update iframe URL
+                document.getElementById('demo-iframe').src = content.iframeUrl;
+
+                // Update video if URL exists in JSON (overrides hardcoded one)
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+
+        // Microphone permission handling for iframe
+        const frame = document.getElementById('demo-iframe');
         frame.addEventListener('load', () => {
             navigator.permissions.query({ name: 'microphone' })
                 .then(result => {
@@ -69,4 +114,5 @@
         });
     </script>
 </body>
+
 </html>
