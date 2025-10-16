@@ -5,6 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eCommerce Demo - AWE2M8</title>
     <link rel="stylesheet" href="../css/demo-styles.css">
+    <style>
+        /* Two column layout for eCommerce page */
+        .two-column-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            align-items: start;
+        }
+        
+        .stacked-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+        
+        .stacked-boxes .column-box:first-child {
+            flex: 1;
+        }
+        
+        /* Horizontal layout for Voice and SMS - FORCE */
+        .horizontal-cta {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .horizontal-cta > div {
+            flex: 1;
+        }
+        
+        @media (max-width: 1200px) {
+            .two-column-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -14,51 +55,58 @@
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
-    <div class="hero">
+    <div class="hero hero-compact">
         <h1>🛒 eCommerce AI Assistant</h1>
         <p>Transform browsers into buyers with an AI shopping assistant that guides customers, answers questions, and recovers abandoned carts in real-time.</p>
     </div>
 
-    <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin: 0 0 15px 0; font-size: 1.3em;">See It In Action</h2>
-        <div class="video-container">
-            <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"></iframe>
-        </div>
-    </div>
-
-    <div class="cta-container">
-        <div class="orb-container">
-            <h2 style="color: #00ff00; margin: 0 0 10px 0; font-size: 1.2em;">Try it with Voice</h2>
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
-                <iframe 
-                    src="https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon="
-                    allow="microphone"
-                    style="width: 100%; height: 200px; border: none;"
-                    id="assistantFrame"
-                ></iframe>
+    <div class="two-column-grid">
+        <!-- Left Column: Stacked boxes -->
+        <div class="stacked-boxes">
+            <!-- How & Why Box -->
+            <div class="column-box">
+                <h3>How It Works</h3>
+                <p>Our AI assistant engages shoppers in real-time through voice or text. It answers product questions, makes recommendations based on preferences, and guides customers through checkout. When carts are abandoned, it automatically follows up with personalized recovery messages.</p>
+                
+                <h3 style="margin-top: 15px;">Why This Matters</h3>
+                <p>Cart abandonment costs eCommerce businesses billions annually. Real-time assistance increases conversion rates by up to 30% while reducing support costs. Every shopper gets instant help, leading to higher sales and happier customers.</p>
             </div>
-            <p style="color: #aaa; margin: 10px 0 0 0; font-size: 0.9em; line-height: 1.5;">This agent is trained to provide B2B customers with voice assistance to help discover product and availabilty from the MickFanning Softboards website</p>
+
+            <!-- Try Our AI Box -->
+            <div class="column-box">
+                <h2 style="margin-bottom: 12px; font-size: 1em; text-align: center;">Try Our AI</h2>
+                
+                <div class="horizontal-cta">
+                    <!-- Voice Orb - LEFT -->
+                    <div style="text-align: center;">
+                        <h3 style="font-size: 0.85em; margin-bottom: 6px;">Voice</h3>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <iframe 
+                                src="https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon="
+                                allow="microphone"
+                                style="width: 100%; height: 100px; border: none;"
+                                id="assistantFrame"
+                            ></iframe>
+                        </div>
+                    </div>
+
+                    <!-- SMS Button - RIGHT -->
+                    <div style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                        <h3 style="font-size: 0.85em; margin-bottom: 8px;">SMS</h3>
+                        <a href="https://agentdemo.ai/welcome/GrBY6PgnTQ" target="_blank" class="card-link" style="display: inline-block; padding: 10px 20px; font-size: 0.85em;">
+                            Try SMS →
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <a href="https://agentdemo.ai/welcome/GrBY6PgnTQ" target="_blank" class="card-link">
-            <div style="font-size: 2.2em; margin-bottom: 8px;">💬</div>
-            <h2 style="color: #00ff00; margin: 0 0 8px 0; font-size: 1.2em;">Try it with SMS</h2>
-            <p style="color: #aaa; margin: 0; font-size: 0.9em; line-height: 1.5;">This agent provides sms based assistance to help customers understand product details from the MickFanning Softboard website, and then send a url for customers to buy directly on the website</p>
-        </a>
-    </div>
-
-    <div class="features">
-        <div class="feature-card">
-            <h3>Product Recommendations</h3>
-            <p>AI suggests products based on browsing history and customer preferences</p>
-        </div>
-        <div class="feature-card">
-            <h3>Cart Recovery</h3>
-            <p>Automatically reach out to customers who abandon their carts with personalized offers</p>
-        </div>
-        <div class="feature-card">
-            <h3>24/7 Support</h3>
-            <p>Answer product questions, track orders, and handle returns any time of day</p>
+        <!-- Right Column: Video -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column">
+                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"></iframe>
+            </div>
         </div>
     </div>
 

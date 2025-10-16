@@ -4,58 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice AI Demo - AWE2M8</title>
-     <link rel="stylesheet" href="../css/demo-styles.css">
-    <style>
-        /* Override for single button - center it */
-        .cta-container {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/logo.png" alt="AWE2M8.ai" style="height: 35px;">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
-    <div class="hero">
+    <div class="hero hero-compact">
         <h1>🎙️ Voice AI Technology</h1>
         <p>Experience conversations that feel natural and human. Our voice AI understands context, handles objections, and adapts to each caller's unique needs in real-time.</p>
     </div>
 
-    <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">Talk to Our AI</h2>
-        
-        <div class="orb-container">
-            <div style="display: flex; justify-content: center; align-items: center;">
-                <iframe
-                    src="https://iframes.ai/o/1760606282083x472026348977127400?color=10A37F&icon="
-                    allow="microphone"
-                    style="width: 100%; max-width: 400px; height: 200px; border: none;"
-                    id="assistantFrame"
-                ></iframe>
+    <div class="three-column-grid">
+        <!-- Column 1: How & Why -->
+        <div class="column-box">
+            <h3>How It Works</h3>
+            <p>Our voice AI answers calls instantly with natural-sounding speech. It understands caller intent, responds intelligently to questions, and handles complex conversations without scripts. The AI adapts its tone and approach based on the caller's needs, creating genuinely helpful interactions.</p>
+            
+            <h3 style="margin-top: 15px;">Why This Matters</h3>
+            <p>Traditional IVR systems frustrate callers and lose customers. Voice AI delivers human-quality conversations at scale, ensuring every caller gets immediate, personalized help. This means higher satisfaction, more conversions, and lower support costs.</p>
+        </div>
+
+        <!-- Column 2: Video Placeholder -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column" style="background: #ff0000; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em;">
+                VIDEO PLACEHOLDER
             </div>
         </div>
-        
-        <p style="text-align: center; color: #aaa; margin-top: 20px;">
-            Click the orb to start a natural voice conversation with our AI assistant
-        </p>
-    </div>
 
-    <div class="features">
-        <div class="feature-card">
-            <h3>Natural Conversations</h3>
-            <p>Advanced NLP understands intent, context, and nuance in every interaction</p>
-        </div>
-        <div class="feature-card">
-            <h3>Multi-Language Support</h3>
-            <p>Communicate with customers in their preferred language automatically</p>
-        </div>
-        <div class="feature-card">
-            <h3>Always Learning</h3>
-            <p>AI continuously improves from every interaction to serve customers better</p>
+        <!-- Column 3: Try It -->
+        <div class="column-box">
+            <div class="cta-in-column">
+                <div style="font-size: 2.5em; margin-bottom: 12px;">🎙️</div>
+                <h2 style="margin-bottom: 15px;">Talk to Our AI</h2>
+                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                    <iframe 
+                        src="https://iframes.ai/o/1760606282083x472026348977127400?color=10A37F&icon="
+                        allow="microphone"
+                        style="width: 100%; max-width: 300px; height: 150px; border: none;"
+                        id="assistantFrame"
+                    ></iframe>
+                </div>
+                <p style="margin: 0; font-size: 0.85em;">Click the orb to start a natural voice conversation</p>
+            </div>
         </div>
     </div>
 

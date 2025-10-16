@@ -6,11 +6,6 @@
     <title>AI Receptionist Demo - AWE2M8</title>
     <link rel="stylesheet" href="../css/demo-styles.css">
     <style>
-        /* Override for single button - center it */
-        .cta-container {
-            display: block;
-        }
-        
         .stat-link {
             color: #00ff00;
             text-decoration: none;
@@ -29,58 +24,48 @@
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
-
-    <div class="hero">
+    
+    <div class="hero hero-compact">
         <h1>📞 AI Receptionist</h1>
         <p>Your perfect front desk, powered by AI. Greet callers professionally, route to the right department, schedule appointments, answer FAQs, and take messages—all with a warm, natural voice that represents your brand flawlessly.</p>
     </div>
-
-    <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin: 0 0 20px 0; font-size: 1.3em;">How It Works</h2>
-        <p style="color: #ccc; text-align: center; line-height: 1.6; margin: 0;">
-            When someone calls your business, our AI receptionist answers instantly with a personalized greeting. It understands natural speech, asks qualifying questions, and intelligently routes calls to the right person or department. Appointments are booked directly into your calendar, messages are captured accurately, and FAQs are answered instantly—all while maintaining a professional, friendly tone that reflects your brand.
-        </p>
-
-        <div class="section-divider"></div>
-
-        <h2 style="color: #00ff00; text-align: center; margin: 0 0 20px 0; font-size: 1.3em;">Why This Is Critical</h2>
-        <p style="color: #ccc; text-align: center; line-height: 1.6; margin: 0;">
-            Missed calls are missed revenue. Studies show that <a href="https://www.cbsnews.com/news/is-it-time-to-hang-up-on-voicemail/" target="_blank" class="stat-link">80% of callers won't leave a voicemail*</a>, and <a href="https://www.numa.com/blog/22-business-phone-statistics" target="_blank" class="stat-link">67% won't listen to voicemails from business contacts*</a>. Every missed call is a potential customer choosing your competitor instead. An AI receptionist ensures you never miss an opportunity—answering every call instantly, 24/7, while freeing your team to focus on high-value work instead of repetitive phone tasks.
-        </p>
-    </div>
-
-    <div class="demo-container" style="padding: 15px 20px;">
-        <h2 style="color: #00ff00; text-align: center; margin: 0 0 10px 0; font-size: 1.1em;">Talk to Our AI Receptionist</h2>
-        
-        <div style="display: flex; justify-content: center; align-items: center; margin: 8px 0;">
-            <iframe 
-                src="https://iframes.ai/o/1760625993791x317755806045175800?color=10A37F&icon="
-                allow="microphone"
-                style="width: 100%; max-width: 300px; height: 100px; border: none;"
-                id="assistantFrame"
-            ></iframe>
+    
+    <div class="three-column-grid">
+        <!-- Column 1: How & Why -->
+        <div class="column-box">
+            <h3>How It Works</h3>
+            <p>When someone calls your business, our AI receptionist answers instantly with a personalized greeting. It understands natural speech, asks qualifying questions, and intelligently routes calls to the right person or department. Appointments are booked directly into your calendar, messages are captured accurately, and FAQs are answered instantly—all while maintaining a professional, friendly tone that reflects your brand.</p>
+            
+            <h3 style="margin-top: 15px;">Why This Matters</h3>
+            <p>Missed calls are missed revenue. Studies show that <a href="https://www.cbsnews.com/news/is-it-time-to-hang-up-on-voicemail/" target="_blank" class="stat-link">80% of callers won't leave a voicemail*</a>, and <a href="https://www.numa.com/blog/22-business-phone-statistics" target="_blank" class="stat-link">67% won't listen to voicemails from business contacts*</a>. Every missed call is a potential customer choosing your competitor instead. An AI receptionist ensures you never miss an opportunity—answering every call instantly, 24/7.</p>
         </div>
         
-        <p style="text-align: center; color: #aaa; margin: 8px 0 0 0; font-size: 0.85em; line-height: 1.3;">
-            This virtual receptionist has been trained on a Hair and Beauty Salon
-        </p>
+        <!-- Column 2: Video Placeholder -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column" style="background: #ff0000; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em;">
+                VIDEO PLACEHOLDER
+            </div>
+        </div>
+        
+        <!-- Column 3: Try It -->
+        <div class="column-box">
+            <div class="cta-in-column">
+                <div style="font-size: 2.5em; margin-bottom: 12px;">📞</div>
+                <h2 style="margin-bottom: 15px;">Talk to Our AI</h2>
+                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                    <iframe 
+                        src="https://iframes.ai/o/1760625993791x317755806045175800?color=10A37F&icon="
+                        allow="microphone"
+                        style="width: 100%; max-width: 300px; height: 150px; border: none;"
+                        id="assistantFrame"
+                    ></iframe>
+                </div>
+                <p style="margin: 0; font-size: 0.85em;">This receptionist is trained on a Hair & Beauty Salon</p>
+            </div>
+        </div>
     </div>
-
-    <div class="features">
-        <div class="feature-card">
-            <h3>Intelligent Call Routing</h3>
-            <p>Direct callers to the right person or department based on their needs</p>
-        </div>
-        <div class="feature-card">
-            <h3>Appointment Scheduling</h3>
-            <p>Book meetings directly into your calendar with automatic confirmations</p>
-        </div>
-        <div class="feature-card">
-            <h3>Custom Greetings</h3>
-            <p>Personalized scripts that match your brand voice and business hours</p>
-        </div>
-    </div>
-
+    
     <script>
         const frame = document.getElementById('assistantFrame');
         frame.addEventListener('load', () => {
