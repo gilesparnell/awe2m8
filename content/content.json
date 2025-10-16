@@ -3,7 +3,7 @@
     "title": "Voice AI Technology",
     "emoji": "🎙️",
     "heroDescription": "Experience conversations that feel natural and human. Our voice AI understands context, handles objections, and adapts to each caller's unique needs in real-time.",
-    "howItWorks": "Our voice AI answers calls instantly with natural-sounding speech. It understands caller intent, responds intelligently to questions, and handles complex conversations without scripts. The AI adapts its tone and approach based on the caller's needs, creating genuinely helpful interactions.",
+    "howItWorks": "GILES IS A ROCK STAR!!!",
     "whyItMatters": "Traditional IVR systems frustrate callers and lose customers. Voice AI delivers human-quality conversations at scale, ensuring every caller gets immediate, personalized help. This means higher satisfaction, more conversions, and lower support costs.",
     "ctaButtonText": "Talk to Our AI",
     "ctaDescription": "Click the orb to start a natural voice conversation",
@@ -62,8 +62,9 @@
     "whyItMatters": "Over 70% of shopping carts are abandoned, and most shoppers leave with unanswered questions. Live chat agents are expensive and can't scale. E-commerce AI provides instant, personalized support at any volume—increasing conversion rates by 20-40% while reducing support costs.",
     "ctaButtonText": "Shop with AI",
     "ctaDescription": "Chat with our AI shopping assistant",
-    "demoUrl": "",
-    "videoUrl": ""
+    "iframeUrl": "https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon=",
+    "demoUrl": "https://agentdemo.ai/welcome/GrBY6PgnTQ",
+    "videoUrl": "https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview"
   },
   "outOfHours": {
     "title": "Out of Hours AI",
