@@ -4,51 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed to Lead Demo - AWE2M8</title>
-     <link rel="stylesheet" href="../css/demo-styles.css">
+    <link rel="stylesheet" href="../css/demo-styles.css">
     <style>
-        /* Override for single button - center it */
-        .cta-container {
-            display: block;
+        /* Two column layout for speed-to-lead page */
+        .two-column-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            align-items: start;
+        }
+        
+        .stacked-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+        }
+        
+        .stacked-boxes .column-box:first-child {
+            flex: 1;
+        }
+        
+        /* Horizontal layout for Voice and SMS - FORCE */
+        .horizontal-cta {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .horizontal-cta > div {
+            flex: 1;
+        }
+        
+        @media (max-width: 1200px) {
+            .two-column-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/logo.png" alt="AWE2M8.ai" style="height: 35px;">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
-    <div class="hero">
+    <div class="hero hero-compact">
         <h1>⚡ Speed to Lead</h1>
         <p>Strike while the iron is hot. Respond to new leads in seconds, not hours. Our AI ensures you're the first to engage, dramatically increasing your conversion rates.</p>
     </div>
 
-    <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">Experience Instant Response</h2>
-        
-        <div class="orb-placeholder">
-            <p>🎙️ Assistable.ai Voice Orb Goes Here</p>
-        </div>
-        
-        <p style="text-align: center; color: #aaa; margin-top: 20px;">
-            See how fast our AI responds and qualifies leads in real-time
-        </p>
-    </div>
+    <div class="two-column-grid">
+        <!-- Left Column: Stacked boxes -->
+        <div class="stacked-boxes">
+            <!-- How & Why Box -->
+            <div class="column-box">
+                <h3>Instant Engagement</h3>
+                <p>Respond to leads within seconds of form submission or inquiry</p>
+                
+                <h3 style="margin-top: 15px;">Lead Qualification</h3>
+                <p>AI asks the right questions to qualify leads before they reach your sales team</p>
+                
+                <h3 style="margin-top: 15px;">Appointment Booking</h3>
+                <p>Schedule qualified prospects directly into your calendar automatically</p>
+            </div>
 
-    <div class="features">
-        <div class="feature-card">
-            <h3>Instant Engagement</h3>
-            <p>Respond to leads within seconds of form submission or inquiry</p>
+            <!-- Try Our AI Box -->
+            <div class="column-box">
+                <h2 style="margin-bottom: 12px; font-size: 1em; text-align: center;">Experience Instant Response</h2>
+                
+                <div class="column-box">
+                    <div class="cta-in-column">
+                    <div style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
+                    <h2 style="margin-bottom: 8px;">Launch SMS Demo</h2>
+                    <p style="margin-bottom: 20px;">Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'</p>
+                    <a href="https://agentdemo.ai/welcome/hKfVPa3zr7" target="_blank" class="card-link" style="display: inline-block; padding: 12px 30px;">
+                    Try It Now →
+                    </a>
+                </div>
+            </div>
+
+                
+                <p style="text-align: center; color: #aaa; margin-top: 20px;">
+                    See how fast our AI responds and qualifies leads in real-time
+                </p>
+            </div>
         </div>
-        <div class="feature-card">
-            <h3>Lead Qualification</h3>
-            <p>AI asks the right questions to qualify leads before they reach your sales team</p>
-        </div>
-        <div class="feature-card">
-            <h3>Appointment Booking</h3>
-            <p>Schedule qualified prospects directly into your calendar automatically</p>
+
+        <!-- Right Column: Video -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column">
+                <iframe src="https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview" allow="autoplay"></iframe>
+            </div>
         </div>
     </div>
 </body>
