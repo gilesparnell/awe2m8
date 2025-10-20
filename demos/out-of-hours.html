@@ -1,55 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Out of Hours AI Demo - AWE2M8</title>
-     <link rel="stylesheet" href="../css/demo-styles.css">
-    <style>
-        /* Override for single button - center it */
-        .cta-container {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero">
         <h1>🌙 Out of Hours AI</h1>
-        <p>Your business never sleeps. Capture leads at 2 AM, answer questions on weekends, and book appointments while you rest. Our AI ensures you never miss an opportunity, no matter the time zone or hour.</p>
+        <p>Your business never sleeps. Capture leads at 2 AM, answer questions on weekends, and book appointments while
+            you rest. Our AI ensures you never miss an opportunity, no matter the time zone or hour.</p>
     </div>
 
-    <div class="demo-container">
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 30px;">Experience 24/7 Coverage</h2>
-        
-        <div class="orb-placeholder">
-            <p>🎙️ Assistable.ai Voice Orb Goes Here</p>
-        </div>
-        
-        <p style="text-align: center; color: #aaa; margin-top: 20px;">
-            Contact us "after hours" and see how seamlessly our AI handles inquiries
-        </p>
-    </div>
-
-    <div class="features">
-        <div class="feature-card">
+    <div class="three-column-grid">
+        <div class="column-box">
             <h3>Global Availability</h3>
             <p>Serve customers across all time zones without hiring night staff</p>
         </div>
-        <div class="feature-card">
+
+        <div class="column-box">
+            <div class="cta-in-column">
+                <div class="cta-emoji">🎙️</div>
+                <h2>Experience 24/7 Coverage</h2>
+                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
+                    <iframe id="demo-iframe" src="" allow="microphone"
+                        style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
+                </div>
+                <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">Contact us "after hours" and see how seamlessly
+                    our AI handles inquiries</p>
+            </div>
+        </div>
+
+        <div class="column-box">
             <h3>Emergency Handling</h3>
             <p>Route urgent matters to on-call staff while handling routine inquiries automatically</p>
         </div>
-        <div class="feature-card">
+    </div>
+
+    <div class="full-width-section">
+        <div class="column-box">
             <h3>Morning Briefings</h3>
-            <p>Wake up to a summary of all overnight interactions and scheduled appointments</p>
+            <p>Wake up to a summary of all overnight interactions and scheduled appointments. Our AI doesn't just handle
+                inquiries—it provides you with detailed reports of every conversation, ensuring you stay informed and
+                can follow up on important leads first thing in the morning.</p>
         </div>
     </div>
+
+    <script>
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const content = data.outOfHours;
+
+                if (content) {
+                    document.querySelector('.hero h1').innerHTML = `${content.emoji || '🌙'} ${content.title || 'Out of Hours AI'}`;
+
+                    if (content.heroDescription) {
+                        document.querySelector('.hero p').textContent = content.heroDescription;
+                    }
+
+                    if (content.iframeUrl && content.iframeUrl.trim() !== '') {
+                        document.getElementById('demo-iframe').src = content.iframeUrl;
+                    }
+
+                    if (content.title) {
+                        document.title = `${content.title} Demo - AWE2M8`;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+            });
+
+        const frame = document.getElementById('demo-iframe');
+        frame.addEventListener('load', () => {
+            navigator.permissions.query({ name: 'microphone' })
+                .then(result => {
+                    if (result.state === 'granted') {
+                        console.log('Microphone access already granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('User will be prompted for microphone access');
+                    }
+                });
+        });
+    </script>
 </body>
+
 </html>
