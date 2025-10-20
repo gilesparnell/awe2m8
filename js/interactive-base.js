@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Optional effects (comment out if too much)
     // initCursorTrail(); // Uncomment for cursor trail
-    initParallax();
+    //initParallax();
     initGradientFollow();
     initSequentialLoad();
 
