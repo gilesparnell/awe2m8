@@ -1050,3 +1050,93 @@ body::before {
         padding: 10px;
     }
 }
+
+/* ============================================
+   MFS PROPOSAL PAGE - BACKGROUND IMAGE
+   ============================================ */
+
+/* Specific body styling for MFS proposal page */
+body.mfs-proposal {
+    background-image: url('https://static.wixstatic.com/media/95e910_9a7012da5cab4d13b2ee98de399399bc~mv2.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* Alternative: if you want to use a local image */
+body.mfs-proposal-local {
+    background-image: url('../images/underwater-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* Ensure content is readable over the image */
+body.mfs-proposal .proposal-hero,
+body.mfs-proposal .summary-box,
+body.mfs-proposal .column-box,
+body.mfs-proposal .stat-card,
+body.mfs-proposal .phase-card,
+body.mfs-proposal .state-card,
+body.mfs-proposal .comparison-table,
+body.mfs-proposal .deliverables-box {
+    background: rgba(10, 14, 39, 0.85);
+    backdrop-filter: blur(30px);
+}
+
+/* Simple hero - no background box, just text on water */
+.proposal-hero-simple {
+    max-width: 1200px;
+    margin: 40px auto;
+    text-align: center;
+    padding: 60px 40px 100px;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 1s ease 0.2s both;
+}
+
+.proposal-hero-simple .mfs-logo {
+    max-width: 150px;
+    margin-bottom: 20px;
+}
+
+.proposal-hero-simple .mfs-subtitle {
+    font-size: 0.9em;
+    color: #00ff00;
+    letter-spacing: 3px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.proposal-hero-simple h1 {
+    font-size: 3.5em;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 15px;
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.7);
+    line-height: 1.1;
+}
+
+.proposal-hero-simple .subtitle {
+    font-size: 1.1em;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 20px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+    .proposal-hero-simple {
+        padding: 40px 20px 80px;
+    }
+
+    .proposal-hero-simple h1 {
+        font-size: 2.2em;
+    }
+
+    .proposal-hero-simple .mfs-logo {
+        max-width: 120px;
+    }
+}
