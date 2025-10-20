@@ -220,7 +220,7 @@ function initSequentialLoad() {
     cards.forEach((card, index) => {
         setTimeout(() => {
             card.style.animation = 'fadeInUp 0.6s ease forwards';
-        }, index * 100);
+        }, index * 50);
     });
 }
 
