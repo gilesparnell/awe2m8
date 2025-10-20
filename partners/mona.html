@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mona Vale Hotel - Virtual Receptionist</title>
-    <link rel="stylesheet" href="/css/demo-styles.css">
+    <link rel="stylesheet" href="../css/demo-styles.css">
 </head>
 
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="/images/AWE2M8Logo.png" alt="AWE2M8.ai">
+            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai">
         </a>
+        <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero">
@@ -22,26 +23,11 @@
     </div>
 
     <div class="three-column-grid">
-        <div class="column-box">
-            <h3>How It Works</h3>
-            <p>Our AI virtual receptionist integrates seamlessly with your hotel's phone and messaging systems, using
-                natural language processing to handle inquiries, book rooms, and provide information 24/7 without human
-                intervention. It learns from interactions to personalize responses, escalating complex issues to staff
-                only when necessary.</p>
-        </div>
-
-        <div class="column-box">
-            <h2>Explainer</h2>
-            <div class="video-in-column">
-                <iframe src="https://drive.google.com/file/d/172zsw63YcymCQCPZFaMafzgAhjDy1Fc5/preview"
-                    allow="autoplay"></iframe>
-            </div>
-        </div>
-
+        <!-- COLUMN 1: CTA / VOICE DEMO (First on mobile) -->
         <div class="column-box">
             <div class="cta-in-column">
                 <div class="cta-emoji">📞</div>
-                <h2>Talk to Our AI</h2>
+                <h2>Talk to Lily</h2>
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
                     <iframe id="demo-iframe"
                         src="https://iframes.ai/o/1760923067545x634335781039636500?color=10A37F&icon="
@@ -52,8 +38,27 @@
                     website.</p>
             </div>
         </div>
+
+        <!-- COLUMN 2: VIDEO (Second on mobile) -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column">
+                <iframe src="https://drive.google.com/file/d/172zsw63YcymCQCPZFaMafzgAhjDy1Fc5/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: HOW IT WORKS (Third on mobile) -->
+        <div class="column-box">
+            <h3>How It Works</h3>
+            <p>Our AI virtual receptionist integrates seamlessly with your hotel's phone and messaging systems, using
+                natural language processing to handle inquiries, book rooms, and provide information 24/7 without human
+                intervention. It learns from interactions to personalize responses, escalating complex issues to staff
+                only when necessary.</p>
+        </div>
     </div>
 
+    <!-- FULL WIDTH: WHY IT MATTERS (Last on mobile) -->
     <div class="full-width-section">
         <div class="column-box">
             <h3>Why This Matters</h3>
@@ -96,6 +101,9 @@
                 });
         });
     </script>
+    <script src="../js/interactive-base.js"></script>
+    <script src="../js/dark-mode.js"></script>
+    <script src="../js/core-effects.js"></script>
 </body>
 
 </html>
