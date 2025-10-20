@@ -1,6 +1,0 @@
-# HTTrack Website Copier Cookie File
-# This file format is compatible with Netscape cookies
-www.awe2m8.ai	TRUE	/	FALSE	1999999999	XSRF-TOKEN	1760499762|c0CNxUP7GShu
-www.awe2m8.ai	TRUE	/	FALSE	1999999999	SameSite	None
-www.awe2m8.ai	TRUE	/	FALSE	1999999999	ssr-caching	cache#desc=miss#varnish=miss#dc#desc=uw2-pub-1
-
