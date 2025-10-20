@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mona Vale Hotel - Virtual Receptionist </title>
+    <link rel="stylesheet" href="../../css/demo-styles.css">
+    <style>
+        .stat-link {
+            color: #00ff00;
+            text-decoration: none;
+            border-bottom: 1px dotted #00ff00;
+        }
+
+        .stat-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <a href="https://awe2m8.ai" class="logo">
+            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+        </a>
+    </div>
+
+    <div class="hero hero-compact">
+        <h1 id="hero-title">📞 Mona Vale Hotel - Virtual Receptionist</h1>
+        <p id="hero-description">Loading...</p>
+    </div>
+
+    <div class="three-column-grid">
+        <!-- Column 1: How It Works -->
+        <div class="column-box">
+            <h3>How It Works</h3>
+            <p id="how-it-works">Our AI virtual receptionist integrates seamlessly with your hotel's phone and messaging
+                systems, using natural language processing to handle inquiries, book rooms, and provide information 24/7
+                without human intervention. It learns from interactions to personalize responses, escalating complex
+                issues to staff only when necessary.</p>
+        </div>
+
+        <!-- Column 2: Video -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/172zsw63YcymCQCPZFaMafzgAhjDy1Fc5/preview"
+                    style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+            </div>
+        </div>
+
+        <!-- Column 3: Try It -->
+        <div class="column-box">
+            <div class="cta-in-column">
+                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">📞</div>
+                <h2 id="cta-title" style="margin-bottom: 15px;">Talk to Our AI</h2>
+                <div
+                    style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                    <iframe id="demo-iframe"
+                        src="https://iframes.ai/o/1760923067545x634335781039636500?color=10A37F&icon="
+                        allow="microphone" style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
+                </div>
+                <p id="cta-description" style="margin: 0; font-size: 0.85em;">Click the floating orb below to talk to
+                    Lily, the Virtual Receptionlist to the Mona Vale Hotel (Note: This Receptionlist has been trained on
+                    publically available data from the Mona Vale website. Further training and prompt engineering from a
+                    more detailed knowledge base would be requried) </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-width "Why It Matters" section below the three columns -->
+    <div class="column-box" style="margin-top: 20px;">
+        <h3>Why This Matters</h3>
+        <p id="why-it-matters">
+            <strong>Guaranteed 24/7 Availability:</strong> The AI voice agent provides round-the-clock service (24/7,
+            365 days a year) without requiring breaks, sick days, or annual leave, ensuring The Mona never misses
+            customer calls or opportunities, especially outside of traditional business hours.
+            <br><br>
+            <strong>Scalable Call Handling:</strong> The system can handle a high volume of unlimited incoming calls
+            simultaneously, eliminating call waiting and managing sudden demand peaks effectively, which is critical for
+            a busy venue like The Mona. AI handles a workload equivalent to dozens of human agents, managing high-volume
+            times smoothly.
+            <br><br>
+            <strong>Automated Scheduling and Follow-Up:</strong> The AI efficiently automates core hospitality services
+            like Book A Table and EVENT ENQUIRY by automatically scheduling appointments and sending necessary reminders
+            and confirmations via text or voice to reduce no-shows.
+            <br><br>
+            <strong>Consistent, Intelligent Customer Experience:</strong> Leveraging Natural Language Processing (NLP),
+            the AI engages in fluid, lifelike conversations. It ensures consistent, error-free service quality across
+            all interactions and can generate accurate answers to service inquiries (e.g., about "Live Music" or "Food +
+            Drink") from the business's data files.
+            <br><br>
+            <strong>Significant Cost Efficiency:</strong> AI voice agents offer a cost-effective solution for The Mona.
+            They operate at approximately 50% of the cost of a full-time employee while handling the workload of
+            numerous human staff members, thereby reducing labor costs associated with routine, repetitive tasks.
+        </p>
+    </div>
+
+    <script>
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Get the content for this specific demo
+                const content = data.aiReceptionist;
+
+                // Update all the text elements
+                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
+                document.getElementById('hero-description').textContent = content.heroDescription;
+                document.getElementById('how-it-works').textContent = content.howItWorks;
+                document.getElementById('cta-emoji').textContent = content.emoji;
+                document.getElementById('cta-title').textContent = content.ctaButtonText;
+                document.getElementById('cta-description').textContent = content.ctaDescription;
+
+                // Update iframe URL
+                document.getElementById('demo-iframe').src = content.iframeUrl;
+
+                // Update video if URL exists
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            style="width: 100%; height: 100%; border: none;"
+                            allow="autoplay"
+                        ></iframe>
+                    `;
+                }
+
+                // Update page title
+                document.title = `${content.title} Demo - AWE2M8`;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                // Fallback content if JSON fails to load
+                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
+            });
+
+        // Microphone permission handling for iframe
+        const frame = document.getElementById('demo-iframe');
+        frame.addEventListener('load', () => {
+            navigator.permissions.query({ name: 'microphone' })
+                .then(result => {
+                    if (result.state === 'granted') {
+                        console.log('Microphone access already granted');
+                    } else if (result.state === 'prompt') {
+                        console.log('User will be prompted for microphone access');
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>

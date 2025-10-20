@@ -257,6 +257,25 @@ body {
     flex-grow: 1;
 }
 
+/* Full-width section for content below three columns */
+.full-width-section {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.full-width-section .column-box {
+    width: 100%;
+}
+
+.full-width-section .column-box p {
+    text-align: left;
+}
+
+.full-width-section .column-box h3 {
+    text-align: left;
+}
+
 @media (max-width: 1200px) {
     .three-column-grid {
         grid-template-columns: 1fr;
