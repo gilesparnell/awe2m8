@@ -6,6 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Out of Hours AI Demo - AWE2M8</title>
     <link rel="stylesheet" href="/css/demo-styles.css">
+    <style>
+        /* Mobile-first ordering override */
+        .three-column-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Voice orb container with proper spacing */
+        .voice-orb-container {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #demo-iframe {
+            min-height: 200px;
+        }
+
+        /* Mobile: Stack in priority order */
+        @media (max-width: 768px) {
+            .three-column-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .column-cta {
+                order: 1;
+                /* CTA first on mobile */
+            }
+
+            .column-info-1 {
+                order: 2;
+                /* Global Availability second */
+            }
+
+            .column-info-2 {
+                order: 3;
+                /* Emergency Handling last */
+            }
+        }
+
+        /* Desktop: Three columns with custom order */
+        @media (min-width: 769px) {
+            .three-column-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .column-cta {
+                order: 1;
+                /* Left column */
+            }
+
+            .column-info-1 {
+                order: 2;
+                /* Middle column */
+            }
+
+            .column-info-2 {
+                order: 3;
+                /* Right column */
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -23,13 +86,9 @@
     </div>
 
     <div class="three-column-grid">
-        <div class="column-box">
-            <h3>Global Availability</h3>
-            <p>Serve customers across all time zones without hiring night staff</p>
-        </div>
-
-        <div class="column-box">
-            <div class="cta-in-column">
+        <!-- Column 1 (Desktop Left / Mobile First): CTA with Voice Orb -->
+        <div class="column-box column-cta">
+            <div class="cta-in-column voice-orb-container">
                 <div class="cta-emoji">🎙️</div>
                 <h2>Experience 24/7 Coverage</h2>
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
@@ -41,7 +100,14 @@
             </div>
         </div>
 
-        <div class="column-box">
+        <!-- Column 2 (Desktop Middle / Mobile Second): Global Availability -->
+        <div class="column-box column-info-1">
+            <h3>Global Availability</h3>
+            <p>Serve customers across all time zones without hiring night staff</p>
+        </div>
+
+        <!-- Column 3 (Desktop Right / Mobile Third): Emergency Handling -->
+        <div class="column-box column-info-2">
             <h3>Emergency Handling</h3>
             <p>Route urgent matters to on-call staff while handling routine inquiries automatically</p>
         </div>

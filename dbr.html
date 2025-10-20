@@ -6,6 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Reactivation Demo - AWE2M8</title>
     <link rel="stylesheet" href="/css/demo-styles.css">
+    <style>
+        /* Mobile-first ordering override */
+        .three-column-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        /* Mobile: Stack in priority order */
+        @media (max-width: 768px) {
+            .three-column-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .column-cta {
+                order: 1;
+                /* CTA first on mobile */
+            }
+
+            .column-video {
+                order: 2;
+                /* Video second */
+            }
+
+            .column-info {
+                order: 3;
+                /* Info last */
+            }
+        }
+
+        /* Desktop: Three columns with custom order */
+        @media (min-width: 769px) {
+            .three-column-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .column-cta {
+                order: 1;
+                /* Left column */
+            }
+
+            .column-video {
+                order: 2;
+                /* Middle column */
+            }
+
+            .column-info {
+                order: 3;
+                /* Right column */
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -22,26 +73,8 @@
     </div>
 
     <div class="three-column-grid">
-        <!-- Column 1: How & Why -->
-        <div class="column-box">
-            <h3>How It Works</h3>
-            <p id="how-it-works">Loading...</p>
-
-            <h3 style="margin-top: 15px;">Why This Matters</h3>
-            <p id="why-it-matters">Loading...</p>
-        </div>
-
-        <!-- Column 2: Video -->
-        <div class="column-box">
-            <h2>See It In Action</h2>
-            <div class="video-in-column" id="video-container">
-                <iframe src="https://drive.google.com/file/d/1LDp3Lb6HBBOkq2ywb1wr_voVazzP9jpN/preview" allow="autoplay"
-                    style="width: 100%; height: 100%; border: none;"></iframe>
-            </div>
-        </div>
-
-        <!-- Column 3: CTA -->
-        <div class="column-box">
+        <!-- Column 1 (Desktop Left / Mobile First): CTA -->
+        <div class="column-box column-cta">
             <div class="cta-in-column">
                 <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
                 <h2 id="cta-title" style="margin-bottom: 8px;">Launch SMS Demo</h2>
@@ -51,6 +84,24 @@
                     Try It Now →
                 </a>
             </div>
+        </div>
+
+        <!-- Column 2 (Desktop Middle / Mobile Second): Video -->
+        <div class="column-box column-video">
+            <h2>See It In Action</h2>
+            <div class="video-in-column" id="video-container">
+                <iframe src="https://drive.google.com/file/d/1LDp3Lb6HBBOkq2ywb1wr_voVazzP9jpN/preview" allow="autoplay"
+                    style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- Column 3 (Desktop Right / Mobile Last): How & Why -->
+        <div class="column-box column-info">
+            <h3>How It Works</h3>
+            <p id="how-it-works">Loading...</p>
+
+            <h3 style="margin-top: 15px;">Why This Matters</h3>
+            <p id="why-it-matters">Loading...</p>
         </div>
     </div>
 
