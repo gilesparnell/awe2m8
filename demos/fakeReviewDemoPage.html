@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,13 +28,13 @@
             padding: 10px;
             font-weight: bold;
             z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .review-container {
             background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
             padding: 24px;
@@ -164,7 +165,7 @@
 
         .btn-submit:hover {
             background: #1765cc;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .success-message {
@@ -207,6 +208,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="demo-banner">
         ⚠️ DEMO ONLY - This is a simulation. No actual review will be posted.
@@ -249,7 +251,7 @@
             <h2>Demo Complete!</h2>
             <p>In a real scenario, your review would now be posted to Google.</p>
             <p style="margin-top: 20px;">
-                <a href="../demos/reviews-ai.html" class="back-link">← Back to Reviews AI Demo</a>
+                <a href="../reviews-ai.html" class="back-link">← Back to Reviews AI Demo</a>
             </p>
         </div>
     </div>
@@ -260,18 +262,18 @@
         const submitBtn = document.getElementById('submitBtn');
 
         stars.forEach(star => {
-            star.addEventListener('click', function() {
+            star.addEventListener('click', function () {
                 selectedRating = parseInt(this.getAttribute('data-rating'));
                 updateStars();
             });
 
-            star.addEventListener('mouseenter', function() {
+            star.addEventListener('mouseenter', function () {
                 const rating = parseInt(this.getAttribute('data-rating'));
                 highlightStars(rating);
             });
         });
 
-        document.getElementById('starRating').addEventListener('mouseleave', function() {
+        document.getElementById('starRating').addEventListener('mouseleave', function () {
             updateStars();
         });
 
@@ -311,5 +313,8 @@
             }, 2000);
         }
     </script>
+    <script src="/js/dark-mode-toggle.js"></script>
+    <script src="/js/interactive-effects.js"></script>
 </body>
+
 </html>
