@@ -11,52 +11,51 @@
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
-    <div class="hero hero-compact">
+    <div class="hero">
         <h1 id="hero-title">🎙️ Voice AI Technology</h1>
         <p id="hero-description">Loading...</p>
     </div>
 
     <div class="three-column-grid">
-        <!-- Column 1: How & Why -->
         <div class="column-box">
             <h3>How It Works</h3>
             <p id="how-it-works">Loading...</p>
-
-            <h3 style="margin-top: 15px;">Why This Matters</h3>
-            <p id="why-it-matters">Loading...</p>
         </div>
 
-        <!-- Column 2: Video -->
         <div class="column-box">
             <h2>See It In Action</h2>
             <div class="video-in-column" id="video-container">
-                <iframe src="https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview" allow="autoplay"
-                    style="width: 100%; height: 100%; border: none;"></iframe>
+                <iframe src="https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview"
+                    allow="autoplay"></iframe>
             </div>
         </div>
 
-        <!-- Column 3: Try It -->
         <div class="column-box">
             <div class="cta-in-column">
-                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">🎙️</div>
-                <h2 id="cta-title" style="margin-bottom: 15px;">Talk to Our AI</h2>
-                <div
-                    style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                <div class="cta-emoji" id="cta-emoji">🎙️</div>
+                <h2 id="cta-title">Talk to Our AI</h2>
+                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
                     <iframe id="demo-iframe" src="" allow="microphone"
-                        style="width: 100%; max-width: 300px; height: 150px; border: none;"></iframe>
+                        style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
                 </div>
-                <p id="cta-description" style="margin: 0; font-size: 0.85em;">Loading...</p>
+                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">Loading...</p>
             </div>
         </div>
     </div>
 
+    <div class="full-width-section">
+        <div class="column-box">
+            <h3>Why This Matters</h3>
+            <p id="why-it-matters">Loading...</p>
+        </div>
+    </div>
+
     <script>
-        // Load content from JSON file
         fetch('../content/content.json')
             .then(response => {
                 if (!response.ok) {
@@ -65,42 +64,36 @@
                 return response.json();
             })
             .then(data => {
-                // Get the content for this specific demo
                 const content = data.voiceAI;
 
-                // Update all the text elements
                 document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
                 document.getElementById('hero-description').textContent = content.heroDescription;
                 document.getElementById('how-it-works').textContent = content.howItWorks;
-                document.getElementById('why-it-matters').textContent = content.whyItMatters;
+                document.getElementById('why-it-matters').innerHTML = content.whyItMatters;
                 document.getElementById('cta-emoji').textContent = content.emoji;
                 document.getElementById('cta-title').textContent = content.ctaButtonText;
                 document.getElementById('cta-description').textContent = content.ctaDescription;
 
-                // Update iframe URL
-                document.getElementById('demo-iframe').src = content.iframeUrl;
+                if (content.iframeUrl && content.iframeUrl.trim() !== '') {
+                    document.getElementById('demo-iframe').src = content.iframeUrl;
+                }
 
-                // Update video if URL exists in JSON (overrides hardcoded one)
                 if (content.videoUrl && content.videoUrl.trim() !== '') {
                     document.getElementById('video-container').innerHTML = `
                         <iframe 
                             src="${content.videoUrl}" 
-                            style="width: 100%; height: 100%; border: none;"
                             allow="autoplay"
                         ></iframe>
                     `;
                 }
 
-                // Update page title
                 document.title = `${content.title} Demo - AWE2M8`;
             })
             .catch(error => {
                 console.error('Error loading content:', error);
-                // Fallback content if JSON fails to load
                 document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
             });
 
-        // Microphone permission handling for iframe
         const frame = document.getElementById('demo-iframe');
         frame.addEventListener('load', () => {
             navigator.permissions.query({ name: 'microphone' })
