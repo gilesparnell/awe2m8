@@ -147,7 +147,7 @@
             setTimeout(() => {
                 loader.classList.add('hide');
                 setTimeout(() => loader.remove(), 500);
-            }, 2000);
+            }, 1000);
         });
 
         console.log('✅ Loading Screen');
@@ -409,7 +409,7 @@
                 badge.textContent = '✓ Viewed';
                 badge.style.cssText = `
                     position: absolute;
-                    top: 15px;
+                    top: 50px;
                     left: 15px;
                     background: rgba(0, 255, 136, 0.2);
                     border: 1px solid #00ff88;
