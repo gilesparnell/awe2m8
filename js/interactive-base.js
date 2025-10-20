@@ -1,6 +1,7 @@
 /* ============================================
    AWE2M8 INTERACTIVE EFFECTS
-   Drop this at the bottom of your HTML pages
+   Foundation interactions: scroll reveals, 3D tilts, animations
+   Loaded on: All pages
    ============================================ */
 
 // ============================================

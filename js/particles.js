@@ -1,6 +1,7 @@
 /* ============================================
    AWE2M8 GREEN PARTICLE SYSTEM
    Interactive particle background with mouse interaction
+   Loaded on: Homepage only
    ============================================ */
 
 (function () {
