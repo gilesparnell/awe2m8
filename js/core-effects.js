@@ -590,7 +590,7 @@
         initRecentlyViewed();           // "✓ Viewed" badges
 
         // ANIMATIONS
-        initCustomCursor();             // Green glowing cursor
+        // initCustomCursor();             // Green glowing cursor
         initParallaxCards();            // Depth scrolling
         initLogoReveal();               // Matrix glitch
         initLazyLoad();                 // Lazy image loading
