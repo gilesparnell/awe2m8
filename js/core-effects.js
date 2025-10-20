@@ -591,7 +591,7 @@
 
         // ANIMATIONS
         // initCustomCursor();             // Green glowing cursor
-        initParallaxCards();            // Depth scrolling
+        //initParallaxCards();            // Depth scrolling
         initLogoReveal();               // Matrix glitch
         initLazyLoad();                 // Lazy image loading
 
