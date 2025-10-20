@@ -342,6 +342,10 @@
     <script>
         let contentData = {};
         let currentDemo = '';
+        let fileHandle = null; // Store file handle for direct saving
+
+        // Check if File System Access API is supported
+        const supportsFileSystemAccess = 'showOpenFilePicker' in window;
 
         // Google Drive URL converter
         function convertGoogleDriveUrl(url) {
@@ -398,7 +402,50 @@
                 contentData = await response.json();
             } catch (error) {
                 console.error('Error loading content:', error);
-                alert('Error loading content.json. Make sure the file exists.');
+
+                // If File System Access is supported, offer to select file
+                if (supportsFileSystemAccess) {
+                    if (confirm('Could not load content.json from server. Would you like to select it from your project folder?')) {
+                        await selectContentFile();
+                    }
+                } else {
+                    alert('Error loading content.json. Make sure the file exists.');
+                }
+            }
+        }
+
+        // Select content.json file from file system
+        async function selectContentFile() {
+            if (!supportsFileSystemAccess) {
+                alert('Your browser does not support direct file access. Please use Chrome or Edge.');
+                return;
+            }
+
+            try {
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'JSON Files',
+                        accept: { 'application/json': ['.json'] }
+                    }],
+                    suggestedName: 'content.json'
+                });
+
+                // Read the file
+                const file = await fileHandle.getFile();
+                const text = await file.text();
+                contentData = JSON.parse(text);
+
+                // Save file handle for later
+                localStorage.setItem('hasFileAccess', 'true');
+
+                alert('✓ File connected! Now when you save, it will write directly to your project.');
+
+                // If a demo is already selected, reload its content
+                if (currentDemo) {
+                    loadContent();
+                }
+            } catch (error) {
+                console.error('Error selecting file:', error);
             }
         }
 
@@ -435,7 +482,7 @@
         }
 
         // Save content
-        function saveContent() {
+        async function saveContent() {
             if (!currentDemo) return;
 
             // Auto-convert video URL one more time before saving
@@ -458,8 +505,31 @@
                 ctaDescription: document.getElementById('ctaDescription').value
             };
 
-            // Download updated JSON
             const dataStr = JSON.stringify(contentData, null, 2);
+
+            // Try to save directly to file system if we have access
+            if (supportsFileSystemAccess && fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+
+                    // Show success message
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated in your project folder</p>';
+                    successMsg.classList.add('show');
+                    setTimeout(() => {
+                        successMsg.classList.remove('show');
+                    }, 5000);
+
+                    return; // Don't download if we saved directly
+                } catch (error) {
+                    console.error('Error saving to file:', error);
+                    // Fall through to download method
+                }
+            }
+
+            // Fallback: Download the file (old method)
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
@@ -468,14 +538,34 @@
             link.click();
 
             // Show success message
-            document.getElementById('successMessage').classList.add('show');
+            const successMsg = document.getElementById('successMessage');
+            successMsg.innerHTML = '<h3>✓ Changes Saved!</h3><p>content.json has been downloaded. Replace the file in your project folder.</p>';
+            successMsg.classList.add('show');
             setTimeout(() => {
-                document.getElementById('successMessage').classList.remove('show');
+                successMsg.classList.remove('show');
             }, 5000);
         }
 
         // Initialize
         loadContentFile();
+
+        // Add connect button to UI if File System Access is supported
+        if (supportsFileSystemAccess) {
+            window.addEventListener('DOMContentLoaded', () => {
+                const container = document.querySelector('.container');
+                const connectButton = document.createElement('div');
+                connectButton.style.cssText = 'text-align: center; margin: 20px 0;';
+                connectButton.innerHTML = `
+                    <button onclick="selectContentFile()" class="btn-secondary" style="margin: 0;">
+                        📁 Connect to Project File
+                    </button>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-top: 10px;">
+                        Click to select content.json from your project. After connecting, saves will write directly to the file!
+                    </p>
+                `;
+                container.insertBefore(connectButton, document.getElementById('form-container'));
+            });
+        }
     </script>
 </body>
 
