@@ -1,5 +1,7 @@
 // Dark Mode Toggle Component
 // Auto-creates button and handles all functionality
+// Theme switching system
+// Loaded on: All pages
 
 (function () {
     // Create the button HTML
