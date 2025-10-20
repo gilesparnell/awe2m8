@@ -586,8 +586,8 @@
 
         // DEMO ENHANCEMENTS
         initDemoSearch();               // Search bar
-        initDemoTimers();               // "⏱️ 2 min" badges
-        initRecentlyViewed();           // "✓ Viewed" badges
+        //initDemoTimers();               // "⏱️ 2 min" badges
+        //initRecentlyViewed();           // "✓ Viewed" badges
 
         // ANIMATIONS
         // initCustomCursor();             // Green glowing cursor
