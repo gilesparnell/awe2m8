@@ -1,0 +1,91 @@
+{
+    "voiceAI": {
+        "title": "Voice AI Technology",
+        "emoji": "🎙️",
+        "heroDescription": "Experience conversations that feel natural and human. Our voice AI understands context, handles objections, and adapts to each caller's unique needs in real-time.",
+        "howItWorks": "Our voice AI answers calls instantly with natural-sounding speech. It understands caller intent, responds intelligently to questions, and handles complex conversations without scripts. The AI adapts its tone and approach based on the caller's needs, creating genuinely helpful interactions.",
+        "whyItMatters": "Traditional IVR systems frustrate callers and lose customers. Voice AI delivers human-quality conversations at scale, ensuring every caller gets immediate, personalized help. This means higher satisfaction, more conversions, and lower support costs.",
+        "ctaButtonText": "Talk to Our AI",
+        "ctaDescription": "Click the orb to start a natural voice conversation",
+        "iframeUrl": "https://iframes.ai/o/1760606282083x472026348977127400?color=10A37F&icon=",
+        "videoUrl": ""
+    },
+    "aiReceptionist": {
+        "title": "AI Receptionist",
+        "emoji": "📞",
+        "heroDescription": "Your perfect front desk, powered by AI. Greet callers professionally, route to the right department, schedule appointments, answer FAQs, and take messages—all with a warm, natural voice that represents your brand flawlessly.",
+        "howItWorks": "When someone calls your business, our AI receptionist answers instantly with a personalized greeting. It understands natural speech, asks qualifying questions, and intelligently routes calls to the right person or department. Appointments are booked directly into your calendar, messages are captured accurately, and FAQs are answered instantly—all while maintaining a professional, friendly tone that reflects your brand.",
+        "whyItMatters": "Missed calls are missed revenue. Studies show that 80% of callers won't leave a voicemail, and 67% won't listen to voicemails from business contacts. Every missed call is a potential customer choosing your competitor instead. An AI receptionist ensures you never miss an opportunity—answering every call instantly, 24/7.",
+        "ctaButtonText": "Talk to Bella, from Nora Hair and Beauty",
+        "ctaDescription": "Bella is trained on a Hair & Beauty Salon, and knows all details on their publicly available website: https://www.fresha.com/lvp/noras-hair-beauty-salon-hennie-alberts-street-alberton-8JyQYL",
+        "iframeUrl": "https://iframes.ai/o/1760625993791x317755806045175800?color=10A37F&icon=",
+        "videoUrl": "https://drive.google.com/file/d/11gxSsjVltun0EgNylmYtwzWmw582Lr_c/preview"
+    },
+    "reviewsAI": {
+        "title": "Reviews AI Assistant",
+        "emoji": "⭐",
+        "heroDescription": "Turn happy customers into 5-star reviews automatically. Our AI reaches out at the perfect moment, guides customers to Google, Trustpilot, or your preferred platform, and increases your review volume by 10x.",
+        "howItWorks": "Our AI detects when a customer has a positive experience, then automatically sends a personalized request to leave a review. The customer is guided through a simple process that takes less than 30 seconds. Negative feedback is routed privately to prevent public complaints.",
+        "whyItMatters": "Reviews build credibility and drive SEO rankings. But most businesses struggle to consistently ask for them. Our AI ensures every happy customer is invited to leave a review at the perfect moment—while unhappy customers are given a private channel to share concerns before going public.",
+        "ctaButtonText": "Try Review Demo",
+        "ctaDescription": "Click to experience what your customers see when leaving a review",
+        "demoUrl": "https://agentdemo.ai/welcome/R6rEp4gCwe",
+        "videoUrl": ""
+    },
+    "databaseReactivation": {
+        "title": "Database Reactivation",
+        "emoji": "💬",
+        "heroDescription": "Wake up dormant customers and reignite relationships automatically. Our AI reaches out with personalized messages that feel human, re-engaging past customers and bringing them back to your business.",
+        "howItWorks": "Our AI analyzes your customer database, identifies inactive contacts, and sends personalized SMS or email campaigns that spark conversations. It adapts messaging based on customer history, handles replies naturally, and nurtures leads back into your sales funnel—all on autopilot.",
+        "whyItMatters": "Your database is sitting on untapped revenue. Studies show it costs 5x more to acquire new customers than to retain existing ones. Reactivation campaigns can recover 10-30% of dormant customers, but most businesses lack the time or resources to do it manually. AI makes it effortless and scalable.",
+        "ctaButtonText": "Launch SMS Demo",
+        "ctaDescription": "Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'",
+        "demoUrl": "https://agentdemo.ai/welcome/hKfVPa3zr7",
+        "videoUrl": ""
+    },
+    "documentCollection": {
+        "title": "Document Collection AI",
+        "emoji": "📄",
+        "heroDescription": "Collect documents, forms, and signatures effortlessly. Our AI guides customers through the submission process, sends reminders, and ensures nothing falls through the cracks—eliminating manual follow-ups.",
+        "howItWorks": "Our AI sends personalized requests for documents via SMS or email, guiding recipients step-by-step through the upload process. It automatically follows up with reminders, confirms receipt, and alerts your team when documents arrive. The system integrates with your existing workflows for seamless processing.",
+        "whyItMatters": "Chasing documents wastes countless hours and delays critical processes. Late submissions cost time and money, while manual follow-ups drain resources. Document Collection AI ensures 90%+ completion rates while freeing your team to focus on higher-value work.",
+        "ctaButtonText": "Try Document Demo",
+        "ctaDescription": "Experience how customers submit documents",
+        "demoUrl": "",
+        "videoUrl": ""
+    },
+    "ecommerce": {
+        "title": "E-commerce AI Assistant",
+        "emoji": "🛒",
+        "heroDescription": "Your 24/7 shopping assistant that converts browsers into buyers. Answer product questions, recommend items, handle objections, and guide customers through checkout—all with natural, helpful conversations.",
+        "howItWorks": "Our AI engages shoppers in real-time across your website, SMS, and social channels. It understands product inventory, answers detailed questions, suggests complementary items, and overcomes purchase hesitations. When customers abandon carts, the AI follows up with personalized messages to recover sales.",
+        "whyItMatters": "Over 70% of shopping carts are abandoned, and most shoppers leave with unanswered questions. Live chat agents are expensive and can't scale. E-commerce AI provides instant, personalized support at any volume—increasing conversion rates by 20-40% while reducing support costs.",
+        "ctaButtonText": "Shop with AI",
+        "ctaDescription": "Chat with our AI shopping assistant",
+        "iframeUrl": "https://iframes.ai/o/1760442563274x523950783927418900?color=ffffff&icon=",
+        "demoUrl": "https://agentdemo.ai/welcome/GrBY6PgnTQ",
+        "videoUrl": "https://drive.google.com/file/d/1kFig57mEScBqXUsmVPba2yOtLJxFnU8k/preview"
+    },
+    "outOfHours": {
+        "title": "Out of Hours AI",
+        "emoji": "🌙",
+        "heroDescription": "Never miss an opportunity, even when you're closed. Our AI handles after-hours inquiries, qualifies leads, books appointments, and ensures urgent matters get immediate attention—so you wake up to warm leads, not missed opportunities.",
+        "howItWorks": "When customers reach out after business hours, our AI responds instantly via phone, SMS, or chat. It answers FAQs, captures lead information, schedules appointments for the next available time, and escalates urgent matters to on-call staff. Everything syncs to your CRM automatically.",
+        "whyItMatters": "Customers don't wait for business hours—they choose whoever responds first. Studies show 78% of customers buy from the first responder. Out of Hours AI ensures you're always first, capturing leads that would otherwise go to competitors while your team sleeps.",
+        "ctaButtonText": "Try After Hours Demo",
+        "ctaDescription": "See how AI handles late-night inquiries",
+        "demoUrl": "",
+        "videoUrl": ""
+    },
+    "speedToLead": {
+        "title": "Speed to Lead AI",
+        "emoji": "⚡",
+        "heroDescription": "Strike while the iron is hot. Our AI contacts new leads within seconds of inquiry, qualifying them instantly and booking appointments before competitors even know they exist—turning speed into your competitive advantage.",
+        "howItWorks": "The moment a lead comes in from your website, ads, or any source, our AI instantly reaches out via SMS or call. It qualifies the lead with smart questions, answers their initial questions, and books them directly into your calendar—all within 60 seconds of their first inquiry.",
+        "whyItMatters": "Response time is everything. Leads contacted within 5 minutes are 100x more likely to convert than those contacted after 30 minutes. Yet most businesses take hours or days to respond. Speed to Lead AI ensures you're always first, dramatically increasing conversion rates and ROI on marketing spend.",
+        "ctaButtonText": "See Speed Demo",
+        "ctaDescription": "Experience instant lead response",
+        "demoUrl": "",
+        "videoUrl": ""
+    }
+}

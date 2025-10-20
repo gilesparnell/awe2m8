@@ -42,8 +42,10 @@
         h1 {
             text-align: center;
             margin-bottom: 10px;
-            color: #00ff00;
-            font-size: 2rem;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            font-weight: 800;
         }
 
         .subtitle {
@@ -55,10 +57,20 @@
 
         .demo-selector {
             background: rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 0, 0.2);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
             margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-selector:hover {
+            background: rgba(0, 255, 0, 0.08);
+            border-color: rgba(0, 255, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 0, 0.2);
         }
 
         .demo-selector label {
@@ -94,9 +106,19 @@
 
         .form-group {
             background: rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 0, 0.2);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover {
+            background: rgba(0, 255, 0, 0.08);
+            border-color: rgba(0, 255, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 0, 0.2);
         }
 
         .form-group label {
@@ -252,7 +274,14 @@
 
                 <div class="form-group">
                     <label for="emoji">Emoji</label>
-                    <input type="text" id="emoji" placeholder="e.g., 🎙️" maxlength="2">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="emoji" placeholder="e.g., 🎙️" maxlength="2" style="flex: 1;">
+                        <button type="button" onclick="window.open('https://emojipedia.org/', '_blank')"
+                            style="padding: 12px 20px; font-size: 0.9rem; white-space: nowrap;">
+                            Browse Emojis 🎨
+                        </button>
+                    </div>
+                    <div class="helper-text">Click "Browse Emojis" to find and copy emojis from Emojipedia</div>
                 </div>
 
                 <div class="form-group">
