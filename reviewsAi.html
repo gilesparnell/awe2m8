@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews AI Demo - AWE2M8</title>
-    <link rel="stylesheet" href="/css/demo-styles.css">
+    <link rel="stylesheet" href="css/demo-styles.css">
 </head>
 
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="/images/AWE2M8Logo.png" alt="AWE2M8.ai">
+            <img src="images/AWE2M8Logo.png" alt="AWE2M8.ai">
         </a>
-        <a href="../index.html" class="back-btn">← Back to Demos</a>
+        <a href="index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero">
@@ -22,21 +22,7 @@
     </div>
 
     <div class="three-column-grid">
-        <div class="column-box">
-            <h3>How It Works</h3>
-            <p id="how-it-works">Loading...</p>
-        </div>
-
-        <div class="column-box">
-            <h2>Watch It In Action</h2>
-            <div class="video-in-column" id="video-container">
-                <div
-                    style="background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em; height: 100%; border-radius: 16px;">
-                    VIDEO LOADING...
-                </div>
-            </div>
-        </div>
-
+        <!-- COLUMN 1: CTA / DEMO LAUNCH (First on mobile) -->
         <div class="column-box">
             <div class="cta-in-column">
                 <div class="cta-emoji" id="cta-emoji">⭐</div>
@@ -47,8 +33,26 @@
                 </a>
             </div>
         </div>
+
+        <!-- COLUMN 2: VIDEO (Second on mobile) -->
+        <div class="column-box">
+            <h2>Watch It In Action</h2>
+            <div class="video-in-column" id="video-container">
+                <div
+                    style="background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em; height: 100%; border-radius: 16px;">
+                    VIDEO LOADING...
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: HOW IT WORKS (Third on mobile) -->
+        <div class="column-box">
+            <h3>How It Works</h3>
+            <p id="how-it-works">Loading...</p>
+        </div>
     </div>
 
+    <!-- FULL WIDTH: WHY IT MATTERS (Last on mobile) -->
     <div class="full-width-section">
         <div class="column-box">
             <h3>Why This Matters</h3>
@@ -57,7 +61,7 @@
     </div>
 
     <script>
-        fetch('../content/content.json')
+        fetch('content/content.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Content file not found');
@@ -84,6 +88,7 @@
                         <iframe 
                             src="${content.videoUrl}" 
                             allow="autoplay"
+                            style="width: 100%; height: 100%; border: none;"
                         ></iframe>
                     `;
                 }
@@ -95,9 +100,9 @@
                 document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
             });
     </script>
-    <script src="js/interactive-base.js"></script> <!-- Core interactions -->
-    <script src="js/dark-mode.js"></script> <!-- Theme toggle -->
-    <script src="js/core-effects.js"></script> <!-- Your custom effects -->
+    <script src="js/interactive-base.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script src="js/core-effects.js"></script>
 </body>
 
 </html>
