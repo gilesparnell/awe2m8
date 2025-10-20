@@ -4,17 +4,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mona Vale Hotel - Virtual Receptionist </title>
-    <link rel="stylesheet" href="../../css/demo-styles.css">
+    <title>Mona Vale Hotel - Virtual Receptionist</title>
     <style>
-        .stat-link {
-            color: #00ff00;
-            text-decoration: none;
-            border-bottom: 1px dotted #00ff00;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .stat-link:hover {
-            text-decoration: underline;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 255, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 0, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        /* Header with glassmorphism */
+        .header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo img {
+            height: 40px;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.3));
+            transition: filter 0.3s ease;
+        }
+
+        .logo img:hover {
+            filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.6));
+        }
+
+        /* Hero section */
+        .hero {
+            max-width: 1200px;
+            margin: 60px auto 40px;
+            text-align: center;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease 0.2s both;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ff00 0%, #00cc88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Three column grid with staggered animation */
+        .three-column-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .column-box {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 0, 0.1);
+            border-radius: 24px;
+            padding: 35px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            animation: fadeInScale 0.8s ease forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .column-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .column-box:hover::before {
+            transform: translateX(100%);
+        }
+
+        .column-box:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+
+        .column-box:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .column-box:nth-child(3) {
+            animation-delay: 0.7s;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .column-box:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 255, 0, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .column-box h2,
+        .column-box h3 {
+            color: #00ff00;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-align: center;
+            position: relative;
+        }
+
+        .column-box h2::after,
+        .column-box h3::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff00, transparent);
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+        .column-box p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            line-height: 1.7;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Video container with modern aspect ratio */
+        .video-in-column {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 16px;
+            margin-top: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .video-in-column:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 60px rgba(0, 255, 0, 0.2);
+        }
+
+        .video-in-column iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+        }
+
+        /* CTA section with floating animation */
+        .cta-in-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .cta-emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 5px 15px rgba(0, 255, 0, 0.3));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #demo-iframe {
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 255, 0, 0.15);
+            transition: all 0.4s ease;
+        }
+
+        #demo-iframe:hover {
+            box-shadow: 0 15px 60px rgba(0, 255, 0, 0.25);
+        }
+
+        /* Full width section */
+        .full-width-section {
+            max-width: 1400px;
+            margin: 60px auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 1s ease 0.9s both;
+        }
+
+        .full-width-section .column-box {
+            animation: none;
+            opacity: 1;
+        }
+
+        .full-width-section .column-box p {
+            text-align: left;
+        }
+
+        .full-width-section .column-box h3 {
+            text-align: left;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .full-width-section .column-box h3::after {
+            margin: 12px 0 0 0;
+            width: 80px;
+        }
+
+        .full-width-section strong {
+            color: #00ff00;
+            font-weight: 600;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .three-column-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                padding: 0 20px;
+            }
+
+            .column-box:nth-child(1),
+            .column-box:nth-child(2),
+            .column-box:nth-child(3) {
+                animation-delay: 0.2s;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .logo img {
+                height: 30px;
+            }
+
+            .hero {
+                margin: 40px auto 30px;
+            }
+
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 1em;
+            }
+
+            .column-box {
+                padding: 25px;
+            }
+
+            .column-box h2,
+            .column-box h3 {
+                font-size: 1.2em;
+            }
+
+            .full-width-section {
+                padding: 0 20px;
+                margin: 40px auto;
+            }
+
+            .full-width-section .column-box h3 {
+                font-size: 1.5em;
+            }
+
+            #demo-iframe {
+                max-width: 100% !important;
+                height: 180px !important;
+            }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 0, 0.5);
         }
     </style>
 </head>
@@ -22,94 +420,79 @@
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="../../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../../images/AWE2M8Logo.png" alt="AWE2M8.ai">
         </a>
     </div>
 
-    <div class="hero hero-compact">
+    <div class="hero">
         <h1>📞 Mona Vale Hotel - Virtual Receptionist</h1>
-        <p>AI-powered virtual receptionist providing 24/7 customer service for The Mona Vale Hotel.</p>
+        <p>AI-powered virtual receptionist providing 24/7 customer service for The Mona Vale Hotel with intelligent
+            conversation and seamless booking capabilities.</p>
     </div>
 
     <div class="three-column-grid">
-        <!-- Column 1: How It Works -->
         <div class="column-box">
             <h3>How It Works</h3>
-            <p>Our AI virtual receptionist integrates seamlessly with your hotel's phone and messaging
-                systems, using natural language processing to handle inquiries, book rooms, and provide information 24/7
-                without human intervention. It learns from interactions to personalize responses, escalating complex
-                issues to staff only when necessary.</p>
+            <p>Our AI virtual receptionist integrates seamlessly with your hotel's phone and messaging systems, using
+                natural language processing to handle inquiries, book rooms, and provide information 24/7 without human
+                intervention. It learns from interactions to personalize responses, escalating complex issues to staff
+                only when necessary.</p>
         </div>
 
-        <!-- Column 2: Video -->
         <div class="column-box">
             <h2>Explainer</h2>
             <div class="video-in-column">
                 <iframe src="https://drive.google.com/file/d/172zsw63YcymCQCPZFaMafzgAhjDy1Fc5/preview"
-                    style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+                    allow="autoplay"></iframe>
             </div>
         </div>
 
-        <!-- Column 3: Try It -->
         <div class="column-box">
             <div class="cta-in-column">
-                <div style="font-size: 2.5em; margin-bottom: 12px;">📞</div>
-                <h2 style="margin-bottom: 15px;">Talk to Our AI</h2>
-                <div
-                    style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+                <div class="cta-emoji">📞</div>
+                <h2>Talk to Our AI</h2>
+                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
                     <iframe id="demo-iframe"
                         src="https://iframes.ai/o/1760923067545x634335781039636500?color=10A37F&icon="
                         allow="microphone" style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
                 </div>
-                <p style="margin: 0; font-size: 0.85em;">Click the floating orb below to talk to
-                    Lily, the Virtual Receptionist to the Mona Vale Hotel (Note: This Receptionist has been trained on
-                    publicly available data from the Mona Vale website. Further training and prompt engineering from a
-                    more detailed knowledge base would be required)</p>
+                <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">Click the floating orb to talk to Lily, the
+                    Virtual Receptionist to the Mona Vale Hotel. Trained on publicly available data from the Mona Vale
+                    website.</p>
             </div>
         </div>
     </div>
 
-    <!-- Full-width "Why It Matters" section below the three columns -->
     <div class="full-width-section">
         <div class="column-box">
             <h3>Why This Matters</h3>
             <p>
                 <strong>Guaranteed 24/7 Availability:</strong> The AI voice agent provides round-the-clock service
-                (24/7,
-                365 days a year) without requiring breaks, sick days, or annual leave, ensuring The Mona never misses
-                customer calls or opportunities, especially outside of traditional business hours.
+                (24/7, 365 days a year) without requiring breaks, sick days, or annual leave, ensuring The Mona never
+                misses customer calls or opportunities, especially outside of traditional business hours.
                 <br><br>
                 <strong>Scalable Call Handling:</strong> The system can handle a high volume of unlimited incoming calls
                 simultaneously, eliminating call waiting and managing sudden demand peaks effectively, which is critical
-                for
-                a busy venue like The Mona. AI handles a workload equivalent to dozens of human agents, managing
-                high-volume
-                times smoothly.
+                for a busy venue like The Mona. AI handles a workload equivalent to dozens of human agents, managing
+                high-volume times smoothly.
                 <br><br>
                 <strong>Automated Scheduling and Follow-Up:</strong> The AI efficiently automates core hospitality
-                services
-                like Book A Table and EVENT ENQUIRY by automatically scheduling appointments and sending necessary
-                reminders
-                and confirmations via text or voice to reduce no-shows.
+                services like Book A Table and EVENT ENQUIRY by automatically scheduling appointments and sending
+                necessary reminders and confirmations via text or voice to reduce no-shows.
                 <br><br>
                 <strong>Consistent, Intelligent Customer Experience:</strong> Leveraging Natural Language Processing
-                (NLP),
-                the AI engages in fluid, lifelike conversations. It ensures consistent, error-free service quality
-                across
-                all interactions and can generate accurate answers to service inquiries (e.g., about "Live Music" or
-                "Food +
-                Drink") from the business's data files.
+                (NLP), the AI engages in fluid, lifelike conversations. It ensures consistent, error-free service
+                quality across all interactions and can generate accurate answers to service inquiries (e.g., about
+                "Live Music" or "Food + Drink") from the business's data files.
                 <br><br>
                 <strong>Significant Cost Efficiency:</strong> AI voice agents offer a cost-effective solution for The
-                Mona.
-                They operate at approximately 50% of the cost of a full-time employee while handling the workload of
-                numerous human staff members, thereby reducing labor costs associated with routine, repetitive tasks.
+                Mona. They operate at approximately 50% of the cost of a full-time employee while handling the workload
+                of numerous human staff members, thereby reducing labor costs associated with routine, repetitive tasks.
             </p>
         </div>
     </div>
 
     <script>
-        // Microphone permission handling for iframe
         const frame = document.getElementById('demo-iframe');
         frame.addEventListener('load', () => {
             navigator.permissions.query({ name: 'microphone' })
