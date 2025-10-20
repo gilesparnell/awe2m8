@@ -28,7 +28,8 @@
 
     <div class="hero hero-compact">
         <h1 id="hero-title">📞 Mona Vale Hotel - Virtual Receptionist</h1>
-        <p id="hero-description">Loading...</p>
+        <p id="hero-description">AI-powered virtual receptionist providing 24/7 customer service for The Mona Vale
+            Hotel.</p>
     </div>
 
     <div class="three-column-grid">
@@ -43,7 +44,7 @@
 
         <!-- Column 2: Video -->
         <div class="column-box">
-            <h2>Explainer </h2>
+            <h2>Explainer</h2>
             <div class="video-in-column" id="video-container">
                 <iframe src="https://drive.google.com/file/d/172zsw63YcymCQCPZFaMafzgAhjDy1Fc5/preview"
                     style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
@@ -62,85 +63,53 @@
                         allow="microphone" style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
                 </div>
                 <p id="cta-description" style="margin: 0; font-size: 0.85em;">Click the floating orb below to talk to
-                    Lily, the Virtual Receptionlist to the Mona Vale Hotel (Note: This Receptionlist has been trained on
-                    publically available data from the Mona Vale website. Further training and prompt engineering from a
-                    more detailed knowledge base would be requried) </p>
+                    Lily, the Virtual Receptionist to the Mona Vale Hotel (Note: This Receptionist has been trained on
+                    publicly available data from the Mona Vale website. Further training and prompt engineering from a
+                    more detailed knowledge base would be required)</p>
             </div>
         </div>
     </div>
 
     <!-- Full-width "Why It Matters" section below the three columns -->
-    <div class="column-box" style="margin-top: 20px;">
-        <h3>Why This Matters</h3>
-        <p id="why-it-matters">
-            <strong>Guaranteed 24/7 Availability:</strong> The AI voice agent provides round-the-clock service (24/7,
-            365 days a year) without requiring breaks, sick days, or annual leave, ensuring The Mona never misses
-            customer calls or opportunities, especially outside of traditional business hours.
-            <br><br>
-            <strong>Scalable Call Handling:</strong> The system can handle a high volume of unlimited incoming calls
-            simultaneously, eliminating call waiting and managing sudden demand peaks effectively, which is critical for
-            a busy venue like The Mona. AI handles a workload equivalent to dozens of human agents, managing high-volume
-            times smoothly.
-            <br><br>
-            <strong>Automated Scheduling and Follow-Up:</strong> The AI efficiently automates core hospitality services
-            like Book A Table and EVENT ENQUIRY by automatically scheduling appointments and sending necessary reminders
-            and confirmations via text or voice to reduce no-shows.
-            <br><br>
-            <strong>Consistent, Intelligent Customer Experience:</strong> Leveraging Natural Language Processing (NLP),
-            the AI engages in fluid, lifelike conversations. It ensures consistent, error-free service quality across
-            all interactions and can generate accurate answers to service inquiries (e.g., about "Live Music" or "Food +
-            Drink") from the business's data files.
-            <br><br>
-            <strong>Significant Cost Efficiency:</strong> AI voice agents offer a cost-effective solution for The Mona.
-            They operate at approximately 50% of the cost of a full-time employee while handling the workload of
-            numerous human staff members, thereby reducing labor costs associated with routine, repetitive tasks.
-        </p>
+    <div class="full-width-section">
+        <div class="column-box">
+            <h3>Why This Matters</h3>
+            <p id="why-it-matters">
+                <strong>Guaranteed 24/7 Availability:</strong> The AI voice agent provides round-the-clock service
+                (24/7,
+                365 days a year) without requiring breaks, sick days, or annual leave, ensuring The Mona never misses
+                customer calls or opportunities, especially outside of traditional business hours.
+                <br><br>
+                <strong>Scalable Call Handling:</strong> The system can handle a high volume of unlimited incoming calls
+                simultaneously, eliminating call waiting and managing sudden demand peaks effectively, which is critical
+                for
+                a busy venue like The Mona. AI handles a workload equivalent to dozens of human agents, managing
+                high-volume
+                times smoothly.
+                <br><br>
+                <strong>Automated Scheduling and Follow-Up:</strong> The AI efficiently automates core hospitality
+                services
+                like Book A Table and EVENT ENQUIRY by automatically scheduling appointments and sending necessary
+                reminders
+                and confirmations via text or voice to reduce no-shows.
+                <br><br>
+                <strong>Consistent, Intelligent Customer Experience:</strong> Leveraging Natural Language Processing
+                (NLP),
+                the AI engages in fluid, lifelike conversations. It ensures consistent, error-free service quality
+                across
+                all interactions and can generate accurate answers to service inquiries (e.g., about "Live Music" or
+                "Food +
+                Drink") from the business's data files.
+                <br><br>
+                <strong>Significant Cost Efficiency:</strong> AI voice agents offer a cost-effective solution for The
+                Mona.
+                They operate at approximately 50% of the cost of a full-time employee while handling the workload of
+                numerous human staff members, thereby reducing labor costs associated with routine, repetitive tasks.
+            </p>
+        </div>
     </div>
 
     <script>
-        // Load content from JSON file
-        fetch('../content/content.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Content file not found');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Get the content for this specific demo
-                const content = data.aiReceptionist;
-
-                // Update all the text elements
-                document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
-                document.getElementById('hero-description').textContent = content.heroDescription;
-                document.getElementById('how-it-works').textContent = content.howItWorks;
-                document.getElementById('cta-emoji').textContent = content.emoji;
-                document.getElementById('cta-title').textContent = content.ctaButtonText;
-                document.getElementById('cta-description').textContent = content.ctaDescription;
-
-                // Update iframe URL
-                document.getElementById('demo-iframe').src = content.iframeUrl;
-
-                // Update video if URL exists
-                if (content.videoUrl && content.videoUrl.trim() !== '') {
-                    document.getElementById('video-container').innerHTML = `
-                        <iframe 
-                            src="${content.videoUrl}" 
-                            style="width: 100%; height: 100%; border: none;"
-                            allow="autoplay"
-                        ></iframe>
-                    `;
-                }
-
-                // Update page title
-                document.title = `${content.title} Demo - AWE2M8`;
-            })
-            .catch(error => {
-                console.error('Error loading content:', error);
-                // Fallback content if JSON fails to load
-                document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
-            });
-
         // Microphone permission handling for iframe
         const frame = document.getElementById('demo-iframe');
         frame.addEventListener('load', () => {
@@ -157,3 +126,12 @@
 </body>
 
 </html>
+```
+
+**The paths are now correct:**
+- CSS: `../../css/demo-styles.css` (goes up 2 levels from `demos/partnerSpecific/` to root, then into `css/`)
+- Logo: `../../images/AWE2M8Logo.png` (goes up 2 levels from `demos/partnerSpecific/` to root, then into `images/`)
+
+**Your URL will be:**
+```
+https://demos.awe2m8.ai/demos/partnerSpecific/monaValeHotel_virtual_assistant.html
