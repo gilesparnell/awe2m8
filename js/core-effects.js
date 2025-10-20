@@ -582,7 +582,7 @@
         // CONVERSION & CTA
         initFloatingCTA();              // Sticky "Book Demo" button
         // initExitIntent();               // Exit popup- too pushy
-        initSocialProof();              // "500+ businesses" counter
+        //initSocialProof();              // "500+ businesses" counter
 
         // DEMO ENHANCEMENTS
         initDemoSearch();               // Search bar
