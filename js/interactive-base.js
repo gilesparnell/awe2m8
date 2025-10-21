@@ -65,8 +65,16 @@ function init3DTilt() {
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+
+            // Only handle internal anchor links (like #section1)
+            // Ignore links that are just "#" or external URLs
+            if (href === '#' || href.startsWith('http')) {
+                return; // Let the link work normally
+            }
+
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(href);
             if (target) {
                 target.scrollIntoView({
                     behavior: 'smooth',
