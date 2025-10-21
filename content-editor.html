@@ -322,3 +322,308 @@
         <!-- Industry Form -->
         <div id="industry-form-container" style="display: none;">
             <h2 style="color: #00ff00; margin-bottom: 20px;">Editing Industry Page</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ind-pageTitle">Page Title</label>
+                    <input type="text" id="ind-pageTitle" placeholder="AI Solutions for Gyms - AWE2M8">
+                </div>
+                <div class="form-group">
+                    <label for="ind-heroTitle">Hero Title</label>
+                    <input type="text" id="ind-heroTitle" placeholder="💪 AI Solutions for Gyms">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="ind-heroSubtitle">Hero Subtitle</label>
+                    <textarea id="ind-heroSubtitle"></textarea>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Solution 1: Database Reactivation</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="ind-solution1Title">Solution 1 Title</label>
+                    <input type="text" id="ind-solution1Title" placeholder="Win Back Inactive Members">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="ind-solution1Description">Solution 1 Description</label>
+                    <textarea id="ind-solution1Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ind-smsAgentDemoUrl">SMS Agent Demo URL</label>
+                    <input type="text" id="ind-smsAgentDemoUrl" placeholder="https://agentdemo.ai/...">
+                    <div class="helper-text">AgentDemo link for SMS conversation</div>
+                </div>
+                <div class="form-group">
+                    <label for="ind-databaseReactivationOrbUrl">Database Reactivation Orb URL</label>
+                    <input type="text" id="ind-databaseReactivationOrbUrl" placeholder="https://iframes.ai/...">
+                    <div class="helper-text">Assistable orb iframe URL</div>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Solution 2: Voice AI Receptionist</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="ind-solution2Title">Solution 2 Title</label>
+                    <input type="text" id="ind-solution2Title" placeholder="Never Miss a Lead Call">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="ind-solution2Description">Solution 2 Description</label>
+                    <textarea id="ind-solution2Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ind-voiceAIOrbUrl">Voice AI Orb URL</label>
+                    <input type="text" id="ind-voiceAIOrbUrl" placeholder="https://iframes.ai/...">
+                    <div class="helper-text">Assistable voice orb iframe URL</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="loadContent()">Reset</button>
+                <button onclick="saveContent()">Save Changes</button>
+            </div>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h3>✓ Changes Saved Successfully!</h3>
+            <p>Content has been updated</p>
+        </div>
+    </div>
+
+    <script>
+        let contentData = {};
+        let currentDemo = '';
+        let currentIndustry = '';
+        let fileHandle = null;
+        const supportsFileSystemAccess = 'showOpenFilePicker' in window;
+
+        // Load content.json
+        async function loadContentFile() {
+            // Try multiple possible paths
+            const paths = ['content/content.json', '../content/content.json', './content.json'];
+
+            for (const path of paths) {
+                try {
+                    console.log('Trying to load:', path);
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        contentData = await response.json();
+                        console.log('✅ Content loaded successfully from:', path);
+                        console.log('Content data:', contentData);
+
+                        // Initialize industries object if it doesn't exist
+                        if (!contentData.industries) {
+                            contentData.industries = {};
+                            console.log('Initialized empty industries object');
+                        }
+                        return; // Success, exit function
+                    }
+                } catch (error) {
+                    console.log('Failed to load from:', path, error);
+                }
+            }
+
+            // If all paths failed
+            console.error('❌ Could not load content.json from any path');
+            if (supportsFileSystemAccess) {
+                if (confirm('Could not load content.json from server. Would you like to select it from your computer?')) {
+                    await selectContentFile();
+                }
+            } else {
+                alert('Error: Could not load content.json. Make sure the file exists in the content/ folder.');
+            }
+        }
+
+        async function selectContentFile() {
+            if (!supportsFileSystemAccess) {
+                alert('Your browser does not support direct file access. Please use Chrome or Edge.');
+                return;
+            }
+
+            try {
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+                    suggestedName: 'content.json'
+                });
+
+                const file = await fileHandle.getFile();
+                const text = await file.text();
+                contentData = JSON.parse(text);
+
+                if (!contentData.industries) {
+                    contentData.industries = {};
+                }
+
+                alert('✓ File connected!');
+                if (currentDemo || currentIndustry) loadContent();
+            } catch (error) {
+                console.error('Error selecting file:', error);
+            }
+        }
+
+        // Demo selector
+        document.getElementById('demo-select').addEventListener('change', function (e) {
+            currentDemo = e.target.value;
+            currentIndustry = '';
+            document.getElementById('industry-select').value = '';
+
+            console.log('Demo selected:', currentDemo);
+
+            if (currentDemo) {
+                document.getElementById('demo-form-container').style.display = 'block';
+                document.getElementById('industry-form-container').style.display = 'none';
+                document.getElementById('demo-selector-box').classList.add('active');
+                document.getElementById('industry-selector-box').classList.remove('active');
+                loadContent();
+            } else {
+                document.getElementById('demo-form-container').style.display = 'none';
+                document.getElementById('demo-selector-box').classList.remove('active');
+            }
+        });
+
+        // Industry selector
+        document.getElementById('industry-select').addEventListener('change', function (e) {
+            currentIndustry = e.target.value;
+            currentDemo = '';
+            document.getElementById('demo-select').value = '';
+
+            console.log('Industry selected:', currentIndustry);
+
+            if (currentIndustry) {
+                document.getElementById('industry-form-container').style.display = 'block';
+                document.getElementById('demo-form-container').style.display = 'none';
+                document.getElementById('industry-selector-box').classList.add('active');
+                document.getElementById('demo-selector-box').classList.remove('active');
+                loadContent();
+            } else {
+                document.getElementById('industry-form-container').style.display = 'none';
+                document.getElementById('industry-selector-box').classList.remove('active');
+            }
+        });
+
+        // Load content
+        function loadContent() {
+            console.log('loadContent called - currentDemo:', currentDemo, 'currentIndustry:', currentIndustry);
+            console.log('contentData:', contentData);
+
+            if (currentDemo) {
+                const demo = contentData[currentDemo] || {};
+                console.log('Loading demo data:', demo);
+                document.getElementById('title').value = demo.title || '';
+                document.getElementById('emoji').value = demo.emoji || '';
+                document.getElementById('heroDescription').value = demo.heroDescription || '';
+                document.getElementById('howItWorks').value = demo.howItWorks || '';
+                document.getElementById('whyItMatters').value = demo.whyItMatters || '';
+                document.getElementById('ctaButtonText').value = demo.ctaButtonText || '';
+                document.getElementById('ctaDescription').value = demo.ctaDescription || '';
+                document.getElementById('demoUrl').value = demo.demoUrl || '';
+                document.getElementById('iframeUrl').value = demo.iframeUrl || '';
+                document.getElementById('videoUrl').value = demo.videoUrl || '';
+            } else if (currentIndustry) {
+                const industry = contentData.industries[currentIndustry] || {};
+                console.log('Loading industry data:', industry);
+                document.getElementById('ind-pageTitle').value = industry.pageTitle || '';
+                document.getElementById('ind-heroTitle').value = industry.heroTitle || '';
+                document.getElementById('ind-heroSubtitle').value = industry.heroSubtitle || '';
+                document.getElementById('ind-solution1Title').value = industry.solution1Title || '';
+                document.getElementById('ind-solution1Description').value = industry.solution1Description || '';
+                document.getElementById('ind-smsAgentDemoUrl').value = industry.smsAgentDemoUrl || '';
+                document.getElementById('ind-databaseReactivationOrbUrl').value = industry.databaseReactivationOrbUrl || '';
+                document.getElementById('ind-solution2Title').value = industry.solution2Title || '';
+                document.getElementById('ind-solution2Description').value = industry.solution2Description || '';
+                document.getElementById('ind-voiceAIOrbUrl').value = industry.voiceAIOrbUrl || '';
+            }
+
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Save content
+        async function saveContent() {
+            if (currentDemo) {
+                contentData[currentDemo] = {
+                    title: document.getElementById('title').value,
+                    emoji: document.getElementById('emoji').value,
+                    heroDescription: document.getElementById('heroDescription').value,
+                    howItWorks: document.getElementById('howItWorks').value,
+                    whyItMatters: document.getElementById('whyItMatters').value,
+                    ctaButtonText: document.getElementById('ctaButtonText').value,
+                    ctaDescription: document.getElementById('ctaDescription').value,
+                    demoUrl: document.getElementById('demoUrl').value,
+                    iframeUrl: document.getElementById('iframeUrl').value,
+                    videoUrl: document.getElementById('videoUrl').value
+                };
+            } else if (currentIndustry) {
+                if (!contentData.industries) {
+                    contentData.industries = {};
+                }
+
+                contentData.industries[currentIndustry] = {
+                    pageTitle: document.getElementById('ind-pageTitle').value,
+                    heroTitle: document.getElementById('ind-heroTitle').value,
+                    heroSubtitle: document.getElementById('ind-heroSubtitle').value,
+                    solution1Title: document.getElementById('ind-solution1Title').value,
+                    solution1Description: document.getElementById('ind-solution1Description').value,
+                    smsAgentDemoUrl: document.getElementById('ind-smsAgentDemoUrl').value,
+                    databaseReactivationOrbUrl: document.getElementById('ind-databaseReactivationOrbUrl').value,
+                    solution2Title: document.getElementById('ind-solution2Title').value,
+                    solution2Description: document.getElementById('ind-solution2Description').value,
+                    voiceAIOrbUrl: document.getElementById('ind-voiceAIOrbUrl').value
+                };
+            }
+
+            const dataStr = JSON.stringify(contentData, null, 2);
+
+            // Try to save directly to file system
+            if (supportsFileSystemAccess && fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated</p>';
+                    successMsg.classList.add('show');
+                    setTimeout(() => successMsg.classList.remove('show'), 5000);
+                    return;
+                } catch (error) {
+                    console.error('Error saving:', error);
+                }
+            }
+
+            // Fallback: Download the file
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'content.json';
+            link.click();
+
+            const successMsg = document.getElementById('successMessage');
+            successMsg.innerHTML = '<h3>✓ Changes Saved!</h3><p>Replace content.json in your project</p>';
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 5000);
+        }
+
+        // Initialize
+        loadContentFile();
+
+        // Add connect button if supported
+        if (supportsFileSystemAccess) {
+            window.addEventListener('DOMContentLoaded', () => {
+                const container = document.querySelector('.container');
+                const connectButton = document.createElement('div');
+                connectButton.style.cssText = 'text-align: center; margin: 20px 0;';
+                connectButton.innerHTML = `
+                    <button onclick="selectContentFile()" class="btn-secondary" style="margin: 0;">
+                        📁 Connect to Project File
+                    </button>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-top: 10px;">
+                        Connect to save directly to your project file
+                    </p>
+                `;
+                container.insertBefore(connectButton, document.querySelector('.selector-grid'));
+            });
+        }
+    </script>
+</body>
+
+</html>
