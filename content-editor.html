@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWE2M8 Content Editor</title>
+    <title>AWE2M8 Content Editor v2</title>
     <style>
         * {
             margin: 0;
@@ -35,7 +35,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -55,32 +55,42 @@
             font-size: 0.9rem;
         }
 
-        .demo-selector {
+        .selector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .selector-box {
             background: rgba(0, 255, 0, 0.05);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 0, 0.2);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 30px;
             transition: all 0.3s ease;
         }
 
-        .demo-selector:hover {
+        .selector-box:hover {
             background: rgba(0, 255, 0, 0.08);
             border-color: rgba(0, 255, 0, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0, 255, 0, 0.2);
         }
 
-        .demo-selector label {
+        .selector-box.active {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .selector-box label {
             display: block;
             margin-bottom: 10px;
             color: #00ff00;
             font-weight: 600;
         }
 
-        .demo-selector select {
+        .selector-box select {
             width: 100%;
             padding: 12px;
             background: rgba(0, 0, 0, 0.3);
@@ -91,7 +101,7 @@
             cursor: pointer;
         }
 
-        .demo-selector select:focus {
+        .selector-box select:focus {
             outline: none;
             border-color: #00ff00;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
@@ -107,7 +117,6 @@
         .form-group {
             background: rgba(0, 255, 0, 0.05);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 255, 0, 0.2);
             border-radius: 16px;
             padding: 20px;
@@ -160,28 +169,6 @@
             margin-top: 5px;
         }
 
-        .url-fixed-indicator {
-            font-size: 0.8rem;
-            color: #00ff88;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .url-fixed-indicator.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
         .button-group {
             display: flex;
             gap: 15px;
@@ -205,10 +192,6 @@
         button:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 255, 0, 0.5);
-        }
-
-        button:active {
-            transform: translateY(-1px);
         }
 
         .btn-secondary {
@@ -242,305 +225,100 @@
                 transform: translateY(0);
             }
         }
+
+        @media (max-width: 768px) {
+            .selector-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>🎨 AWE2M8 Content Editor</h1>
-        <p class="subtitle">Edit content for your demo pages</p>
+        <h1>🎨 AWE2M8 Content Editor v2</h1>
+        <p class="subtitle">Edit content for demo pages and industry-specific pages</p>
 
-        <div class="demo-selector">
-            <label for="demo-select">Select Demo to Edit:</label>
-            <select id="demo-select">
-                <option value="">-- Choose a demo --</option>
-                <option value="voiceAI">Voice AI</option>
-                <option value="databaseReactivation">Database Reactivation</option>
-                <option value="documentCollection">Document Collection</option>
-                <option value="ecommerce">eCommerce</option>
-                <option value="outOfHours">Out of Hours AI</option>
-                <option value="reviewsAI">Reviews AI</option>
-                <option value="speedToLead">Speed to Lead</option>
-                <option value="aiReceptionist">AI Receptionist</option>
-            </select>
+        <div class="selector-grid">
+            <div class="selector-box" id="demo-selector-box">
+                <label for="demo-select">Demo Pages:</label>
+                <select id="demo-select">
+                    <option value="">-- Choose a demo --</option>
+                    <option value="voiceAI">Voice AI</option>
+                    <option value="databaseReactivation">Database Reactivation</option>
+                    <option value="documentCollection">Document Collection</option>
+                    <option value="ecommerce">eCommerce</option>
+                    <option value="outOfHours">Out of Hours AI</option>
+                    <option value="reviewsAI">Reviews AI</option>
+                    <option value="speedToLead">Speed to Lead</option>
+                    <option value="aiReceptionist">AI Receptionist</option>
+                </select>
+            </div>
+
+            <div class="selector-box" id="industry-selector-box">
+                <label for="industry-select">Industry Pages:</label>
+                <select id="industry-select">
+                    <option value="">-- Choose an industry --</option>
+                    <option value="gyms">Gyms & Fitness Centers</option>
+                    <option value="realestate">Real Estate</option>
+                    <option value="automotive">Automotive</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="hospitality">Hospitality</option>
+                </select>
+            </div>
         </div>
 
-        <div id="form-container" style="display: none;">
+        <!-- Demo Form -->
+        <div id="demo-form-container" style="display: none;">
+            <h2 style="color: #00ff00; margin-bottom: 20px;">Editing Demo Page</h2>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="title">Title</label>
                     <input type="text" id="title" placeholder="e.g., Voice AI Technology">
                 </div>
-
                 <div class="form-group">
                     <label for="emoji">Emoji</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" id="emoji" placeholder="e.g., 🎙️" maxlength="2" style="flex: 1;">
-                        <button type="button" onclick="window.open('https://emojipedia.org/', '_blank')"
-                            style="padding: 12px 20px; font-size: 0.9rem; white-space: nowrap;">
-                            Browse Emojis 🎨
-                        </button>
-                    </div>
-                    <div class="helper-text">Click "Browse Emojis" to find and copy emojis from Emojipedia</div>
+                    <input type="text" id="emoji" placeholder="e.g., 🎙️" maxlength="2">
                 </div>
-
                 <div class="form-group">
                     <label for="heroDescription">Hero Description</label>
-                    <textarea id="heroDescription" placeholder="Main description shown at the top"></textarea>
+                    <textarea id="heroDescription"></textarea>
                 </div>
-
                 <div class="form-group">
                     <label for="howItWorks">How It Works</label>
-                    <textarea id="howItWorks" placeholder="Explain how this demo works"></textarea>
+                    <textarea id="howItWorks"></textarea>
                 </div>
-
                 <div class="form-group">
                     <label for="whyItMatters">Why This Matters</label>
-                    <textarea id="whyItMatters" placeholder="Explain the value proposition"></textarea>
+                    <textarea id="whyItMatters"></textarea>
                 </div>
-
                 <div class="form-group">
                     <label for="ctaButtonText">CTA Button Text</label>
-                    <input type="text" id="ctaButtonText" placeholder="e.g., Talk to Our AI">
+                    <input type="text" id="ctaButtonText">
                 </div>
-
                 <div class="form-group">
                     <label for="ctaDescription">CTA Description</label>
-                    <textarea id="ctaDescription" placeholder="Text under the CTA button"></textarea>
+                    <textarea id="ctaDescription"></textarea>
                 </div>
-
                 <div class="form-group">
-                    <label for="demoUrl">External Demo Link (if applicable)</label>
-                    <input type="text" id="demoUrl" placeholder="https://...">
+                    <label for="demoUrl">External Demo Link</label>
+                    <input type="text" id="demoUrl">
                 </div>
-
                 <div class="form-group">
-                    <label for="iframeUrl">Demo/Agent URL (if applicable)</label>
-                    <input type="text" id="iframeUrl" placeholder="https://assistable.ai/...">
+                    <label for="iframeUrl">Demo/Agent URL</label>
+                    <input type="text" id="iframeUrl">
                 </div>
-
                 <div class="form-group">
-                    <label for="videoUrl">Video URL (Google Drive)</label>
-                    <input type="text" id="videoUrl" placeholder="Paste Google Drive link...">
-                    <div class="helper-text">Paste any Google Drive link - it will auto-convert to preview format</div>
-                    <div class="url-fixed-indicator" id="urlFixed">✓ URL converted to preview format</div>
+                    <label for="videoUrl">Video URL</label>
+                    <input type="text" id="videoUrl">
                 </div>
             </div>
-
             <div class="button-group">
-                <button class="btn-secondary" onclick="loadContent()">Reset to Saved</button>
+                <button class="btn-secondary" onclick="loadContent()">Reset</button>
                 <button onclick="saveContent()">Save Changes</button>
             </div>
-
-            <div class="success-message" id="successMessage">
-                <h3>✓ Changes Saved Successfully!</h3>
-                <p>Content has been updated in content.json</p>
-            </div>
         </div>
-    </div>
 
-    <script>
-        let contentData = {};
-        let currentDemo = '';
-        let fileHandle = null;
-
-        const supportsFileSystemAccess = 'showOpenFilePicker' in window;
-
-        function convertGoogleDriveUrl(url) {
-            if (!url || !url.includes('drive.google.com')) {
-                return url;
-            }
-
-            let fileId = '';
-
-            const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (match1) {
-                fileId = match1[1];
-            }
-
-            const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (match2) {
-                fileId = match2[1];
-            }
-
-            if (fileId) {
-                return `https://drive.google.com/file/d/${fileId}/preview`;
-            }
-
-            return url;
-        }
-
-        document.getElementById('videoUrl').addEventListener('input', function (e) {
-            const originalUrl = e.target.value.trim();
-            if (originalUrl && originalUrl.includes('drive.google.com')) {
-                const convertedUrl = convertGoogleDriveUrl(originalUrl);
-
-                if (convertedUrl !== originalUrl) {
-                    e.target.value = convertedUrl;
-                    document.getElementById('urlFixed').classList.add('show');
-
-                    setTimeout(() => {
-                        document.getElementById('urlFixed').classList.remove('show');
-                    }, 3000);
-                }
-            }
-        });
-
-        async function loadContentFile() {
-            try {
-                const response = await fetch('content/content.json');
-                contentData = await response.json();
-            } catch (error) {
-                console.error('Error loading content:', error);
-
-                if (supportsFileSystemAccess) {
-                    if (confirm('Could not load content.json from server. Would you like to select it from your project folder?')) {
-                        await selectContentFile();
-                    }
-                } else {
-                    alert('Error loading content.json. Make sure the file exists.');
-                }
-            }
-        }
-
-        async function selectContentFile() {
-            if (!supportsFileSystemAccess) {
-                alert('Your browser does not support direct file access. Please use Chrome or Edge.');
-                return;
-            }
-
-            try {
-                [fileHandle] = await window.showOpenFilePicker({
-                    types: [{
-                        description: 'JSON Files',
-                        accept: { 'application/json': ['.json'] }
-                    }],
-                    suggestedName: 'content.json'
-                });
-
-                const file = await fileHandle.getFile();
-                const text = await file.text();
-                contentData = JSON.parse(text);
-
-                localStorage.setItem('hasFileAccess', 'true');
-
-                alert('✓ File connected! Now when you save, it will write directly to your project.');
-
-                if (currentDemo) {
-                    loadContent();
-                }
-            } catch (error) {
-                console.error('Error selecting file:', error);
-            }
-        }
-
-        document.getElementById('demo-select').addEventListener('change', function (e) {
-            currentDemo = e.target.value;
-            if (currentDemo) {
-                document.getElementById('form-container').style.display = 'block';
-                loadContent();
-            } else {
-                document.getElementById('form-container').style.display = 'none';
-            }
-        });
-
-        function loadContent() {
-            if (!currentDemo || !contentData[currentDemo]) return;
-
-            const demo = contentData[currentDemo];
-
-            document.getElementById('title').value = demo.title || '';
-            document.getElementById('emoji').value = demo.emoji || '';
-            document.getElementById('heroDescription').value = demo.heroDescription || '';
-            document.getElementById('howItWorks').value = demo.howItWorks || '';
-            document.getElementById('whyItMatters').value = demo.whyItMatters || '';
-            document.getElementById('ctaButtonText').value = demo.ctaButtonText || '';
-            document.getElementById('ctaDescription').value = demo.ctaDescription || '';
-            document.getElementById('demoUrl').value = demo.demoUrl || '';
-            document.getElementById('iframeUrl').value = demo.iframeUrl || '';
-            document.getElementById('videoUrl').value = demo.videoUrl || '';
-
-            document.getElementById('successMessage').classList.remove('show');
-        }
-
-        async function saveContent() {
-            if (!currentDemo) return;
-
-            const videoUrlInput = document.getElementById('videoUrl');
-            const videoUrl = videoUrlInput.value.trim();
-            if (videoUrl) {
-                videoUrlInput.value = convertGoogleDriveUrl(videoUrl);
-            }
-
-            // FIXED: Correct field order with demoUrl BEFORE videoUrl/iframeUrl
-            contentData[currentDemo] = {
-                title: document.getElementById('title').value,
-                emoji: document.getElementById('emoji').value,
-                heroDescription: document.getElementById('heroDescription').value,
-                howItWorks: document.getElementById('howItWorks').value,
-                whyItMatters: document.getElementById('whyItMatters').value,
-                ctaButtonText: document.getElementById('ctaButtonText').value,
-                ctaDescription: document.getElementById('ctaDescription').value,
-                demoUrl: document.getElementById('demoUrl').value,
-                iframeUrl: document.getElementById('iframeUrl').value,
-                videoUrl: document.getElementById('videoUrl').value
-            };
-
-            const dataStr = JSON.stringify(contentData, null, 2);
-
-            if (supportsFileSystemAccess && fileHandle) {
-                try {
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(dataStr);
-                    await writable.close();
-
-                    const successMsg = document.getElementById('successMessage');
-                    successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated in your project folder</p>';
-                    successMsg.classList.add('show');
-                    setTimeout(() => {
-                        successMsg.classList.remove('show');
-                    }, 5000);
-
-                    return;
-                } catch (error) {
-                    console.error('Error saving to file:', error);
-                }
-            }
-
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'content.json';
-            link.click();
-
-            const successMsg = document.getElementById('successMessage');
-            successMsg.innerHTML = '<h3>✓ Changes Saved!</h3><p>content.json has been downloaded. Replace the file in your project folder.</p>';
-            successMsg.classList.add('show');
-            setTimeout(() => {
-                successMsg.classList.remove('show');
-            }, 5000);
-        }
-
-        loadContentFile();
-
-        if (supportsFileSystemAccess) {
-            window.addEventListener('DOMContentLoaded', () => {
-                const container = document.querySelector('.container');
-                const connectButton = document.createElement('div');
-                connectButton.style.cssText = 'text-align: center; margin: 20px 0;';
-                connectButton.innerHTML = `
-                    <button onclick="selectContentFile()" class="btn-secondary" style="margin: 0;">
-                        📁 Connect to Project File
-                    </button>
-                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-top: 10px;">
-                        Click to select content.json from your project. After connecting, saves will write directly to the file!
-                    </p>
-                `;
-                container.insertBefore(connectButton, document.getElementById('form-container'));
-            });
-        }
-    </script>
-</body>
-
-</html>
+        <!-- Industry Form -->
+        <div id="industry-form-container" style="display: none;">
+            <h2 style="color: #00ff00; margin-bottom: 20px;">Editing Industry Page</h2>
