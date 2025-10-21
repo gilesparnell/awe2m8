@@ -580,7 +580,7 @@
         initLoadingScreen();            // AWE2M8 branded loader
 
         // CONVERSION & CTA
-        initFloatingCTA();              // Sticky "Book Demo" button
+        //initFloatingCTA();              // Sticky "Book Demo" button
         // initExitIntent();               // Exit popup- too pushy
         //initSocialProof();              // "500+ businesses" counter
 

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Solutions for Gyms & Fitness Centers - AWE2M8</title>
+    <link rel="stylesheet" href="/css/demo-styles.css">
+    <style>
+        .industry-hero {
+            text-align: center;
+            padding: 60px 30px 40px;
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 200, 0, 0.05));
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        .industry-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .industry-hero .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            background: rgba(0, 255, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #00ff00;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .solution-section {
+            margin: 60px 0;
+        }
+
+        .solution-card {
+            background: rgba(0, 255, 0, 0.03);
+            border: 1px solid rgba(0, 255, 0, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .solution-card:hover {
+            background: rgba(0, 255, 0, 0.08);
+            border-color: rgba(0, 255, 0, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 0, 0.2);
+        }
+
+        .solution-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .solution-icon {
+            font-size: 3.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .solution-title {
+            font-size: 2rem;
+            color: #00ff00;
+            margin: 0;
+        }
+
+        .solution-description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .demo-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 0, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .demo-box:hover {
+            border-color: #00ff00;
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .demo-box h3 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .demo-box p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .demo-button {
+            display: inline-block;
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 255, 0, 0.5);
+        }
+
+        .iframe-container {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .benefits-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 0, 0.1);
+        }
+
+        .benefit-icon {
+            font-size: 1.8rem;
+            min-width: 40px;
+        }
+
+        .benefit-text {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .cta-banner {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.15), rgba(0, 200, 0, 0.1));
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .cta-banner h2 {
+            font-size: 2.5rem;
+            color: #00ff00;
+            margin-bottom: 20px;
+        }
+
+        .cta-banner p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .industry-hero h1 {
+                font-size: 2rem;
+            }
+
+            .solution-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <a href="https://awe2m8.ai" class="logo">
+            <img src="/images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+        </a>
+        <a href="../index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <!-- Hero Section -->
+        <div class="industry-hero">
+            <h1 id="hero-title">💪 AI Solutions for Gyms & Fitness Centers</h1>
+            <p class="subtitle" id="hero-subtitle">
+                Stop losing members to missed calls and poor follow-up. Our AI handles member reactivation, answers
+                calls 24/7, and converts leads while you focus on what matters—helping people get fit.
+            </p>
+        </div>
+
+        <!-- Industry Stats -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">67%</div>
+                <div class="stat-label">of gym leads call after hours</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">$200</div>
+                <div class="stat-label">average lifetime value per reactivated member</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">40%</div>
+                <div class="stat-label">of members churn annually</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">5 mins</div>
+                <div class="stat-label">response time to convert a lead</div>
+            </div>
+        </div>
+
+        <!-- Solution 1: Database Reactivation -->
+        <section class="solution-section">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">🔄</div>
+                    <h2 class="solution-title" id="solution1-title">Win Back Inactive Members Automatically</h2>
+                </div>
+
+                <p class="solution-description" id="solution1-description">
+                    Your inactive member list is sitting on untapped revenue. Our AI reaches out with personalized
+                    messages that feel human, reigniting relationships and bringing lapsed members back to your gym.
+                    No manual follow-ups. No awkward phone calls. Just results.
+                </p>
+
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✅</div>
+                        <div class="benefit-text"><strong>Automated Outreach:</strong> AI sends personalized SMS
+                            campaigns to inactive members</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">💬</div>
+                        <div class="benefit-text"><strong>Natural Conversations:</strong> Handles replies like a human,
+                            building rapport</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🎯</div>
+                        <div class="benefit-text"><strong>Smart Timing:</strong> Reaches out at optimal moments for
+                            re-engagement</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">📊</div>
+                        <div class="benefit-text"><strong>Track Results:</strong> See who's coming back and booking
+                            sessions</div>
+                    </div>
+                </div>
+
+                <div class="demo-grid">
+                    <div class="demo-box">
+                        <h3>📱 Try the SMS Demo</h3>
+                        <p>Experience how our AI reconnects with inactive members through natural text conversations</p>
+                        <a href="#" id="sms-demo-link" target="_blank" rel="noopener noreferrer" class="demo-button">
+                            Start Text Conversation →
+                        </a>
+                    </div>
+
+                    <div class="demo-box">
+                        <h3>💬 Interactive AI Assistant</h3>
+                        <p>Chat with our AI to see how it handles member questions and objections in real-time</p>
+                        <div class="iframe-container" id="orb-container">
+                            <!-- Orb iframe will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution 2: AI Receptionist -->
+        <section class="solution-section">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">📞</div>
+                    <h2 class="solution-title" id="solution2-title">Never Miss a Lead Call Again</h2>
+                </div>
+
+                <p class="solution-description" id="solution2-description">
+                    67% of gym leads call outside business hours. Every missed call is a potential member choosing
+                    your competitor. Our AI receptionist answers instantly, 24/7, booking tours and trial sessions
+                    while you sleep. Wake up to a calendar full of qualified leads.
+                </p>
+
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🌙</div>
+                        <div class="benefit-text"><strong>24/7 Availability:</strong> Answers calls instantly, even at 2
+                            AM</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">📅</div>
+                        <div class="benefit-text"><strong>Books Tours Automatically:</strong> Schedules gym tours
+                            directly into your calendar</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">❓</div>
+                        <div class="benefit-text"><strong>Answers FAQs:</strong> Handles pricing, class schedules, and
+                            membership questions</div>
+                    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">🎤</div>
+                        <div class="benefit-text"><strong>Human-Like Voice:</strong> Natural conversations that
+                            represent your brand</div>
+                    </div>
+                </div>
+
+                <div class="demo-grid">
+                    <div class="demo-box" style="grid-column: 1 / -1;">
+                        <h3>🎙️ Call the AI Receptionist</h3>
+                        <p>Click the orb below to have a real voice conversation with our AI receptionist trained
+                            specifically for gyms</p>
+                        <div class="iframe-container" id="voice-orb-container">
+                            <!-- Voice orb iframe will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Load content from JSON file
+        fetch('../content/content.json')
+            .then(response => response.json())
+            .then(data => {
+                const gymData = data.industries?.gyms;
+
+                if (gymData) {
+                    // Update hero
+                    if (gymData.heroTitle) {
+                        document.getElementById('hero-title').textContent = gymData.heroTitle;
+                    }
+                    if (gymData.heroSubtitle) {
+                        document.getElementById('hero-subtitle').textContent = gymData.heroSubtitle;
+                    }
+
+                    // Update Solution 1 (Database Reactivation)
+                    if (gymData.solution1Title) {
+                        document.getElementById('solution1-title').textContent = gymData.solution1Title;
+                    }
+                    if (gymData.solution1Description) {
+                        document.getElementById('solution1-description').textContent = gymData.solution1Description;
+                    }
+
+                    // Load SMS demo link
+                    if (gymData.smsAgentDemoUrl) {
+                        document.getElementById('sms-demo-link').href = gymData.smsAgentDemoUrl;
+                    }
+
+                    // Load Database Reactivation orb
+                    if (gymData.databaseReactivationOrbUrl) {
+                        document.getElementById('orb-container').innerHTML = `
+                            <iframe src="${gymData.databaseReactivationOrbUrl}" 
+                                    style="width: 100%; height: 500px; border: none; border-radius: 10px;">
+                            </iframe>
+                        `;
+                    }
+
+                    // Update Solution 2 (Voice AI)
+                    if (gymData.solution2Title) {
+                        document.getElementById('solution2-title').textContent = gymData.solution2Title;
+                    }
+                    if (gymData.solution2Description) {
+                        document.getElementById('solution2-description').textContent = gymData.solution2Description;
+                    }
+
+                    // Load Voice AI orb
+                    if (gymData.voiceAIOrbUrl) {
+                        document.getElementById('voice-orb-container').innerHTML = `
+                            <iframe src="${gymData.voiceAIOrbUrl}" 
+                                    style="width: 100%; height: 500px; border: none; border-radius: 10px;">
+                            </iframe>
+                        `;
+                    }
+
+                    // Update page title
+                    if (gymData.pageTitle) {
+                        document.title = gymData.pageTitle;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+            });
+    </script>
+
+    <script src="../js/interactive-base.js"></script>
+    <script src="../js/dark-mode.js"></script>
+    <script src="../js/core-effects.js"></script>
+</body>
+
+</html>
