@@ -1,3 +1,6 @@
+} else if (currentIndustry) {
+const industry = contentData.industries[currentIndustry] || {};
+console.log('Loading industry data:', industry);
 <!DOCTYPE html>
 <html lang="en">
 
@@ -401,11 +404,6 @@
                 <div class="form-group" style="grid-column: 1 / -1;">
                     <label for="ind-solution2Description">Solution 2 Description</label>
                     <textarea id="ind-solution2Description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="ind-voiceAIOrbUrl">Voice AI Orb URL</label>
-                    <input type="text" id="ind-voiceAIOrbUrl" placeholder="https://iframes.ai/...">
-                    <div class="helper-text">Assistable voice orb iframe URL</div>
                 </div>
             </div>
             <div class="button-group">
