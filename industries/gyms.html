@@ -134,9 +134,11 @@
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid rgba(0, 255, 0, 0.2);
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .demo-box:hover {
@@ -147,15 +149,16 @@
 
         .demo-box h3 {
             color: #00ff00;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+            margin-bottom: 12px;
+            font-size: 1.3rem;
         }
 
         .demo-box p {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-            line-height: 1.6;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            flex-grow: 0;
         }
 
         .demo-button {
@@ -179,8 +182,9 @@
             margin-top: 20px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 15px;
-            padding: 20px;
-            min-height: 500px;
+            padding: 15px;
+            min-height: 350px;
+            max-height: 450px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -188,7 +192,7 @@
 
         .iframe-container iframe {
             width: 100%;
-            height: 500px;
+            height: 350px;
             border: none;
             border-radius: 10px;
         }
@@ -268,12 +272,13 @@
             }
 
             .iframe-container {
-                min-height: 400px;
-                padding: 15px;
+                min-height: 280px;
+                max-height: 320px;
+                padding: 10px;
             }
 
             .iframe-container iframe {
-                height: 400px;
+                height: 280px;
             }
 
             .cta-banner {
@@ -324,6 +329,39 @@
                 calls 24/7, and converts leads while you focus on what matters—helping people get fit.
             </p>
         </div>
+
+        <!-- Quick Access Demos - AT THE TOP -->
+        <section style="margin-bottom: 40px;">
+            <h2 style="text-align: center; color: #00ff00; font-size: 2rem; margin-bottom: 30px;">Try Our AI Solutions
+            </h2>
+            <div class="demo-grid">
+                <div class="demo-box">
+                    <h3>📱 SMS Demo</h3>
+                    <p>Experience member reactivation texts</p>
+                    <a href="#" id="quick-sms-demo-link" target="_blank" rel="noopener noreferrer" class="demo-button">
+                        Start Text Conversation →
+                    </a>
+                </div>
+
+                <div class="demo-box">
+                    <h3>💬 Chat AI</h3>
+                    <p>Chat with our member support AI</p>
+                    <div class="iframe-container" id="quick-orb-container"
+                        style="min-height: 300px; max-height: 350px;">
+                        <!-- Orb iframe will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="demo-box">
+                    <h3>🎙️ Voice AI</h3>
+                    <p>Call our AI receptionist</p>
+                    <div class="iframe-container" id="quick-voice-orb-container"
+                        style="min-height: 300px; max-height: 350px;">
+                        <!-- Voice orb iframe will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Industry Stats -->
         <div class="stats-grid">
@@ -489,16 +527,19 @@
                     // Load SMS demo link
                     if (gymData.smsAgentDemoUrl) {
                         document.getElementById('sms-demo-link').href = gymData.smsAgentDemoUrl;
+                        document.getElementById('quick-sms-demo-link').href = gymData.smsAgentDemoUrl;
                     }
 
                     // Load Database Reactivation orb
                     if (gymData.databaseReactivationOrbUrl) {
-                        document.getElementById('orb-container').innerHTML = `
+                        const orbHTML = `
                             <iframe src="${gymData.databaseReactivationOrbUrl}" 
                                     allow="microphone *; camera *; autoplay *; display-capture *"
-                                    style="width: 100%; height: 500px; border: none; border-radius: 10px;">
+                                    style="width: 100%; height: 300px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
+                        document.getElementById('orb-container').innerHTML = orbHTML;
+                        document.getElementById('quick-orb-container').innerHTML = orbHTML;
                     }
 
                     // Update Solution 2 (Voice AI)
@@ -511,12 +552,14 @@
 
                     // Load Voice AI orb
                     if (gymData.voiceAIOrbUrl) {
-                        document.getElementById('voice-orb-container').innerHTML = `
+                        const voiceHTML = `
                             <iframe src="${gymData.voiceAIOrbUrl}" 
                                     allow="microphone *; camera *; autoplay *; display-capture *"
-                                    style="width: 100%; height: 500px; border: none; border-radius: 10px;">
+                                    style="width: 100%; height: 300px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
+                        document.getElementById('voice-orb-container').innerHTML = voiceHTML;
+                        document.getElementById('quick-voice-orb-container').innerHTML = voiceHTML;
                     }
 
                     // Update page title
