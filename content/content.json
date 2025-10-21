@@ -38,11 +38,11 @@
     "heroDescription": "Wake up dormant customers and reignite relationships automatically. Our AI reaches out with personalized messages that feel human, re-engaging past customers and bringing them back to your business.",
     "howItWorks": "Our AI analyzes your customer database, identifies inactive contacts, and sends personalized SMS or email campaigns that spark conversations. It adapts messaging based on customer history, handles replies naturally, and nurtures leads back into your sales funnel—all on autopilot.",
     "whyItMatters": "Your database is sitting on untapped revenue. Studies show it costs 5x more to acquire new customers than to retain existing ones. Reactivation campaigns can recover 10-30% of dormant customers, but most businesses lack the time or resources to do it manually. AI makes it effortless and scalable.",
-    "videoUrl": "",
-    "iframeUrl": "",
-    "demoUrl": "https://agentdemo.ai/welcome/o4y6OQQP2B",
     "ctaButtonText": "Launch SMS Demo",
-    "ctaDescription": "Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'"
+    "ctaDescription": "Click to start a text conversation with our AI assistant. This model is trained on Robin Banks 'Mind Power Quantum Economics'",
+    "demoUrl": "https://agentdemo.ai/welcome/oWwkHXyTlM",
+    "iframeUrl": "",
+    "videoUrl": ""
   },
   "documentCollection": {
     "title": "Document Collection AI",
