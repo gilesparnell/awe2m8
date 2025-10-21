@@ -300,15 +300,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="videoUrl">Video URL (Google Drive)</label>
-                    <input type="text" id="videoUrl" placeholder="Paste Google Drive link...">
-                    <div class="helper-text">Paste any Google Drive link - it will auto-convert to preview format</div>
-                    <div class="url-fixed-indicator" id="urlFixed">✓ URL converted to preview format</div>
+                    <label for="ctaButtonText">CTA Button Text</label>
+                    <input type="text" id="ctaButtonText" placeholder="e.g., Talk to Our AI">
                 </div>
 
                 <div class="form-group">
-                    <label for="iframeUrl">Demo/Agent URL (if applicable)</label>
-                    <input type="text" id="iframeUrl" placeholder="https://assistable.ai/...">
+                    <label for="ctaDescription">CTA Description</label>
+                    <textarea id="ctaDescription" placeholder="Text under the CTA button"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -317,13 +315,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="ctaButtonText">CTA Button Text</label>
-                    <input type="text" id="ctaButtonText" placeholder="e.g., Talk to Our AI">
+                    <label for="iframeUrl">Demo/Agent URL (if applicable)</label>
+                    <input type="text" id="iframeUrl" placeholder="https://assistable.ai/...">
                 </div>
 
                 <div class="form-group">
-                    <label for="ctaDescription">CTA Description</label>
-                    <textarea id="ctaDescription" placeholder="Text under the CTA button"></textarea>
+                    <label for="videoUrl">Video URL (Google Drive)</label>
+                    <input type="text" id="videoUrl" placeholder="Paste Google Drive link...">
+                    <div class="helper-text">Paste any Google Drive link - it will auto-convert to preview format</div>
+                    <div class="url-fixed-indicator" id="urlFixed">✓ URL converted to preview format</div>
                 </div>
             </div>
 
@@ -342,42 +342,34 @@
     <script>
         let contentData = {};
         let currentDemo = '';
-        let fileHandle = null; // Store file handle for direct saving
+        let fileHandle = null;
 
-        // Check if File System Access API is supported
         const supportsFileSystemAccess = 'showOpenFilePicker' in window;
 
-        // Google Drive URL converter
         function convertGoogleDriveUrl(url) {
             if (!url || !url.includes('drive.google.com')) {
                 return url;
             }
 
-            // Extract file ID from various Google Drive URL formats
             let fileId = '';
 
-            // Format: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-            // or: https://drive.google.com/file/d/FILE_ID/view?usp=drive_link
             const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (match1) {
                 fileId = match1[1];
             }
 
-            // Format: https://drive.google.com/open?id=FILE_ID
             const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             if (match2) {
                 fileId = match2[1];
             }
 
             if (fileId) {
-                // Return in preview format
                 return `https://drive.google.com/file/d/${fileId}/preview`;
             }
 
             return url;
         }
 
-        // Auto-fix video URL on paste or input
         document.getElementById('videoUrl').addEventListener('input', function (e) {
             const originalUrl = e.target.value.trim();
             if (originalUrl && originalUrl.includes('drive.google.com')) {
@@ -387,7 +379,6 @@
                     e.target.value = convertedUrl;
                     document.getElementById('urlFixed').classList.add('show');
 
-                    // Hide indicator after 3 seconds
                     setTimeout(() => {
                         document.getElementById('urlFixed').classList.remove('show');
                     }, 3000);
@@ -395,7 +386,6 @@
             }
         });
 
-        // Load content.json
         async function loadContentFile() {
             try {
                 const response = await fetch('content/content.json');
@@ -403,7 +393,6 @@
             } catch (error) {
                 console.error('Error loading content:', error);
 
-                // If File System Access is supported, offer to select file
                 if (supportsFileSystemAccess) {
                     if (confirm('Could not load content.json from server. Would you like to select it from your project folder?')) {
                         await selectContentFile();
@@ -414,7 +403,6 @@
             }
         }
 
-        // Select content.json file from file system
         async function selectContentFile() {
             if (!supportsFileSystemAccess) {
                 alert('Your browser does not support direct file access. Please use Chrome or Edge.');
@@ -430,17 +418,14 @@
                     suggestedName: 'content.json'
                 });
 
-                // Read the file
                 const file = await fileHandle.getFile();
                 const text = await file.text();
                 contentData = JSON.parse(text);
 
-                // Save file handle for later
                 localStorage.setItem('hasFileAccess', 'true');
 
                 alert('✓ File connected! Now when you save, it will write directly to your project.');
 
-                // If a demo is already selected, reload its content
                 if (currentDemo) {
                     loadContent();
                 }
@@ -449,7 +434,6 @@
             }
         }
 
-        // Demo selector change
         document.getElementById('demo-select').addEventListener('change', function (e) {
             currentDemo = e.target.value;
             if (currentDemo) {
@@ -460,7 +444,6 @@
             }
         });
 
-        // Load content for selected demo
         function loadContent() {
             if (!currentDemo || !contentData[currentDemo]) return;
 
@@ -471,50 +454,46 @@
             document.getElementById('heroDescription').value = demo.heroDescription || '';
             document.getElementById('howItWorks').value = demo.howItWorks || '';
             document.getElementById('whyItMatters').value = demo.whyItMatters || '';
-            document.getElementById('videoUrl').value = demo.videoUrl || '';
-            document.getElementById('iframeUrl').value = demo.iframeUrl || '';
-            document.getElementById('demoUrl').value = demo.demoUrl || '';
             document.getElementById('ctaButtonText').value = demo.ctaButtonText || '';
             document.getElementById('ctaDescription').value = demo.ctaDescription || '';
+            document.getElementById('demoUrl').value = demo.demoUrl || '';
+            document.getElementById('iframeUrl').value = demo.iframeUrl || '';
+            document.getElementById('videoUrl').value = demo.videoUrl || '';
 
-            // Hide success message
             document.getElementById('successMessage').classList.remove('show');
         }
 
-        // Save content
         async function saveContent() {
             if (!currentDemo) return;
 
-            // Auto-convert video URL one more time before saving
             const videoUrlInput = document.getElementById('videoUrl');
             const videoUrl = videoUrlInput.value.trim();
             if (videoUrl) {
                 videoUrlInput.value = convertGoogleDriveUrl(videoUrl);
             }
 
+            // FIXED: Correct field order with demoUrl BEFORE videoUrl/iframeUrl
             contentData[currentDemo] = {
                 title: document.getElementById('title').value,
                 emoji: document.getElementById('emoji').value,
                 heroDescription: document.getElementById('heroDescription').value,
                 howItWorks: document.getElementById('howItWorks').value,
                 whyItMatters: document.getElementById('whyItMatters').value,
-                videoUrl: document.getElementById('videoUrl').value,
-                iframeUrl: document.getElementById('iframeUrl').value,
-                demoUrl: document.getElementById('demoUrl').value,
                 ctaButtonText: document.getElementById('ctaButtonText').value,
-                ctaDescription: document.getElementById('ctaDescription').value
+                ctaDescription: document.getElementById('ctaDescription').value,
+                demoUrl: document.getElementById('demoUrl').value,
+                iframeUrl: document.getElementById('iframeUrl').value,
+                videoUrl: document.getElementById('videoUrl').value
             };
 
             const dataStr = JSON.stringify(contentData, null, 2);
 
-            // Try to save directly to file system if we have access
             if (supportsFileSystemAccess && fileHandle) {
                 try {
                     const writable = await fileHandle.createWritable();
                     await writable.write(dataStr);
                     await writable.close();
 
-                    // Show success message
                     const successMsg = document.getElementById('successMessage');
                     successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated in your project folder</p>';
                     successMsg.classList.add('show');
@@ -522,14 +501,12 @@
                         successMsg.classList.remove('show');
                     }, 5000);
 
-                    return; // Don't download if we saved directly
+                    return;
                 } catch (error) {
                     console.error('Error saving to file:', error);
-                    // Fall through to download method
                 }
             }
 
-            // Fallback: Download the file (old method)
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
@@ -537,7 +514,6 @@
             link.download = 'content.json';
             link.click();
 
-            // Show success message
             const successMsg = document.getElementById('successMessage');
             successMsg.innerHTML = '<h3>✓ Changes Saved!</h3><p>content.json has been downloaded. Replace the file in your project folder.</p>';
             successMsg.classList.add('show');
@@ -546,10 +522,8 @@
             }, 5000);
         }
 
-        // Initialize
         loadContentFile();
 
-        // Add connect button to UI if File System Access is supported
         if (supportsFileSystemAccess) {
             window.addEventListener('DOMContentLoaded', () => {
                 const container = document.querySelector('.container');

@@ -79,7 +79,7 @@
                 <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
                 <h2 id="cta-title" style="margin-bottom: 8px;">Launch SMS Demo</h2>
                 <p id="cta-description" style="margin-bottom: 20px;">Loading...</p>
-                <a id="demo-link" href="#" target="_blank" class="card-link"
+                <a id="demo-link" href="#" target="_blank" rel="noopener noreferrer" class="card-link"
                     style="display: inline-block; padding: 12px 30px;">
                     Try It Now →
                 </a>
@@ -109,14 +109,18 @@
         // Load content from JSON file
         fetch('../content/content.json')
             .then(response => {
+                console.log('Fetch response status:', response.status);
                 if (!response.ok) {
                     throw new Error('Content file not found');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('JSON data loaded:', data);
+
                 // Get the content for this specific demo
                 const content = data.databaseReactivation;
+                console.log('Database Reactivation content:', content);
 
                 // Update all the text elements
                 document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
@@ -130,6 +134,10 @@
                 // Update demo link URL
                 if (content.demoUrl && content.demoUrl.trim() !== '') {
                     document.getElementById('demo-link').href = content.demoUrl;
+                    console.log('✅ Demo link set to:', content.demoUrl);
+                    console.log('✅ Link will open in new tab:', document.getElementById('demo-link').target);
+                } else {
+                    console.warn('⚠️ No demoUrl found in content');
                 }
 
                 // Update video if URL exists in JSON (overrides hardcoded one)
@@ -141,13 +149,14 @@
                             allow="autoplay"
                         ></iframe>
                     `;
+                    console.log('✅ Video URL updated:', content.videoUrl);
                 }
 
                 // Update page title
                 document.title = `${content.title} Demo - AWE2M8`;
             })
             .catch(error => {
-                console.error('Error loading content:', error);
+                console.error('❌ Error loading content:', error);
                 // Fallback content if JSON fails to load
                 document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
             });
