@@ -495,7 +495,7 @@
                     if (gymData.databaseReactivationOrbUrl) {
                         document.getElementById('orb-container').innerHTML = `
                             <iframe src="${gymData.databaseReactivationOrbUrl}" 
-                                    allow="microphone; camera; autoplay"
+                                    allow="microphone *; camera *; autoplay *; display-capture *"
                                     style="width: 100%; height: 500px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
@@ -513,7 +513,7 @@
                     if (gymData.voiceAIOrbUrl) {
                         document.getElementById('voice-orb-container').innerHTML = `
                             <iframe src="${gymData.voiceAIOrbUrl}" 
-                                    allow="microphone; camera; autoplay"
+                                    allow="microphone *; camera *; autoplay *; display-capture *"
                                     style="width: 100%; height: 500px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
