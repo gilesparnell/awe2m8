@@ -246,13 +246,62 @@
                 font-size: 2rem;
             }
 
+            .industry-hero .subtitle {
+                font-size: 1.1rem;
+            }
+
             .solution-header {
                 flex-direction: column;
                 text-align: center;
             }
 
+            .solution-title {
+                font-size: 1.5rem;
+            }
+
+            .solution-description {
+                font-size: 1rem;
+            }
+
             .demo-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .iframe-container {
+                min-height: 400px;
+                padding: 15px;
+            }
+
+            .iframe-container iframe {
+                height: 400px;
+            }
+
+            .cta-banner {
+                padding: 30px 20px;
+            }
+
+            .cta-banner h2 {
+                font-size: 1.8rem;
+            }
+
+            .cta-banner p {
+                font-size: 1rem;
+            }
+
+            .stat-box {
+                padding: 20px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .solution-card {
+                padding: 25px;
+            }
+
+            .container {
+                padding: 10px;
             }
         }
     </style>
@@ -403,6 +452,14 @@
             </div>
         </section>
 
+        <!-- CTA Banner -->
+        <div class="cta-banner">
+            <h2>Ready to Stop Losing Members and Leads?</h2>
+            <p>See how AI can transform your gym's member retention and lead conversion</p>
+            <a href="https://awe2m8.ai/contact" class="demo-button" style="font-size: 1.1rem; padding: 18px 45px;">
+                Book Your Free Demo →
+            </a>
+        </div>
     </div>
 
     <script>
@@ -438,6 +495,7 @@
                     if (gymData.databaseReactivationOrbUrl) {
                         document.getElementById('orb-container').innerHTML = `
                             <iframe src="${gymData.databaseReactivationOrbUrl}" 
+                                    allow="microphone; camera; autoplay"
                                     style="width: 100%; height: 500px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
@@ -455,6 +513,7 @@
                     if (gymData.voiceAIOrbUrl) {
                         document.getElementById('voice-orb-container').innerHTML = `
                             <iframe src="${gymData.voiceAIOrbUrl}" 
+                                    allow="microphone; camera; autoplay"
                                     style="width: 100%; height: 500px; border: none; border-radius: 10px;">
                             </iframe>
                         `;
