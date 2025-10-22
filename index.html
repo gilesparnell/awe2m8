@@ -4,91 +4,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Demos - AWE2M8</title>
+    <title>AWE2M8 AI Demos - Agent & Industry Solutions</title>
     <link rel="stylesheet" href="css/demo-styles.css">
+    <style>
+        /* Compact Hero for Homepage */
+        .hero {
+            padding: 30px 20px 20px !important;
+        }
+
+        .hero h1 {
+            margin-bottom: 10px !important;
+        }
+
+        .hero p {
+            margin-bottom: 0 !important;
+        }
+
+        /* Tab System Styles */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            max-width: 600px;
+            margin: 20px auto 20px;
+            border-bottom: 2px solid rgba(0, 255, 0, 0.2);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .tab.active {
+            color: #ffffff;
+            border-bottom-color: var(--primary);
+            background: rgba(0, 255, 0, 0.08);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Search Bar */
+        .demo-search {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+        }
+
+        .demo-search input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .demo-search input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 255, 0, 0.08);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .demo-search input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+        .demo-search {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .tab-container {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .tab {
+                font-size: 1rem;
+                padding: 12px 20px;
+                white-space: nowrap;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Particle Background -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- Content Wrapper - Ensures everything is above particles -->
     <div class="content-wrapper">
-
         <div class="header">
             <a href="https://awe2m8.ai" class="logo">
                 <img src="images/AWE2M8Logo.png" alt="AWE2M8.ai">
             </a>
-            <a href="https://awe2m8.ai" class="back-btn">← Back to Home</a>
         </div>
 
-        <div class="demo-section">
-            <h2>Explore Partner Demos</h2>
-            <p>Select a demo to see our AI in action for different use cases</p>
+        <div class="hero">
+            <h1>Explore AWE2M8 Demos</h1>
+            <p>Discover AI-powered solutions that transform how businesses operate</p>
+        </div>
 
-            <div class="demo-grid">
-                <a href="dbr.html" class="demo-card">
-                    <div class="demo-icon">🔄</div>
-                    <h3>Database Reactivation</h3>
-                    <p>Re-engage dormant leads and convert cold contacts into warm opportunities with intelligent AI
-                        follow-up.</p>
-                </a>
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab active" data-tab="agent-demos">
+                Agent Demos
+            </button>
+            <button class="tab" data-tab="industry-demos">
+                Industry Demos
+            </button>
+        </div>
 
-                <a href="eCommerce.html" class="demo-card">
-                    <div class="demo-icon">🛒</div>
-                    <h3>eCommerce</h3>
-                    <p>Boost sales with AI-powered shopping assistance, cart recovery, and personalized product
-                        recommendations.</p>
-                </a>
+        <!-- Agent Demos Tab Content -->
+        <div id="agent-demos" class="tab-content active">
+            <div class="demo-section">
+                <div class="demo-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="agent-search" placeholder="Search agent demos...">
+                </div>
 
-                <a href="speedToLead.html" class="demo-card">
-                    <div class="demo-icon">⚡</div>
-                    <h3>Speed to Lead</h3>
-                    <p>Capture and respond to leads instantly, reducing response time from hours to seconds.</p>
-                </a>
+                <div class="demo-grid" id="agent-grid">
+                    <a href="demos/voiceAI.html" class="demo-card" data-keywords="voice ai call phone receptionist">
+                        <div class="demo-icon">🎙️</div>
+                        <h3>Voice AI</h3>
+                        <p>Natural voice conversations that feel human and handle complex inquiries</p>
+                    </a>
 
-                <a href="voiceAi.html" class="demo-card">
-                    <div class="demo-icon">🎙️</div>
-                    <h3>Voice AI</h3>
-                    <p>Experience natural voice conversations that qualify leads, book appointments, and answer
-                        questions
-                        24/7.</p>
-                </a>
+                    <a href="demos/dbr.html" class="demo-card"
+                        data-keywords="database reactivation sms text message email campaign">
+                        <div class="demo-icon">💬</div>
+                        <h3>Database Reactivation</h3>
+                        <p>Re-engage dormant leads with intelligent, personalized outreach</p>
+                    </a>
 
-                <a href="documentCollection.html" class="demo-card">
-                    <div class="demo-icon">📄</div>
-                    <h3>Document Collection</h3>
-                    <p>Stop chasing clients for paperwork. AI automatically tracks and collects all required documents.
-                    </p>
-                </a>
+                    <a href="demos/reviews.html" class="demo-card"
+                        data-keywords="reviews reputation management feedback google">
+                        <div class="demo-icon">⭐</div>
+                        <h3>Reviews AI</h3>
+                        <p>Turn happy customers into 5-star reviews automatically</p>
+                    </a>
 
-                <a href="reviewsAi.html" class="demo-card">
-                    <div class="demo-icon">⭐</div>
-                    <h3>Reviews AI</h3>
-                    <p>Turn satisfied customers into 5-star reviews on Google, Trustpilot, and more automatically.</p>
-                </a>
+                    <a href="demos/documents.html" class="demo-card"
+                        data-keywords="document collection forms upload files">
+                        <div class="demo-icon">📄</div>
+                        <h3>Document Collection</h3>
+                        <p>Automated document requests, reminders, and tracking</p>
+                    </a>
 
-                <a href="outOfHours.html" class="demo-card">
-                    <div class="demo-icon">🌙</div>
-                    <h3>Out of Hours AI</h3>
-                    <p>Never miss a lead. Capture opportunities 24/7 across all time zones while you sleep.</p>
-                </a>
+                    <a href="demos/ecommerce.html" class="demo-card"
+                        data-keywords="ecommerce shop cart shopping assistant retail">
+                        <div class="demo-icon">🛒</div>
+                        <h3>E-commerce AI</h3>
+                        <p>24/7 shopping assistant that converts browsers into buyers</p>
+                    </a>
 
-                <a href="aiReceptionist.html" class="demo-card">
-                    <div class="demo-icon">📞</div>
-                    <h3>AI Receptionist</h3>
-                    <p>Professional call handling, routing, and appointment scheduling with a natural AI voice.</p>
-                </a>
+                    <a href="demos/outofhours.html" class="demo-card"
+                        data-keywords="after hours night weekend emergency 24/7">
+                        <div class="demo-icon">🌙</div>
+                        <h3>Out of Hours AI</h3>
+                        <p>Never miss an opportunity, even when you're closed</p>
+                    </a>
+
+                    <a href="demos/speedtolead.html" class="demo-card"
+                        data-keywords="speed lead response fast quick instant">
+                        <div class="demo-icon">⚡</div>
+                        <h3>Speed to Lead</h3>
+                        <p>Contact new leads within seconds of inquiry</p>
+                    </a>
+
+                    <a href="demos/receptionist.html" class="demo-card"
+                        data-keywords="receptionist front desk call answering secretary">
+                        <div class="demo-icon">📞</div>
+                        <h3>AI Receptionist</h3>
+                        <p>Professional front desk powered by AI, 24/7</p>
+                    </a>
+                </div>
             </div>
         </div>
 
-    </div>
-    <!-- End Content Wrapper -->
+        <!-- Industry Demos Tab Content -->
+        <div id="industry-demos" class="tab-content">
+            <div class="demo-section">
+                <div class="demo-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="industry-search" placeholder="Search industry demos...">
+                </div>
 
-    <!-- Scripts -->
-    <script src="js/interactive-base.js"></script> <!-- Core interactions -->
-    <script src="js/dark-mode.js"></script> <!-- Theme toggle -->
-    <script src="js/core-effects.js"></script> <!-- Your custom effects -->
+                <div class="demo-grid" id="industry-grid">
+                    <a href="industries/gyms.html" class="demo-card"
+                        data-keywords="gym fitness health wellness workout training members">
+                        <div class="demo-icon">💪</div>
+                        <h3>Gyms & Fitness Centers</h3>
+                        <p>Reactivate members, answer calls 24/7, and never miss a lead</p>
+                    </a>
+
+                    <a href="industries/realestate.html" class="demo-card"
+                        data-keywords="real estate property homes houses agents buyers sellers">
+                        <div class="demo-icon">🏠</div>
+                        <h3>Real Estate</h3>
+                        <p>Qualify leads instantly and schedule viewings automatically</p>
+                    </a>
+
+                    <a href="industries/coaching.html" class="demo-card"
+                        data-keywords="coaching consulting mentoring training development">
+                        <div class="demo-icon">🎯</div>
+                        <h3>Coaching & Consulting</h3>
+                        <p>Book discovery calls and manage client communications</p>
+                    </a>
+
+                    <a href="industries/education.html" class="demo-card"
+                        data-keywords="education school training courses learning students">
+                        <div class="demo-icon">🎓</div>
+                        <h3>Education & Training</h3>
+                        <p>Handle enrollment inquiries and course information 24/7</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab
+                tab.classList.add('active');
+
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Search functionality for Agent Demos
+        document.getElementById('agent-search').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('#agent-grid .demo-card');
+
+            cards.forEach(card => {
+                const keywords = card.getAttribute('data-keywords').toLowerCase();
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+
+                if (keywords.includes(searchTerm) || title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Search functionality for Industry Demos
+        document.getElementById('industry-search').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('#industry-grid .demo-card');
+
+            cards.forEach(card => {
+                const keywords = card.getAttribute('data-keywords').toLowerCase();
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+
+                if (keywords.includes(searchTerm) || title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <script src="js/particles.js"></script>
+    <script src="js/interactive-base.js"></script>
+    <script src="js/dark-mode.js"></script>
 </body>
 
 </html>
