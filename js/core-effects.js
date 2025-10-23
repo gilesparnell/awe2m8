@@ -316,6 +316,7 @@
        ========================================== */
 
     // DEMO SEARCH BAR - Filter demos by keyword
+    /*
     function initDemoSearch() {
         const demoSection = document.querySelector('.demo-section');
         if (!demoSection) return;
@@ -367,7 +368,7 @@
 
         console.log('✅ Demo Search Bar');
     }
-
+*/
     // DEMO TIMER BADGES - "⏱️ 2 min" badges on cards
     function initDemoTimers() {
         document.querySelectorAll('.demo-card').forEach(card => {
