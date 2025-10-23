@@ -284,6 +284,19 @@
                     <option value="speedToLead">Speed to Lead</option>
                     <option value="aiReceptionist">AI Receptionist</option>
                 </select>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Solution 3: Document Collection (Optional)</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="ind-solution3Title">Solution 3 Title</label>
+                    <input type="text" id="ind-solution3Title" placeholder="Automate Document Collection">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="ind-solution3Description">Solution 3 Description</label>
+                    <textarea id="ind-solution3Description"></textarea>
+                </div>
             </div>
 
             <div class="selector-box" id="industry-selector-box">
@@ -561,6 +574,8 @@
                 document.getElementById('ind-databaseReactivationOrbUrl').value = industry.databaseReactivationOrbUrl || '';
                 document.getElementById('ind-solution2Title').value = industry.solution2Title || '';
                 document.getElementById('ind-solution2Description').value = industry.solution2Description || '';
+                document.getElementById('ind-solution3Title').value = industry.solution3Title || '';
+                document.getElementById('ind-solution3Description').value = industry.solution3Description || '';
             }
 
             document.getElementById('successMessage').classList.remove('show');
@@ -595,7 +610,9 @@
                     smsAgentDemoUrl: document.getElementById('ind-smsAgentDemoUrl').value,
                     databaseReactivationOrbUrl: document.getElementById('ind-databaseReactivationOrbUrl').value,
                     solution2Title: document.getElementById('ind-solution2Title').value,
-                    solution2Description: document.getElementById('ind-solution2Description').value
+                    solution2Description: document.getElementById('ind-solution2Description').value,
+                    solution3Title: document.getElementById('ind-solution3Title').value,
+                    solution3Description: document.getElementById('ind-solution3Description').value
                 };
             }
 
