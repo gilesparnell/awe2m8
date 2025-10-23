@@ -1,6 +1,3 @@
-} else if (currentIndustry) {
-const industry = contentData.industries[currentIndustry] || {};
-console.log('Loading industry data:', industry);
 <!DOCTYPE html>
 <html lang="en">
 
@@ -564,7 +561,6 @@ console.log('Loading industry data:', industry);
                 document.getElementById('ind-databaseReactivationOrbUrl').value = industry.databaseReactivationOrbUrl || '';
                 document.getElementById('ind-solution2Title').value = industry.solution2Title || '';
                 document.getElementById('ind-solution2Description').value = industry.solution2Description || '';
-                document.getElementById('ind-voiceAIOrbUrl').value = industry.voiceAIOrbUrl || '';
             }
 
             document.getElementById('successMessage').classList.remove('show');
@@ -599,8 +595,7 @@ console.log('Loading industry data:', industry);
                     smsAgentDemoUrl: document.getElementById('ind-smsAgentDemoUrl').value,
                     databaseReactivationOrbUrl: document.getElementById('ind-databaseReactivationOrbUrl').value,
                     solution2Title: document.getElementById('ind-solution2Title').value,
-                    solution2Description: document.getElementById('ind-solution2Description').value,
-                    voiceAIOrbUrl: document.getElementById('ind-voiceAIOrbUrl').value
+                    solution2Description: document.getElementById('ind-solution2Description').value
                 };
             }
 
