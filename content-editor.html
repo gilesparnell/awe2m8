@@ -284,19 +284,6 @@
                     <option value="speedToLead">Speed to Lead</option>
                     <option value="aiReceptionist">AI Receptionist</option>
                 </select>
-
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <h3 style="color: #00ff00; margin-bottom: 15px;">Solution 3: Document Collection (Optional)</h3>
-                </div>
-
-                <div class="form-group">
-                    <label for="ind-solution3Title">Solution 3 Title</label>
-                    <input type="text" id="ind-solution3Title" placeholder="Automate Document Collection">
-                </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="ind-solution3Description">Solution 3 Description</label>
-                    <textarea id="ind-solution3Description"></textarea>
-                </div>
             </div>
 
             <div class="selector-box" id="industry-selector-box">
@@ -304,10 +291,10 @@
                 <select id="industry-select">
                     <option value="">-- Choose an industry --</option>
                     <option value="gyms">Gyms & Fitness Centers</option>
+                    <option value="fireSafety">Fire Safety Compliance</option>
                     <option value="realestate">Real Estate</option>
-                    <option value="automotive">Automotive</option>
-                    <option value="healthcare">Healthcare</option>
-                    <option value="hospitality">Hospitality</option>
+                    <option value="coaching">Coaching & Consulting</option>
+                    <option value="education">Education & Training</option>
                 </select>
             </div>
         </div>
@@ -415,6 +402,19 @@
                     <label for="ind-solution2Description">Solution 2 Description</label>
                     <textarea id="ind-solution2Description"></textarea>
                 </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <h3 style="color: #00ff00; margin-bottom: 15px;">Solution 3: Document Collection (Optional)</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="ind-solution3Title">Solution 3 Title</label>
+                    <input type="text" id="ind-solution3Title" placeholder="Automate Document Collection">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="ind-solution3Description">Solution 3 Description</label>
+                    <textarea id="ind-solution3Description"></textarea>
+                </div>
             </div>
             <div class="button-group">
                 <button class="btn-secondary" onclick="loadContent()">Reset</button>
@@ -442,7 +442,6 @@
 
         // Load content.json
         async function loadContentFile() {
-            // Try multiple possible paths
             const paths = ['content/content.json', '../content/content.json', './content.json'];
 
             for (const path of paths) {
@@ -452,28 +451,22 @@
                     if (response.ok) {
                         contentData = await response.json();
                         console.log('✅ Content loaded successfully from:', path);
-                        console.log('Content data:', contentData);
 
-                        // Initialize industries object if it doesn't exist
                         if (!contentData.industries) {
                             contentData.industries = {};
-                            console.log('Initialized empty industries object');
                         }
-                        return; // Success, exit function
+                        return;
                     }
                 } catch (error) {
-                    console.log('Failed to load from:', path, error);
+                    console.log('Failed to load from:', path);
                 }
             }
 
-            // If all paths failed
             console.error('❌ Could not load content.json from any path');
             if (supportsFileSystemAccess) {
                 if (confirm('Could not load content.json from server. Would you like to select it from your computer?')) {
                     await selectContentFile();
                 }
-            } else {
-                alert('Error: Could not load content.json. Make sure the file exists in the content/ folder.');
             }
         }
 
@@ -510,8 +503,6 @@
             currentIndustry = '';
             document.getElementById('industry-select').value = '';
 
-            console.log('Demo selected:', currentDemo);
-
             if (currentDemo) {
                 document.getElementById('demo-form-container').style.display = 'block';
                 document.getElementById('industry-form-container').style.display = 'none';
@@ -530,8 +521,6 @@
             currentDemo = '';
             document.getElementById('demo-select').value = '';
 
-            console.log('Industry selected:', currentIndustry);
-
             if (currentIndustry) {
                 document.getElementById('industry-form-container').style.display = 'block';
                 document.getElementById('demo-form-container').style.display = 'none';
@@ -546,12 +535,8 @@
 
         // Load content
         function loadContent() {
-            console.log('loadContent called - currentDemo:', currentDemo, 'currentIndustry:', currentIndustry);
-            console.log('contentData:', contentData);
-
             if (currentDemo) {
                 const demo = contentData[currentDemo] || {};
-                console.log('Loading demo data:', demo);
                 document.getElementById('title').value = demo.title || '';
                 document.getElementById('emoji').value = demo.emoji || '';
                 document.getElementById('heroDescription').value = demo.heroDescription || '';
@@ -564,7 +549,6 @@
                 document.getElementById('videoUrl').value = demo.videoUrl || '';
             } else if (currentIndustry) {
                 const industry = contentData.industries[currentIndustry] || {};
-                console.log('Loading industry data:', industry);
                 document.getElementById('ind-pageTitle').value = industry.pageTitle || '';
                 document.getElementById('ind-heroTitle').value = industry.heroTitle || '';
                 document.getElementById('ind-heroSubtitle').value = industry.heroSubtitle || '';
@@ -583,6 +567,14 @@
 
         // Save content
         async function saveContent() {
+            if (!fileHandle) {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 5000);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
             if (currentDemo) {
                 contentData[currentDemo] = {
                     title: document.getElementById('title').value,
@@ -618,41 +610,28 @@
 
             const dataStr = JSON.stringify(contentData, null, 2);
 
-            // Try to save directly to file system
-            if (supportsFileSystemAccess && fileHandle) {
-                try {
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(dataStr);
-                    await writable.close();
+            try {
+                const writable = await fileHandle.createWritable();
+                await writable.write(dataStr);
+                await writable.close();
 
-                    const successMsg = document.getElementById('successMessage');
-                    successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated</p>';
-                    successMsg.classList.add('show');
-                    setTimeout(() => successMsg.classList.remove('show'), 5000);
-                    return;
-                } catch (error) {
-                    console.error('Error saving:', error);
-                }
+                const successMsg = document.getElementById('successMessage');
+                successMsg.innerHTML = '<h3>✓ Saved Directly to Project!</h3><p>content.json has been updated</p>';
+                successMsg.classList.add('show');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => successMsg.classList.remove('show'), 5000);
+            } catch (error) {
+                console.error('Error saving:', error);
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.innerHTML = '<h3>⚠️ Save Failed</h3><p>Could not save to file</p>';
+                errorMsg.classList.add('show');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => errorMsg.classList.remove('show'), 5000);
             }
-
-            // Fallback: Download the file
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'content.json';
-            link.click();
-
-            const successMsg = document.getElementById('successMessage');
-            successMsg.innerHTML = '<h3>✓ Changes Saved!</h3><p>Replace content.json in your project</p>';
-            successMsg.classList.add('show');
-            setTimeout(() => successMsg.classList.remove('show'), 5000);
         }
 
-        // Initialize
         loadContentFile();
 
-        // Add connect button if supported
         if (supportsFileSystemAccess) {
             window.addEventListener('DOMContentLoaded', () => {
                 const container = document.querySelector('.container');
