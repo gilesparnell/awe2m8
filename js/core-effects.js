@@ -585,7 +585,7 @@
         //initSocialProof();              // "500+ businesses" counter
 
         // DEMO ENHANCEMENTS
-        initDemoSearch();               // Search bar
+        //initDemoSearch();               // Search bar
         //initDemoTimers();               // "⏱️ 2 min" badges
         //initRecentlyViewed();           // "✓ Viewed" badges
 
