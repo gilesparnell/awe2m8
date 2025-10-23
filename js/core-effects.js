@@ -580,18 +580,18 @@
         initLoadingScreen();            // AWE2M8 branded loader
 
         // CONVERSION & CTA
-        //initFloatingCTA();              // Sticky "Book Demo" button
+        // initFloatingCTA();              // Sticky "Book Demo" button
         // initExitIntent();               // Exit popup- too pushy
-        //initSocialProof();              // "500+ businesses" counter
+        // initSocialProof();              // "500+ businesses" counter
 
         // DEMO ENHANCEMENTS
-        //initDemoSearch();               // Search bar
-        //initDemoTimers();               // "⏱️ 2 min" badges
-        //initRecentlyViewed();           // "✓ Viewed" badges
+        // initDemoSearch();               // Search bar
+        // initDemoTimers();               // "⏱️ 2 min" badges
+        // initRecentlyViewed();           // "✓ Viewed" badges
 
         // ANIMATIONS
         // initCustomCursor();             // Green glowing cursor
-        //initParallaxCards();            // Depth scrolling
+        // initParallaxCards();            // Depth scrolling
         initLogoReveal();               // Matrix glitch
         initLazyLoad();                 // Lazy image loading
 
