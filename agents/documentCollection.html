@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Reactivation Demo - AWE2M8</title>
-    <link rel="stylesheet" href="/css/demo-styles.css">
+    <title>Document Collection Demo - AWE2M8</title>
+    <link rel="stylesheet" href="../css/demo-styles.css">
     <style>
         /* Mobile-first ordering override */
         .three-column-grid {
@@ -62,13 +62,13 @@
 <body>
     <div class="header">
         <a href="https://awe2m8.ai" class="logo">
-            <img src="/images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
+            <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
         </a>
         <a href="../index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero hero-compact">
-        <h1 id="hero-title">🔄 Database Reactivation</h1>
+        <h1 id="hero-title">📄 Document Collection AI</h1>
         <p id="hero-description">Loading...</p>
     </div>
 
@@ -76,10 +76,10 @@
         <!-- Column 1 (Desktop Left / Mobile First): CTA -->
         <div class="column-box column-cta">
             <div class="cta-in-column">
-                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">💬</div>
-                <h2 id="cta-title" style="margin-bottom: 8px;">Launch SMS Demo</h2>
+                <div id="cta-emoji" style="font-size: 2.5em; margin-bottom: 12px;">📄</div>
+                <h2 id="cta-title" style="margin-bottom: 8px;">Try Document Demo</h2>
                 <p id="cta-description" style="margin-bottom: 20px;">Loading...</p>
-                <a id="demo-link" href="#" target="_blank" rel="noopener noreferrer" class="card-link"
+                <a id="demo-link" href="#" target="_blank" class="card-link"
                     style="display: inline-block; padding: 12px 30px;">
                     Try It Now →
                 </a>
@@ -88,10 +88,12 @@
 
         <!-- Column 2 (Desktop Middle / Mobile Second): Video -->
         <div class="column-box column-video">
-            <h2>See It In Action</h2>
+            <h2>Watch It In Action</h2>
             <div class="video-in-column" id="video-container">
-                <iframe src="https://drive.google.com/file/d/1LDp3Lb6HBBOkq2ywb1wr_voVazzP9jpN/preview" allow="autoplay"
-                    style="width: 100%; height: 100%; border: none;"></iframe>
+                <div
+                    style="background: #ff0000; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2em; height: 100%;">
+                    VIDEO PLACEHOLDER
+                </div>
             </div>
         </div>
 
@@ -109,18 +111,14 @@
         // Load content from JSON file
         fetch('../content/content.json')
             .then(response => {
-                console.log('Fetch response status:', response.status);
                 if (!response.ok) {
                     throw new Error('Content file not found');
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('JSON data loaded:', data);
-
                 // Get the content for this specific demo
-                const content = data.databaseReactivation;
-                console.log('Database Reactivation content:', content);
+                const content = data.documentCollection;
 
                 // Update all the text elements
                 document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
@@ -134,13 +132,9 @@
                 // Update demo link URL
                 if (content.demoUrl && content.demoUrl.trim() !== '') {
                     document.getElementById('demo-link').href = content.demoUrl;
-                    console.log('✅ Demo link set to:', content.demoUrl);
-                    console.log('✅ Link will open in new tab:', document.getElementById('demo-link').target);
-                } else {
-                    console.warn('⚠️ No demoUrl found in content');
                 }
 
-                // Update video if URL exists in JSON (overrides hardcoded one)
+                // Update video if URL exists
                 if (content.videoUrl && content.videoUrl.trim() !== '') {
                     document.getElementById('video-container').innerHTML = `
                         <iframe 
@@ -149,21 +143,20 @@
                             allow="autoplay"
                         ></iframe>
                     `;
-                    console.log('✅ Video URL updated:', content.videoUrl);
                 }
 
                 // Update page title
                 document.title = `${content.title} Demo - AWE2M8`;
             })
             .catch(error => {
-                console.error('❌ Error loading content:', error);
+                console.error('Error loading content:', error);
                 // Fallback content if JSON fails to load
                 document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
             });
     </script>
-    <script src="js/interactive-base.js"></script> <!-- Core interactions -->
-    <script src="js/dark-mode.js"></script> <!-- Theme toggle -->
-    <script src="js/core-effects.js"></script> <!-- Your custom effects -->
+    <script src="../js/interactive-base.js"></script> <!-- Core interactions -->
+    <script src="../js/dark-mode.js"></script> <!-- Theme toggle -->
+    <script src="../js/core-effects.js"></script> <!-- Your custom effects -->
 </body>
 
 </html>
