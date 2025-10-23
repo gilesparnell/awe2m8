@@ -64,7 +64,7 @@
         <a href="https://awe2m8.ai" class="logo">
             <img src="../images/AWE2M8Logo.png" alt="AWE2M8.ai" style="height: 40px;">
         </a>
-        <a href="../index.html" class="back-btn">← Back to Demos</a>
+        <a href="/index.html" class="back-btn">← Back to Demos</a>
     </div>
 
     <div class="hero hero-compact">
@@ -109,7 +109,7 @@
 
     <script>
         // Load content from JSON file
-        fetch('../content/content.json')
+        fetch('/content/content.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Content file not found');
@@ -154,9 +154,9 @@
                 document.getElementById('hero-description').textContent = 'Error loading content. Please refresh the page.';
             });
     </script>
-    <script src="../js/interactive-base.js"></script> <!-- Core interactions -->
-    <script src="../js/dark-mode.js"></script> <!-- Theme toggle -->
-    <script src="../js/core-effects.js"></script> <!-- Your custom effects -->
+    <script src="/js/interactive-base.js"></script> <!-- Core interactions -->
+    <script src="/js/dark-mode.js"></script> <!-- Theme toggle -->
+    <script src="/js/core-effects.js"></script> <!-- Your custom effects -->
 </body>
 
 </html>
