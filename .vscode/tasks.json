@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Quick Tests",
+            "type": "shell",
+            "command": "npm run test:quick",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false,
+                "clear": true,
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run All Tests",
+            "type": "shell",
+            "command": "npm test",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": false,
+                "clear": true,
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Open Test Suite (Browser)",
+            "type": "shell",
+            "command": "open",
+            "args": [
+                "test-suite.html"
+            ],
+            "osx": {
+                "command": "open",
+                "args": [
+                    "test-suite.html"
+                ]
+            },
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/c",
+                    "start",
+                    "test-suite.html"
+                ]
+            },
+            "linux": {
+                "command": "xdg-open",
+                "args": [
+                    "test-suite.html"
+                ]
+            },
+            "presentation": {
+                "reveal": "never"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
