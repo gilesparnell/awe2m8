@@ -1,0 +1,89 @@
+name: AWE2M8 Tests
+
+on:
+  push:
+    branches: [ main, develop, staging ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Run Quick Tests
+      run: node test-runner.js --quick
+      continue-on-error: false
+    
+    - name: Run Full Test Suite
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: node test-runner.js
+    
+    - name: Generate Test Report
+      if: always()
+      run: |
+        echo "Test run completed at $(date)" > test-summary.txt
+        echo "Branch: ${{ github.ref_name }}" >> test-summary.txt
+        echo "Commit: ${{ github.sha }}" >> test-summary.txt
+    
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: |
+          test-summary.txt
+          test-report-*.json
+        retention-days: 30
+    
+    - name: Comment PR with Results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '✅ Tests passed! Safe to merge.'
+          })
+
+  # Optional: Deploy if tests pass
+  deploy-staging:
+    name: Deploy to Staging
+    needs: test
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your deployment commands here
+    
+  deploy-production:
+    name: Deploy to Production
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your deployment commands here
