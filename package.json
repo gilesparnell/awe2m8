@@ -1,0 +1,19 @@
+{
+    "name": "awe2m8-testing",
+    "version": "1.0.0",
+    "description": "Testing framework for AWE2M8 project",
+    "scripts": {
+        "test": "node test-runner.js",
+        "test:quick": "node test-runner.js --quick",
+        "precommit": "node test-runner.js --quick",
+        "setup:hooks": "cp pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Pre-commit hook installed!'"
+    },
+    "keywords": [
+        "testing",
+        "validation",
+        "ci",
+        "cd"
+    ],
+    "author": "AWE2M8",
+    "license": "ISC"
+}
