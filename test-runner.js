@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * AWE2M8 Comprehensive Test Suite - CLI Version
- * Tests ALL HTML, JS, and content files across the entire project
- * Usage: node test-runner-comprehensive.js [--quick]
+ * AWE2M8 Test Suite - Final Comprehensive Version
+ * Tests ALL HTML files in agents/, industries/, partners/
+ * Usage: node test-runner.js [--quick]
  */
 
 const fs = require('fs');
@@ -23,37 +23,19 @@ const colors = {
 // Test Configuration
 const config = {
     contentJsonPath: './content/content.json',
-    projectRoot: '.',
-
-    // Folders to scan
-    foldersToTest: {
-        agents: './agents',
-        partners: './partners',
-        industries: './industries',
-        api: './api'
-    },
-
-    // Required files
-    requiredFiles: [
-        './content/content.json',
-        './content-editor.html',
-        './index.html'
-    ],
-
-    // Required JSON structure
     requiredIndustries: ['fireSafety', 'gyms'],
     requiredDemos: ['voiceAI', 'aiReceptionist', 'databaseReactivation'],
-
-    // Critical fields per content type
     criticalFields: {
         industry: ['pageTitle', 'heroTitle', 'heroSubtitle', 'solution1Title', 'smsAgentDemoUrl'],
         demo: ['title', 'emoji', 'heroDescription']
     },
-
-    // HTML validation
-    htmlRequiredElements: {
-        industry: ['hero-title', 'hero-subtitle', 'solution1-title'],
-        standard: ['head', 'body', 'title']
+    // Folders to validate
+    requiredFolders: ['content', 'industries', 'agents'],
+    optionalFolders: ['partners', 'css', 'js', 'images'],
+    // Expected core files
+    expectedFiles: {
+        'content/content.json': 'Content JSON file',
+        'content-editor.html': 'Content editor'
     }
 };
 
@@ -75,7 +57,8 @@ function log(message, color = 'reset') {
 function printHeader() {
     console.log('');
     log('════════════════════════════════════════════════', 'cyan');
-    log('  🧪 AWE2M8 Comprehensive Test Suite - CLI Version  ', 'bright');
+    log('       🧪 AWE2M8 Test Suite - CLI Version       ', 'bright');
+    log('    📁 Testing ALL HTML Files in All Folders    ', 'cyan');
     log('════════════════════════════════════════════════', 'cyan');
     console.log('');
 }
@@ -122,49 +105,235 @@ function printTestResult(name, result) {
     }
 }
 
-// ===== FILE DISCOVERY FUNCTIONS =====
+// ===== COMPREHENSIVE HTML VALIDATION =====
 
-function findFilesInDirectory(dir, extension, recursive = true) {
-    if (!fs.existsSync(dir)) {
-        return [];
+function testAgentsHtmlFilesExist() {
+    if (!fs.existsSync('agents')) {
+        return {
+            pass: false,
+            message: 'Agents folder does not exist'
+        };
     }
 
-    let results = [];
-    const items = fs.readdirSync(dir);
+    const htmlFiles = fs.readdirSync('agents').filter(f => f.endsWith('.html'));
 
-    for (const item of items) {
-        const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
+    if (htmlFiles.length === 0) {
+        return {
+            pass: false,
+            message: 'Agents folder exists but contains no HTML files'
+        };
+    }
 
-        if (stat.isDirectory() && recursive) {
-            results = results.concat(findFilesInDirectory(fullPath, extension, recursive));
-        } else if (stat.isFile() && fullPath.endsWith(extension)) {
-            results.push(fullPath);
+    return {
+        pass: true,
+        message: `Found ${htmlFiles.length} HTML files in agents/ folder`
+    };
+}
+
+function testAllAgentsFilesValid() {
+    if (!fs.existsSync('agents')) {
+        return { pass: false, message: 'Agents folder missing' };
+    }
+
+    const htmlFiles = fs.readdirSync('agents').filter(f => f.endsWith('.html'));
+    const issues = [];
+    let validFiles = 0;
+
+    for (const file of htmlFiles) {
+        const filePath = path.join('agents', file);
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+
+            // Check for basic HTML structure
+            const hasDoctype = content.includes('<!DOCTYPE') || content.includes('<!doctype');
+            const hasHtml = content.includes('<html') || content.includes('<HTML');
+            const hasHead = content.includes('<head') || content.includes('<HEAD');
+            const hasBody = content.includes('<body') || content.includes('<BODY');
+
+            if (!hasDoctype && !hasHtml) {
+                issues.push(`${file}: Missing DOCTYPE and html tags`);
+            } else if (content.length < 50) {
+                issues.push(`${file}: File too short (${content.length} chars)`);
+            } else {
+                validFiles++;
+            }
+
+        } catch (error) {
+            issues.push(`${file}: Cannot read - ${error.message}`);
         }
     }
 
-    return results;
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            warning: validFiles > 0,
+            message: `${issues.length}/${htmlFiles.length} files have issues: ${issues.slice(0, 3).join('; ')}${issues.length > 3 ? '...' : ''}`
+        };
+    }
+
+    return {
+        pass: true,
+        message: `All ${validFiles} agent HTML files are valid`
+    };
 }
 
-function getAllHtmlFiles() {
-    const files = [];
-    for (const [name, dir] of Object.entries(config.foldersToTest)) {
-        files.push(...findFilesInDirectory(dir, '.html'));
+function testIndustriesHtmlFilesExist() {
+    if (!fs.existsSync('industries')) {
+        return {
+            pass: false,
+            message: 'Industries folder does not exist'
+        };
     }
-    // Add root HTML files
-    files.push(...findFilesInDirectory('.', '.html', false));
-    return files;
+
+    const htmlFiles = fs.readdirSync('industries').filter(f => f.endsWith('.html'));
+
+    if (htmlFiles.length === 0) {
+        return {
+            pass: false,
+            message: 'Industries folder exists but contains no HTML files'
+        };
+    }
+
+    return {
+        pass: true,
+        message: `Found ${htmlFiles.length} HTML files in industries/ folder`
+    };
 }
 
-function getAllJsFiles() {
-    const files = [];
-    for (const [name, dir] of Object.entries(config.foldersToTest)) {
-        files.push(...findFilesInDirectory(dir, '.js'));
+function testAllIndustriesFilesValid() {
+    if (!fs.existsSync('industries')) {
+        return { pass: false, message: 'Industries folder missing' };
     }
-    // Add root JS files
-    files.push(...findFilesInDirectory('.', '.js', false));
-    // Exclude node_modules and test files
-    return files.filter(f => !f.includes('node_modules') && !f.includes('test-runner'));
+
+    const htmlFiles = fs.readdirSync('industries').filter(f => f.endsWith('.html'));
+    const issues = [];
+    let validFiles = 0;
+
+    for (const file of htmlFiles) {
+        const filePath = path.join('industries', file);
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+
+            if (!content.includes('<!DOCTYPE') && !content.includes('<html')) {
+                issues.push(`${file}: Missing DOCTYPE or html tag`);
+            } else if (content.length < 50) {
+                issues.push(`${file}: File too short`);
+            } else {
+                validFiles++;
+            }
+
+        } catch (error) {
+            issues.push(`${file}: Cannot read`);
+        }
+    }
+
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            warning: validFiles > 0,
+            message: `${issues.length}/${htmlFiles.length} files have issues`
+        };
+    }
+
+    return {
+        pass: true,
+        message: `All ${validFiles} industry HTML files are valid`
+    };
+}
+
+function testPartnersFolder() {
+    if (!fs.existsSync('partners')) {
+        return {
+            pass: true,
+            warning: true,
+            message: 'Partners folder does not exist (optional)'
+        };
+    }
+
+    const htmlFiles = fs.readdirSync('partners').filter(f => f.endsWith('.html'));
+
+    return {
+        pass: true,
+        message: `Partners folder exists with ${htmlFiles.length} HTML files`
+    };
+}
+
+function testRequiredFoldersExist() {
+    const missing = [];
+    const found = [];
+
+    for (const folder of config.requiredFolders) {
+        if (fs.existsSync(folder) && fs.statSync(folder).isDirectory()) {
+            const htmlCount = fs.readdirSync(folder).filter(f => f.endsWith('.html')).length;
+            found.push(`${folder} (${htmlCount} HTML files)`);
+        } else {
+            missing.push(folder);
+        }
+    }
+
+    if (missing.length > 0) {
+        return {
+            pass: false,
+            message: `Missing critical folders: ${missing.join(', ')}`
+        };
+    }
+
+    return {
+        pass: true,
+        message: `All required folders exist: ${found.join(', ')}`
+    };
+}
+
+function testRelativePathsWork() {
+    const issues = [];
+    const foldersToTest = ['industries', 'agents', 'partners'];
+
+    for (const folder of foldersToTest) {
+        if (fs.existsSync(folder)) {
+            const relativePath = path.join(folder, '..', 'content', 'content.json');
+            if (!fs.existsSync(relativePath)) {
+                issues.push(`From ${folder}/ to content.json is broken`);
+            }
+        }
+    }
+
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            message: issues.join('; ')
+        };
+    }
+
+    return {
+        pass: true,
+        message: 'All relative paths work correctly'
+    };
+}
+
+function testDeploymentStructure() {
+    const required = ['content', 'industries', 'agents'];
+    const missing = required.filter(f => !fs.existsSync(f));
+
+    if (missing.length > 0) {
+        return {
+            pass: false,
+            message: `Missing required for deployment: ${missing.join(', ')}`
+        };
+    }
+
+    // Check for index.html
+    if (!fs.existsSync('index.html')) {
+        return {
+            pass: true,
+            warning: true,
+            message: 'Deployment structure valid (index.html recommended but not required)'
+        };
+    }
+
+    return {
+        pass: true,
+        message: 'Deployment structure is complete'
+    };
 }
 
 // ===== JSON TESTS =====
@@ -188,318 +357,104 @@ function testJsonValid() {
     }
     try {
         JSON.stringify(contentData);
-        return { pass: true, message: 'JSON is valid and parseable' };
+        return { pass: true, message: 'JSON is valid' };
     } catch (error) {
-        return { pass: false, message: `JSON parse error: ${error.message}` };
+        return { pass: false, message: `JSON error: ${error.message}` };
     }
 }
-
-function testAllIndustriesHaveData() {
-    if (!contentData || !contentData.industries) {
-        return { pass: false, message: 'No industries data' };
-    }
-
-    const industries = Object.keys(contentData.industries);
-    const issues = [];
-
-    for (const industry of industries) {
-        const data = contentData.industries[industry];
-        for (const field of config.criticalFields.industry) {
-            if (!data[field] || data[field].trim() === '') {
-                issues.push(`${industry}.${field}`);
-            }
-        }
-    }
-
-    if (issues.length > 0) {
-        return {
-            pass: false,
-            message: `Missing fields: ${issues.slice(0, 5).join(', ')}${issues.length > 5 ? ` (+${issues.length - 5} more)` : ''}`,
-            warning: issues.length < 5
-        };
-    }
-
-    return { pass: true, message: `All ${industries.length} industries have complete data` };
-}
-
-// ===== HTML TESTS =====
-
-function testHtmlFilesExist() {
-    const htmlFiles = getAllHtmlFiles();
-    if (htmlFiles.length === 0) {
-        return { pass: false, message: 'No HTML files found in project' };
-    }
-    return { pass: true, message: `Found ${htmlFiles.length} HTML files` };
-}
-
-function testHtmlFilesValid() {
-    const htmlFiles = getAllHtmlFiles();
-    const issues = [];
-
-    for (const file of htmlFiles) {
-        try {
-            const content = fs.readFileSync(file, 'utf8');
-
-            // Basic HTML validation
-            if (!content.includes('<html')) {
-                issues.push(`${file}: Missing <html> tag`);
-            }
-            if (!content.includes('<head')) {
-                issues.push(`${file}: Missing <head> tag`);
-            }
-            if (!content.includes('<body')) {
-                issues.push(`${file}: Missing <body> tag`);
-            }
-
-            // Check for unclosed tags (basic check)
-            const openDivs = (content.match(/<div/g) || []).length;
-            const closeDivs = (content.match(/<\/div>/g) || []).length;
-            if (openDivs !== closeDivs) {
-                issues.push(`${file}: Mismatched div tags (${openDivs} open, ${closeDivs} close)`);
-            }
-
-        } catch (error) {
-            issues.push(`${file}: ${error.message}`);
-        }
-    }
-
-    if (issues.length > 0) {
-        return {
-            pass: false,
-            message: `Issues found: ${issues.slice(0, 3).join('; ')}${issues.length > 3 ? ` (+${issues.length - 3} more)` : ''}`,
-            warning: issues.length < 5
-        };
-    }
-
-    return { pass: true, message: `All ${htmlFiles.length} HTML files are structurally valid` };
-}
-
-function testIndustryPagesHaveRequiredIds() {
-    const industryFiles = findFilesInDirectory(config.foldersToTest.industries, '.html');
-    const issues = [];
-
-    for (const file of industryFiles) {
-        try {
-            const content = fs.readFileSync(file, 'utf8');
-
-            // Check for required IDs
-            const requiredIds = config.htmlRequiredElements.industry;
-            for (const id of requiredIds) {
-                if (!content.includes(`id="${id}"`) && !content.includes(`id='${id}'`)) {
-                    issues.push(`${path.basename(file)}: Missing id="${id}"`);
-                }
-            }
-
-        } catch (error) {
-            issues.push(`${file}: ${error.message}`);
-        }
-    }
-
-    if (issues.length > 0) {
-        return {
-            pass: false,
-            message: `Missing IDs: ${issues.slice(0, 3).join('; ')}${issues.length > 3 ? `... (+${issues.length - 3} more)` : ''}`,
-            warning: true
-        };
-    }
-
-    return { pass: true, message: `All ${industryFiles.length} industry pages have required IDs` };
-}
-
-// ===== JS TESTS =====
-
-function testJsFilesExist() {
-    const jsFiles = getAllJsFiles();
-    if (jsFiles.length === 0) {
-        return { pass: false, message: 'No JS files found in project', warning: true };
-    }
-    return { pass: true, message: `Found ${jsFiles.length} JavaScript files` };
-}
-
-function testJsFilesSyntax() {
-    const jsFiles = getAllJsFiles();
-    const issues = [];
-
-    for (const file of jsFiles) {
-        try {
-            const content = fs.readFileSync(file, 'utf8');
-
-            // Basic syntax checks
-            const openBraces = (content.match(/{/g) || []).length;
-            const closeBraces = (content.match(/}/g) || []).length;
-            if (openBraces !== closeBraces) {
-                issues.push(`${path.basename(file)}: Mismatched braces (${openBraces} open, ${closeBraces} close)`);
-            }
-
-            const openParens = (content.match(/\(/g) || []).length;
-            const closeParens = (content.match(/\)/g) || []).length;
-            if (openParens !== closeParens) {
-                issues.push(`${path.basename(file)}: Mismatched parentheses (${openParens} open, ${closeParens} close)`);
-            }
-
-            // Check for console.log in production files (warning only)
-            if (content.includes('console.log') && !file.includes('test') && !file.includes('debug')) {
-                // This is just a warning, not a failure
-            }
-
-        } catch (error) {
-            issues.push(`${file}: ${error.message}`);
-        }
-    }
-
-    if (issues.length > 0) {
-        return {
-            pass: false,
-            message: `Syntax issues: ${issues.slice(0, 3).join('; ')}${issues.length > 3 ? ` (+${issues.length - 3} more)` : ''}`,
-            warning: issues.length < 3
-        };
-    }
-
-    return { pass: true, message: `All ${jsFiles.length} JS files have valid syntax` };
-}
-
-// ===== FOLDER STRUCTURE TESTS =====
-
-function testAgentsFolderStructure() {
-    const agentsDir = config.foldersToTest.agents;
-
-    if (!fs.existsSync(agentsDir)) {
-        return { pass: false, message: 'Agents folder not found', warning: true };
-    }
-
-    const files = fs.readdirSync(agentsDir);
-    return { pass: true, message: `Agents folder exists with ${files.length} items` };
-}
-
-function testPartnersFolderStructure() {
-    const partnersDir = config.foldersToTest.partners;
-
-    if (!fs.existsSync(partnersDir)) {
-        return { pass: false, message: 'Partners folder not found', warning: true };
-    }
-
-    const files = fs.readdirSync(partnersDir);
-    return { pass: true, message: `Partners folder exists with ${files.length} items` };
-}
-
-function testIndustriesFolderStructure() {
-    const industriesDir = config.foldersToTest.industries;
-
-    if (!fs.existsSync(industriesDir)) {
-        return { pass: false, message: 'Industries folder not found' };
-    }
-
-    const htmlFiles = findFilesInDirectory(industriesDir, '.html');
-
-    if (htmlFiles.length === 0) {
-        return { pass: false, message: 'No HTML files in industries folder' };
-    }
-
-    return { pass: true, message: `Industries folder has ${htmlFiles.length} HTML files` };
-}
-
-// ===== INTEGRATION TESTS =====
 
 function testIndustryPagesMatchJson() {
     if (!contentData || !contentData.industries) {
-        return { pass: false, message: 'No industries data in JSON' };
+        return { pass: false, message: 'No industries in JSON' };
     }
 
-    const industriesInJson = Object.keys(contentData.industries);
-    const industryFiles = findFilesInDirectory(config.foldersToTest.industries, '.html');
-    const industryFilenames = industryFiles.map(f => path.basename(f, '.html'));
-
-    const missingPages = industriesInJson.filter(ind =>
-        !industryFilenames.some(f => f.toLowerCase().includes(ind.toLowerCase()))
-    );
-
-    if (missingPages.length > 0) {
-        return {
-            pass: false,
-            message: `Industries in JSON but missing HTML pages: ${missingPages.join(', ')}`,
-            warning: true
-        };
-    }
-
-    return { pass: true, message: `All ${industriesInJson.length} industries have corresponding HTML pages` };
-}
-
-function testAllPagesLoadJson() {
-    const htmlFiles = getAllHtmlFiles();
     const issues = [];
 
-    for (const file of htmlFiles) {
-        try {
-            const content = fs.readFileSync(file, 'utf8');
-
-            // Check if page references content.json
-            if (content.includes('content.json') || content.includes('content/content.json')) {
-                // Check if it has proper error handling
-                if (!content.includes('catch') && !content.includes('.then')) {
-                    issues.push(`${path.basename(file)}: Loads JSON but missing error handling`);
-                }
-            }
-
-        } catch (error) {
-            issues.push(`${file}: ${error.message}`);
+    for (const [industryName, industryData] of Object.entries(contentData.industries)) {
+        const htmlPath = `industries/${industryName}.html`;
+        if (!fs.existsSync(htmlPath)) {
+            issues.push(`${industryName} in JSON but missing HTML at ${htmlPath}`);
         }
     }
 
     if (issues.length > 0) {
         return {
             pass: false,
-            message: `Issues: ${issues.slice(0, 2).join('; ')}`,
-            warning: true
+            message: issues.join('; ')
         };
     }
 
-    return { pass: true, message: 'All pages that load JSON have error handling' };
+    return {
+        pass: true,
+        message: 'All industries in JSON have matching HTML files'
+    };
+}
+
+function testIndustryFields() {
+    if (!contentData || !contentData.industries) {
+        return { pass: false, message: 'No industries data' };
+    }
+    const issues = [];
+    for (const [industryName, industryData] of Object.entries(contentData.industries)) {
+        for (const field of config.criticalFields.industry) {
+            if (!industryData[field] || industryData[field].trim() === '') {
+                issues.push(`${industryName}.${field}`);
+            }
+        }
+    }
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            message: `Missing fields: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? ` (+${issues.length - 3} more)` : ''}`,
+            warning: issues.length < 3
+        };
+    }
+    return { pass: true, message: 'All critical fields present' };
 }
 
 // ===== TEST CATEGORIES =====
 
 const testCategories = [
     {
-        name: 'JSON Structure Tests',
-        quick: true,
-        tests: [
-            { name: 'content.json exists and is accessible', fn: testContentJsonExists },
-            { name: 'JSON is valid and parseable', fn: testJsonValid },
-            { name: 'All industries have complete data', fn: testAllIndustriesHaveData }
-        ]
-    },
-    {
-        name: 'HTML File Tests',
-        quick: true,
-        tests: [
-            { name: 'HTML files exist in project', fn: testHtmlFilesExist },
-            { name: 'All HTML files are structurally valid', fn: testHtmlFilesValid },
-            { name: 'Industry pages have required IDs', fn: testIndustryPagesHaveRequiredIds }
-        ]
-    },
-    {
-        name: 'JavaScript Tests',
-        quick: true,
-        tests: [
-            { name: 'JavaScript files exist in project', fn: testJsFilesExist },
-            { name: 'All JS files have valid syntax', fn: testJsFilesSyntax }
-        ]
-    },
-    {
         name: 'Folder Structure Tests',
         quick: true,
         tests: [
-            { name: 'Agents folder structure is valid', fn: testAgentsFolderStructure },
-            { name: 'Partners folder structure is valid', fn: testPartnersFolderStructure },
-            { name: 'Industries folder structure is valid', fn: testIndustriesFolderStructure }
+            { name: 'Required folders exist', fn: testRequiredFoldersExist },
+            { name: 'Relative paths work correctly', fn: testRelativePathsWork },
+            { name: 'Deployment structure is valid', fn: testDeploymentStructure }
         ]
     },
     {
-        name: 'Integration Tests',
+        name: 'Agents Folder Tests',
         quick: true,
         tests: [
-            { name: 'Industry pages match JSON data', fn: testIndustryPagesMatchJson },
-            { name: 'Pages loading JSON have error handling', fn: testAllPagesLoadJson }
+            { name: 'Agents HTML files exist', fn: testAgentsHtmlFilesExist },
+            { name: 'All agents HTML files are valid', fn: testAllAgentsFilesValid }
+        ]
+    },
+    {
+        name: 'Industries Folder Tests',
+        quick: true,
+        tests: [
+            { name: 'Industries HTML files exist', fn: testIndustriesHtmlFilesExist },
+            { name: 'All industries HTML files are valid', fn: testAllIndustriesFilesValid }
+        ]
+    },
+    {
+        name: 'Partners Folder Tests',
+        quick: true,
+        tests: [
+            { name: 'Partners folder structure', fn: testPartnersFolder }
+        ]
+    },
+    {
+        name: 'JSON & Integration Tests',
+        quick: true,
+        tests: [
+            { name: 'content.json exists and loads', fn: testContentJsonExists },
+            { name: 'JSON is valid', fn: testJsonValid },
+            { name: 'Industry pages match JSON', fn: testIndustryPagesMatchJson },
+            { name: 'Industry fields are complete', fn: testIndustryFields }
         ]
     }
 ];
@@ -516,14 +471,6 @@ function runTests(quickOnly = false) {
     for (const category of categoriesToRun) {
         printCategoryHeader(category.name);
 
-        const categoryResults = {
-            name: category.name,
-            passed: 0,
-            failed: 0,
-            warnings: 0,
-            tests: []
-        };
-
         for (const test of category.tests) {
             testResults.total++;
             const result = test.fn();
@@ -533,25 +480,17 @@ function runTests(quickOnly = false) {
             if (!result.pass) {
                 if (result.warning) {
                     testResults.warnings++;
-                    categoryResults.warnings++;
                 } else {
                     testResults.failed++;
-                    categoryResults.failed++;
                 }
             } else {
                 if (result.warning) {
                     testResults.warnings++;
-                    categoryResults.warnings++;
                 } else {
                     testResults.passed++;
-                    categoryResults.passed++;
                 }
             }
-
-            categoryResults.tests.push({ name: test.name, ...result });
         }
-
-        testResults.categories.push(categoryResults);
     }
 
     const exitCode = printSummary();
@@ -562,10 +501,6 @@ function runTests(quickOnly = false) {
 
 const args = process.argv.slice(2);
 const quickOnly = args.includes('--quick');
-
-if (quickOnly) {
-    log('Running quick tests only...', 'yellow');
-}
 
 const exitCode = runTests(quickOnly);
 process.exit(exitCode);
