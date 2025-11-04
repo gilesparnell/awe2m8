@@ -36,15 +36,30 @@
             </div>
         </div>
 
-        <div class="column-box">
-            <div class="cta-in-column">
-                <div class="cta-emoji" id="cta-emoji">🎙️</div>
-                <h2 id="cta-title">Talk to Our AI</h2>
+        <div class="column-box" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Chat AI Section -->
+            <div class="cta-in-column" style="flex: 1;">
+                <div class="cta-emoji" id="cta-emoji">💬</div>
+                <h2 id="cta-title">Chat AI</h2>
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
                     <iframe id="demo-iframe" src="" allow="microphone"
                         style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
                 </div>
-                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">Loading...</p>
+                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">Chat with our database
+                    reactivation AI</p>
+            </div>
+
+            <!-- SMS Demo Section -->
+            <div
+                style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 2.5em; margin-bottom: 15px;">📱</div>
+                <h2 style="margin: 0 0 15px 0; font-size: 1.5em;">SMS Demo</h2>
+                <p style="margin: 0 0 20px 0; font-size: 0.9em; opacity: 0.8;">See how AI reactivates your database via
+                    text</p>
+                <a href="#" id="sms-demo-link" target="_blank" rel="noopener noreferrer"
+                    style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                    Start Text Conversation →
+                </a>
             </div>
         </div>
     </div>
