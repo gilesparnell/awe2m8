@@ -36,17 +36,19 @@
             </div>
         </div>
 
+        <!-- Column 3: Voice AI + SMS Demo (Stacked) - Like Fire Safety -->
         <div class="column-box" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Chat AI Section -->
+            <!-- Voice AI Section -->
             <div class="cta-in-column" style="flex: 1;">
-                <div class="cta-emoji" id="cta-emoji">💬</div>
-                <h2 id="cta-title">Chat AI</h2>
+                <div class="cta-emoji" id="cta-emoji">🎙️</div>
+                <h2 id="cta-title">Talk to Our AI</h2>
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
                     <iframe id="demo-iframe" src="" allow="microphone"
                         style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
                 </div>
-                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">Chat with our database
-                    reactivation AI</p>
+                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">
+                    Talk to our database reactivation AI
+                </p>
             </div>
 
             <!-- SMS Demo Section -->
@@ -91,15 +93,15 @@
                 document.getElementById('cta-title').textContent = content.ctaButtonText;
                 document.getElementById('cta-description').textContent = content.ctaDescription;
 
-                // Load iframe URL for voice/chat AI
+                // Load Voice AI iframe
                 if (content.iframeUrl && content.iframeUrl.trim() !== '') {
                     document.getElementById('demo-iframe').src = content.iframeUrl;
                 } else {
-                    // Hide iframe section if no URL
+                    // Hide Voice AI section if no URL
                     document.querySelector('.cta-in-column').style.display = 'none';
                 }
 
-                // ✅ FIX: Load SMS demo URL
+                // Load SMS demo URL
                 if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
                     document.getElementById('sms-demo-link').href = content.smsAgentDemoUrl;
                 } else {
