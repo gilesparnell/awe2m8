@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 AWE2M8 Content Editor v2.1 DEBUG</title>
+    <title>🎨 AWE2M8 Content Editor v2</title>
     <style>
         body {
             background: linear-gradient(135deg, #0a2e1f 0%, #051510 100%);
@@ -28,17 +28,6 @@
             color: #00ff00;
             font-size: 2.5em;
             margin-bottom: 10px;
-        }
-
-        .version-badge {
-            display: inline-block;
-            background: #ff00ff;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin-left: 10px;
         }
 
         .editor-header p {
@@ -119,29 +108,6 @@
             font-family: monospace;
             font-size: 0.9em;
             opacity: 0.8;
-        }
-
-        .debug-panel {
-            background: rgba(255, 0, 255, 0.1);
-            border: 2px solid #ff00ff;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            color: #ff00ff;
-        }
-
-        .debug-panel h3 {
-            margin-top: 0;
-            color: #ff00ff;
-        }
-
-        .debug-panel pre {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
-            color: #00ff00;
-            font-size: 0.9em;
         }
 
         .editor-grid {
@@ -272,8 +238,8 @@
 <body>
     <div class="editor-container">
         <div class="editor-header">
-            <h1>🎨 AWE2M8 Content Editor <span class="version-badge">v2.1 DEBUG</span></h1>
-            <p>⚠️ DEBUG VERSION - Shows what's being saved</p>
+            <h1>🎨 AWE2M8 Content Editor v2</h1>
+            <p>Edit content for demo pages and industry-specific pages</p>
             <button class="file-connect-btn" onclick="connectToFile()">
                 📁 Connect to Project File
             </button>
@@ -283,12 +249,41 @@
             </div>
         </div>
 
-        <div class="debug-panel" id="debug-panel" style="display: none;">
-            <h3>🐛 DEBUG: Last Save Operation</h3>
-            <pre id="debug-output">No save operations yet...</pre>
-        </div>
-
         <div class="editor-grid">
+            <!-- Demo Pages Section -->
+            <div class="editor-section">
+                <h2 class="section-title">Demo Pages:</h2>
+                <select class="page-selector" id="demo-selector" onchange="loadDemoPage(this.value)">
+                    <option value="">-- Choose a demo --</option>
+                    <option value="voiceAI">🎙️ Voice AI</option>
+                    <option value="aiReceptionist">📞 AI Receptionist</option>
+                    <option value="reviewsAI">⭐ Reviews AI</option>
+                    <option value="databaseReactivation">💬 Database Reactivation</option>
+                    <option value="documentCollection">📄 Document Collection</option>
+                    <option value="ecommerce">🛒 E-commerce</option>
+                    <option value="outOfHours">🌙 Out of Hours</option>
+                    <option value="speedToLead">⚡ Speed to Lead</option>
+                </select>
+
+                <div id="demo-editor" class="editor-form">
+                    <!-- Form fields will be populated here -->
+                </div>
+            </div>
+
+            <!-- Industry Pages Section -->
+            <div class="editor-section">
+                <h2 class="section-title">Industry Pages:</h2>
+                <select class="page-selector" id="industry-selector" onchange="loadIndustryPage(this.value)">
+                    <option value="">-- Choose an industry --</option>
+                    <option value="gyms">💪 Gyms & Fitness</option>
+                    <option value="fireSafety">🚒 Fire Safety</option>
+                </select>
+
+                <div id="industry-editor" class="editor-form">
+                    <!-- Form fields will be populated here -->
+                </div>
+            </div>
+
             <!-- Partner Pages Section -->
             <div class="editor-section">
                 <h2 class="section-title">Partner Pages:</h2>
@@ -307,18 +302,19 @@
 
     <script>
         let contentData = {};
-        let fileHandle = null;
+        let fileHandle = null; // Store the file handle for saving
 
-        console.log('🐛 DEBUG VERSION LOADED - v2.1');
-
+        // Connect to content.json file using File System Access API
         async function connectToFile() {
             try {
+                // Check if File System Access API is supported
                 if (!window.showOpenFilePicker) {
                     alert('⚠️ Your browser doesn\'t support direct file saving. Files will download to your Downloads folder.');
                     updateFileStatus(false);
                     return;
                 }
 
+                // Let user pick the content.json file
                 [fileHandle] = await window.showOpenFilePicker({
                     types: [{
                         description: 'JSON Files',
@@ -327,20 +323,21 @@
                     multiple: false
                 });
 
+                // Read the file
                 const file = await fileHandle.getFile();
                 const text = await file.text();
                 contentData = JSON.parse(text);
 
-                console.log('🐛 Loaded content.json:', contentData);
                 updateFileStatus(true, file.name);
             } catch (error) {
                 console.error('Error loading content:', error);
-                if (error.name !== 'AbortError') {
+                if (error.name !== 'AbortError') { // Don't show error if user cancelled
                     updateFileStatus(false);
                 }
             }
         }
 
+        // Update the file status indicator
         function updateFileStatus(isConnected, fileName = null) {
             const statusDiv = document.getElementById('file-status');
             const indicator = statusDiv.querySelector('.status-indicator');
@@ -349,22 +346,139 @@
             if (isConnected && fileName) {
                 statusDiv.className = 'file-status connected';
                 indicator.className = 'status-indicator connected';
-                textSpan.innerHTML = `Connected to: <span class="file-path">${fileName}</span>`;
+                textSpan.innerHTML = `Connected to: <span class="file-path">${fileName}</span> - Saving directly to disk`;
             } else {
                 statusDiv.className = 'file-status disconnected';
                 indicator.className = 'status-indicator disconnected';
-                textSpan.textContent = 'Not connected - Will download to Downloads folder';
+                textSpan.textContent = 'Not connected - Changes will download to Downloads folder';
             }
         }
 
+        // Load demo page content
+        function loadDemoPage(pageKey) {
+            if (!pageKey || !contentData[pageKey]) return;
+
+            const content = contentData[pageKey];
+            const editorDiv = document.getElementById('demo-editor');
+            editorDiv.classList.add('active');
+
+            editorDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Page Title</label>
+                    <input type="text" id="demo-title" value="${content.title || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Emoji</label>
+                    <input type="text" id="demo-emoji" value="${content.emoji || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Hero Description</label>
+                    <textarea id="demo-hero">${content.heroDescription || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>How It Works</label>
+                    <textarea id="demo-how">${content.howItWorks || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Why It Matters</label>
+                    <textarea id="demo-why">${content.whyItMatters || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>CTA Button Text</label>
+                    <input type="text" id="demo-cta-text" value="${content.ctaButtonText || ''}">
+                </div>
+                <div class="form-group">
+                    <label>CTA Description</label>
+                    <textarea id="demo-cta-desc">${content.ctaDescription || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Iframe URL (Voice Orb)</label>
+                    <input type="text" id="demo-iframe" value="${content.iframeUrl || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Demo URL (SMS/Link)</label>
+                    <input type="text" id="demo-url" value="${content.demoUrl || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Video URL</label>
+                    <input type="text" id="demo-video" value="${content.videoUrl || ''}">
+                </div>
+                <button class="save-btn" onclick="saveDemoContent('${pageKey}')">💾 Save Changes</button>
+                <div class="success-message" id="demo-success">✅ Changes saved successfully!</div>
+            `;
+        }
+
+        // Load industry page content
+        function loadIndustryPage(pageKey) {
+            if (!pageKey || !contentData.industries || !contentData.industries[pageKey]) return;
+
+            const content = contentData.industries[pageKey];
+            const editorDiv = document.getElementById('industry-editor');
+            editorDiv.classList.add('active');
+
+            editorDiv.innerHTML = `
+                <div class="form-group">
+                    <label>Page Title</label>
+                    <input type="text" id="ind-page-title" value="${content.pageTitle || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Hero Title</label>
+                    <input type="text" id="ind-hero-title" value="${content.heroTitle || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Hero Subtitle</label>
+                    <textarea id="ind-hero-subtitle">${content.heroSubtitle || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Solution 1 Title</label>
+                    <input type="text" id="ind-sol1-title" value="${content.solution1Title || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Solution 1 Description</label>
+                    <textarea id="ind-sol1-desc">${content.solution1Description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>SMS Agent Demo URL</label>
+                    <input type="text" id="ind-sms-url" value="${content.smsAgentDemoUrl || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Database Reactivation Orb URL</label>
+                    <input type="text" id="ind-db-orb" value="${content.databaseReactivationOrbUrl || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Solution 2 Title</label>
+                    <input type="text" id="ind-sol2-title" value="${content.solution2Title || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Solution 2 Description</label>
+                    <textarea id="ind-sol2-desc">${content.solution2Description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Voice AI Orb URL</label>
+                    <input type="text" id="ind-voice-orb" value="${content.voiceAIOrbUrl || ''}">
+                </div>
+                ${pageKey === 'fireSafety' ? `
+                <div class="form-group">
+                    <label>Solution 3 Title</label>
+                    <input type="text" id="ind-sol3-title" value="${content.solution3Title || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Solution 3 Description</label>
+                    <textarea id="ind-sol3-desc">${content.solution3Description || ''}</textarea>
+                </div>
+                ` : ''}
+                <button class="save-btn" onclick="saveIndustryContent('${pageKey}')">💾 Save Changes</button>
+                <div class="success-message" id="industry-success">✅ Changes saved successfully!</div>
+            `;
+        }
+
+        // Load partner page content
         function loadPartnerPage(pageKey) {
             if (!pageKey || !contentData.partners || !contentData.partners[pageKey]) return;
 
             const content = contentData.partners[pageKey];
             const editorDiv = document.getElementById('partner-editor');
             editorDiv.classList.add('active');
-
-            console.log('🐛 Loading partner page:', pageKey, content);
 
             editorDiv.innerHTML = `
                 <div class="form-group">
@@ -404,31 +518,65 @@
                     <input type="text" id="part-iframe" value="${content.iframeUrl || ''}">
                 </div>
                  <div class="form-group">
-                    <label>📱 SMS Agent Demo URL (DEBUG: Check this field!)</label>
-                    <input type="text" id="part-sms-url" value="${content.smsAgentDemoUrl || ''}" 
-                           style="border: 3px solid #ff00ff !important;">
+                    <label>SMS Agent Demo URL</label>
+                    <input type="text" id="part-sms-url" value="${content.smsAgentDemoUrl || ''}">
                 </div>
                 <div class="form-group">
                     <label>Video URL</label>
                     <input type="text" id="part-video" value="${content.videoUrl || ''}">
                 </div>
-                <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes (DEBUG MODE)</button>
+                <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes</button>
                 <div class="success-message" id="partner-success">✅ Changes saved successfully!</div>
+                
             `;
         }
 
+        // Save functions
+        function saveDemoContent(pageKey) {
+            contentData[pageKey] = {
+                title: document.getElementById('demo-title').value,
+                emoji: document.getElementById('demo-emoji').value,
+                heroDescription: document.getElementById('demo-hero').value,
+                howItWorks: document.getElementById('demo-how').value,
+                whyItMatters: document.getElementById('demo-why').value,
+                ctaButtonText: document.getElementById('demo-cta-text').value,
+                ctaDescription: document.getElementById('demo-cta-desc').value,
+                iframeUrl: document.getElementById('demo-iframe').value,
+                demoUrl: document.getElementById('demo-url').value,
+                videoUrl: document.getElementById('demo-video').value
+            };
+
+            showSuccessMessage('demo-success');
+            downloadJSON();
+        }
+
+        function saveIndustryContent(pageKey) {
+            const updates = {
+                pageTitle: document.getElementById('ind-page-title').value,
+                heroTitle: document.getElementById('ind-hero-title').value,
+                heroSubtitle: document.getElementById('ind-hero-subtitle').value,
+                solution1Title: document.getElementById('ind-sol1-title').value,
+                solution1Description: document.getElementById('ind-sol1-desc').value,
+                smsAgentDemoUrl: document.getElementById('ind-sms-url').value,
+                databaseReactivationOrbUrl: document.getElementById('ind-db-orb').value,
+                solution2Title: document.getElementById('ind-sol2-title').value,
+                solution2Description: document.getElementById('ind-sol2-desc').value,
+                voiceAIOrbUrl: document.getElementById('ind-voice-orb').value
+            };
+
+            if (pageKey === 'fireSafety') {
+                updates.solution3Title = document.getElementById('ind-sol3-title').value;
+                updates.solution3Description = document.getElementById('ind-sol3-desc').value;
+            }
+
+            contentData.industries[pageKey] = { ...contentData.industries[pageKey], ...updates };
+
+            showSuccessMessage('industry-success');
+            downloadJSON();
+        }
+
         function savePartnerContent(pageKey) {
-            console.log('🐛 savePartnerContent called for:', pageKey);
-
-            // Get the SMS URL value
-            const smsUrlElement = document.getElementById('part-sms-url');
-            const smsUrlValue = smsUrlElement ? smsUrlElement.value : 'ELEMENT NOT FOUND!';
-
-            console.log('🐛 SMS URL element:', smsUrlElement);
-            console.log('🐛 SMS URL value:', smsUrlValue);
-
-            // Build the save object
-            const saveData = {
+            contentData.partners[pageKey] = {
                 pageTitle: document.getElementById('part-page-title').value,
                 title: document.getElementById('part-title').value,
                 emoji: document.getElementById('part-emoji').value,
@@ -438,25 +586,9 @@
                 ctaButtonText: document.getElementById('part-cta-text').value,
                 ctaDescription: document.getElementById('part-cta-desc').value,
                 iframeUrl: document.getElementById('part-iframe').value,
-                smsAgentDemoUrl: smsUrlValue,
+                smsAgentDemoUrl: document.getElementById('part-sms-url').value,
                 videoUrl: document.getElementById('part-video').value
             };
-
-            console.log('🐛 Data to save:', saveData);
-
-            // Update contentData
-            contentData.partners[pageKey] = saveData;
-
-            console.log('🐛 Updated contentData.partners[' + pageKey + ']:', contentData.partners[pageKey]);
-
-            // Show debug panel
-            const debugPanel = document.getElementById('debug-panel');
-            const debugOutput = document.getElementById('debug-output');
-            debugPanel.style.display = 'block';
-            debugOutput.textContent = JSON.stringify(saveData, null, 2);
-
-            // Alert with SMS URL
-            alert(`🐛 DEBUG INFO:\n\nSMS URL Found: ${smsUrlValue}\n\nCheck console (F12) for full details.`);
 
             showSuccessMessage('partner-success');
             downloadJSON();
@@ -473,15 +605,13 @@
         async function downloadJSON() {
             const dataStr = JSON.stringify(contentData, null, 2);
 
-            console.log('🐛 Full JSON being saved:', dataStr);
-
+            // If we have a file handle, save directly to the file
             if (fileHandle) {
                 try {
                     const writable = await fileHandle.createWritable();
                     await writable.write(dataStr);
                     await writable.close();
                     console.log('✅ File saved successfully to disk!');
-                    alert('✅ File saved! Check the downloaded JSON for smsAgentDemoUrl');
                     return;
                 } catch (error) {
                     console.error('Error saving file:', error);
@@ -489,6 +619,7 @@
                 }
             }
 
+            // Fallback: download to Downloads folder
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const exportFileDefaultName = 'content.json';
 
