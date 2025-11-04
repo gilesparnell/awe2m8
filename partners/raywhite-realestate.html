@@ -21,11 +21,13 @@
     </div>
 
     <div class="three-column-grid">
+        <!-- Column 1: How It Works -->
         <div class="column-box">
             <h3>How It Works</h3>
             <p id="how-it-works">Loading...</p>
         </div>
 
+        <!-- Column 2: Video -->
         <div class="column-box">
             <h2>Watch It In Action</h2>
             <div class="video-in-column" id="video-container">
@@ -36,31 +38,32 @@
             </div>
         </div>
 
-        <!-- Column 3: Voice AI + SMS Demo (Stacked) - Like Fire Safety -->
-        <div class="column-box" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Voice AI Section -->
-            <div class="cta-in-column" style="flex: 1;">
-                <div class="cta-emoji" id="cta-emoji">🎙️</div>
-                <h2 id="cta-title">Talk to Our AI</h2>
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 20px 0;">
-                    <iframe id="demo-iframe" src="" allow="microphone"
-                        style="width: 100%; max-width: 300px; height: 200px; border: none;"></iframe>
-                </div>
-                <p id="cta-description" style="margin: 0; font-size: 0.9em; opacity: 0.8;">
+        <!-- Column 3: Compact Voice AI + SMS Demo -->
+        <div class="column-box" style="display: flex; flex-direction: column; gap: 15px; padding: 20px;">
+
+            <!-- Voice AI Section - Compact -->
+            <div
+                style="flex: 1; display: flex; flex-direction: column; padding-bottom: 15px; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="margin: 0 0 10px 0; font-size: 1.1em; color: #fff;">🎙️ Voice AI</h3>
+                <p id="cta-description" style="margin: 0 0 12px 0; font-size: 0.85em; opacity: 0.7; line-height: 1.4;">
                     Talk to our database reactivation AI
                 </p>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                    <iframe id="demo-iframe" src="" allow="microphone"
+                        style="width: 100%; max-width: 280px; height: 160px; border: none; border-radius: 8px;">
+                    </iframe>
+                </div>
             </div>
 
-            <!-- SMS Demo Section -->
-            <div
-                style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 2.5em; margin-bottom: 15px;">📱</div>
-                <h2 style="margin: 0 0 15px 0; font-size: 1.5em;">SMS Demo</h2>
-                <p style="margin: 0 0 20px 0; font-size: 0.9em; opacity: 0.8;">See how AI reactivates your database via
-                    text</p>
+            <!-- SMS Demo Section - Compact -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center;">
+                <h3 style="margin: 0 0 8px 0; font-size: 1.1em; color: #fff;">📱 SMS Demo</h3>
+                <p style="margin: 0 0 15px 0; font-size: 0.85em; opacity: 0.7; line-height: 1.4;">
+                    See how AI reactivates your database
+                </p>
                 <a href="#" id="sms-demo-link" target="_blank" rel="noopener noreferrer"
-                    style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                    Start Text Conversation →
+                    style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9em; transition: transform 0.2s;">
+                    Start Conversation →
                 </a>
             </div>
         </div>
@@ -89,24 +92,21 @@
                 document.getElementById('hero-description').textContent = content.heroDescription;
                 document.getElementById('how-it-works').textContent = content.howItWorks;
                 document.getElementById('why-it-matters').innerHTML = content.whyItMatters;
-                document.getElementById('cta-emoji').textContent = content.emoji;
-                document.getElementById('cta-title').textContent = content.ctaButtonText;
-                document.getElementById('cta-description').textContent = content.ctaDescription;
+                document.getElementById('cta-description').textContent = content.ctaDescription || 'Talk to our database reactivation AI';
 
                 // Load Voice AI iframe
+                const voiceIframe = document.getElementById('demo-iframe');
                 if (content.iframeUrl && content.iframeUrl.trim() !== '') {
-                    document.getElementById('demo-iframe').src = content.iframeUrl;
+                    voiceIframe.src = content.iframeUrl;
                 } else {
-                    // Hide Voice AI section if no URL
-                    document.querySelector('.cta-in-column').style.display = 'none';
+                    voiceIframe.parentElement.innerHTML = '<div style="color: #ff6b6b; padding: 20px; text-align: center; font-size: 0.9em;">Voice AI URL not configured</div>';
                 }
 
                 // Load SMS demo URL
+                const smsLink = document.getElementById('sms-demo-link');
                 if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
-                    document.getElementById('sms-demo-link').href = content.smsAgentDemoUrl;
+                    smsLink.href = content.smsAgentDemoUrl;
                 } else {
-                    // Disable link if no URL
-                    const smsLink = document.getElementById('sms-demo-link');
                     smsLink.href = '#';
                     smsLink.style.opacity = '0.5';
                     smsLink.style.cursor = 'not-allowed';
@@ -122,6 +122,7 @@
                         <iframe 
                             src="${content.videoUrl}" 
                             allow="autoplay"
+                            style="width: 100%; height: 100%; border: none; border-radius: 16px;"
                         ></iframe>
                     `;
                 }
@@ -142,7 +143,8 @@
                     if (result.state === 'granted') {
                         console.log('Microphone access granted');
                     }
-                });
+                })
+                .catch(err => console.log('Microphone permission check unavailable'));
         });
     </script>
 </body>
