@@ -517,12 +517,17 @@
                     <label>Iframe URL (Voice Orb)</label>
                     <input type="text" id="part-iframe" value="${content.iframeUrl || ''}">
                 </div>
+                 <div class="form-group">
+                    <label>SMS Agent Demo URL</label>
+                    <input type="text" id="part-sms-url" value="${content.smsAgentDemoUrl || ''}">
+                </div>
                 <div class="form-group">
                     <label>Video URL</label>
                     <input type="text" id="part-video" value="${content.videoUrl || ''}">
                 </div>
                 <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes</button>
                 <div class="success-message" id="partner-success">✅ Changes saved successfully!</div>
+                
             `;
         }
 
