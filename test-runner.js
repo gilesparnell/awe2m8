@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * AWE2M8 Test Suite - Final Comprehensive Version
+ * AWE2M8 Test Suite - Updated with Partners Support
  * Tests ALL HTML files in agents/, industries/, partners/
  * Usage: node test-runner.js [--quick]
  */
@@ -25,9 +25,11 @@ const config = {
     contentJsonPath: './content/content.json',
     requiredIndustries: ['fireSafety', 'gyms'],
     requiredDemos: ['voiceAI', 'aiReceptionist', 'databaseReactivation'],
+    requiredPartners: ['rayWhiteUpperNorthShore'], // NEW: Required partner pages
     criticalFields: {
         industry: ['pageTitle', 'heroTitle', 'heroSubtitle', 'solution1Title', 'smsAgentDemoUrl'],
-        demo: ['title', 'emoji', 'heroDescription']
+        demo: ['title', 'emoji', 'heroDescription'],
+        partner: ['title', 'emoji', 'heroDescription', 'pageTitle'] // NEW: Partner required fields
     },
     // Folders to validate
     requiredFolders: ['content', 'industries', 'agents'],
@@ -36,6 +38,10 @@ const config = {
     expectedFiles: {
         'content/content.json': 'Content JSON file',
         'content-editor.html': 'Content editor'
+    },
+    // Partner HTML file mappings
+    partnerHtmlFiles: {
+        'rayWhiteUpperNorthShore': 'partners/raywhite-realestate.html'
     }
 };
 
@@ -59,6 +65,7 @@ function printHeader() {
     log('════════════════════════════════════════════════', 'cyan');
     log('       🧪 AWE2M8 Test Suite - CLI Version       ', 'bright');
     log('    📁 Testing ALL HTML Files in All Folders    ', 'cyan');
+    log('       ✨ Now with Partners Support! ✨         ', 'cyan');
     log('════════════════════════════════════════════════', 'cyan');
     console.log('');
 }
@@ -241,22 +248,189 @@ function testAllIndustriesFilesValid() {
     };
 }
 
+// ===== NEW PARTNER TESTS =====
+
 function testPartnersFolder() {
     if (!fs.existsSync('partners')) {
         return {
-            pass: true,
-            warning: true,
-            message: 'Partners folder does not exist (optional)'
+            pass: false,
+            message: 'Partners folder does not exist - create it to add partner pages'
         };
     }
 
     const htmlFiles = fs.readdirSync('partners').filter(f => f.endsWith('.html'));
 
+    if (htmlFiles.length === 0) {
+        return {
+            pass: false,
+            warning: true,
+            message: 'Partners folder exists but contains no HTML files'
+        };
+    }
+
     return {
         pass: true,
-        message: `Partners folder exists with ${htmlFiles.length} HTML files`
+        message: `Partners folder exists with ${htmlFiles.length} HTML file(s)`
     };
 }
+
+function testPartnersHtmlFilesValid() {
+    if (!fs.existsSync('partners')) {
+        return { pass: false, message: 'Partners folder missing' };
+    }
+
+    const htmlFiles = fs.readdirSync('partners').filter(f => f.endsWith('.html'));
+
+    if (htmlFiles.length === 0) {
+        return {
+            pass: false,
+            warning: true,
+            message: 'No HTML files in partners folder'
+        };
+    }
+
+    const issues = [];
+    let validFiles = 0;
+
+    for (const file of htmlFiles) {
+        const filePath = path.join('partners', file);
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+
+            if (!content.includes('<!DOCTYPE') && !content.includes('<html')) {
+                issues.push(`${file}: Missing DOCTYPE or html tag`);
+            } else if (content.length < 50) {
+                issues.push(`${file}: File too short`);
+            } else {
+                validFiles++;
+            }
+
+        } catch (error) {
+            issues.push(`${file}: Cannot read`);
+        }
+    }
+
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            warning: validFiles > 0,
+            message: `${issues.length}/${htmlFiles.length} partner files have issues`
+        };
+    }
+
+    return {
+        pass: true,
+        message: `All ${validFiles} partner HTML file(s) are valid`
+    };
+}
+
+function testRayWhitePageExists() {
+    const expectedPath = config.partnerHtmlFiles.rayWhiteUpperNorthShore;
+
+    if (!fs.existsSync(expectedPath)) {
+        return {
+            pass: false,
+            message: `Ray White page not found at: ${expectedPath}`
+        };
+    }
+
+    try {
+        const content = fs.readFileSync(expectedPath, 'utf8');
+
+        if (content.length < 100) {
+            return {
+                pass: false,
+                warning: true,
+                message: 'Ray White HTML file exists but appears incomplete'
+            };
+        }
+
+        return {
+            pass: true,
+            message: `Ray White page exists at ${expectedPath}`
+        };
+    } catch (error) {
+        return {
+            pass: false,
+            message: `Cannot read Ray White page: ${error.message}`
+        };
+    }
+}
+
+function testPartnersInContentJson() {
+    if (!contentData) {
+        return { pass: false, message: 'No JSON data loaded' };
+    }
+
+    if (!contentData.partners) {
+        return {
+            pass: false,
+            message: 'Partners section missing from content.json'
+        };
+    }
+
+    if (typeof contentData.partners !== 'object') {
+        return {
+            pass: false,
+            message: 'Partners section exists but is not an object'
+        };
+    }
+
+    const partnerCount = Object.keys(contentData.partners).length;
+    return {
+        pass: true,
+        message: `Partners section exists with ${partnerCount} partner(s)`
+    };
+}
+
+function testRayWhiteInContentJson() {
+    if (!contentData || !contentData.partners) {
+        return { pass: false, message: 'No partners data in JSON' };
+    }
+
+    if (!contentData.partners.rayWhiteUpperNorthShore) {
+        return {
+            pass: false,
+            message: 'rayWhiteUpperNorthShore missing from content.json partners section'
+        };
+    }
+
+    return {
+        pass: true,
+        message: 'Ray White entry exists in content.json'
+    };
+}
+
+function testPartnerFields() {
+    if (!contentData || !contentData.partners) {
+        return { pass: false, message: 'No partners data' };
+    }
+
+    const issues = [];
+
+    for (const [partnerName, partnerData] of Object.entries(contentData.partners)) {
+        for (const field of config.criticalFields.partner) {
+            if (!partnerData[field] || partnerData[field].trim() === '') {
+                issues.push(`${partnerName}.${field}`);
+            }
+        }
+    }
+
+    if (issues.length > 0) {
+        return {
+            pass: false,
+            message: `Missing/empty partner fields: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? ` (+${issues.length - 3} more)` : ''}`,
+            warning: issues.length < 3
+        };
+    }
+
+    return {
+        pass: true,
+        message: `All ${Object.keys(contentData.partners).length} partner(s) have required fields`
+    };
+}
+
+// ===== EXISTING TESTS =====
 
 function testRequiredFoldersExist() {
     const missing = [];
@@ -441,10 +615,12 @@ const testCategories = [
         ]
     },
     {
-        name: 'Partners Folder Tests',
+        name: 'Partners Folder Tests (NEW)',
         quick: true,
         tests: [
-            { name: 'Partners folder structure', fn: testPartnersFolder }
+            { name: 'Partners folder exists', fn: testPartnersFolder },
+            { name: 'All partner HTML files are valid', fn: testPartnersHtmlFilesValid },
+            { name: 'Ray White page exists', fn: testRayWhitePageExists }
         ]
     },
     {
@@ -453,6 +629,9 @@ const testCategories = [
         tests: [
             { name: 'content.json exists and loads', fn: testContentJsonExists },
             { name: 'JSON is valid', fn: testJsonValid },
+            { name: 'Partners section exists in JSON', fn: testPartnersInContentJson },
+            { name: 'Ray White in content.json', fn: testRayWhiteInContentJson },
+            { name: 'Partner fields are complete', fn: testPartnerFields },
             { name: 'Industry pages match JSON', fn: testIndustryPagesMatchJson },
             { name: 'Industry fields are complete', fn: testIndustryFields }
         ]
