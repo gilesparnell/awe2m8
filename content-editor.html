@@ -5,12 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎨 AWE2M8 Content Editor v2</title>
-    <link rel="stylesheet" href="/css/demo-styles.css">
     <style>
         body {
             background: linear-gradient(135deg, #0a2e1f 0%, #051510 100%);
             min-height: 100vh;
             padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
         }
 
         .editor-container {
@@ -44,11 +45,69 @@
             text-decoration: none;
             margin: 20px 0;
             transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
         }
 
         .file-connect-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+        }
+
+        .file-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            margin-top: 15px;
+        }
+
+        .file-status.connected {
+            background: rgba(0, 255, 0, 0.15);
+            border: 2px solid rgba(0, 255, 0, 0.4);
+            color: #00ff00;
+        }
+
+        .file-status.disconnected {
+            background: rgba(255, 165, 0, 0.15);
+            border: 2px solid rgba(255, 165, 0, 0.4);
+            color: #ffa500;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #00ff00;
+        }
+
+        .status-indicator.disconnected {
+            background: #ffa500;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .file-path {
+            font-family: monospace;
+            font-size: 0.9em;
+            opacity: 0.8;
         }
 
         .editor-grid {
@@ -128,6 +187,7 @@
             color: white;
             font-size: 1em;
             font-family: inherit;
+            box-sizing: border-box;
         }
 
         .form-group textarea {
@@ -183,6 +243,10 @@
             <button class="file-connect-btn" onclick="connectToFile()">
                 📁 Connect to Project File
             </button>
+            <div id="file-status" class="file-status disconnected">
+                <span class="status-indicator disconnected"></span>
+                <span>Not connected - Changes will download to Downloads folder</span>
+            </div>
         </div>
 
         <div class="editor-grid">
@@ -220,7 +284,7 @@
                 </div>
             </div>
 
-            <!-- Partner Pages Section (NEW) -->
+            <!-- Partner Pages Section -->
             <div class="editor-section">
                 <h2 class="section-title">Partner Pages:</h2>
                 <select class="page-selector" id="partner-selector" onchange="loadPartnerPage(this.value)">
@@ -238,19 +302,56 @@
 
     <script>
         let contentData = {};
+        let fileHandle = null; // Store the file handle for saving
 
-        // Connect to content.json file
-        function connectToFile() {
-            fetch('/content/content.json')
-                .then(response => response.json())
-                .then(data => {
-                    contentData = data;
-                    alert('✅ Connected to content.json successfully!');
-                })
-                .catch(error => {
-                    console.error('Error loading content:', error);
-                    alert('❌ Could not connect to content.json. Make sure the file exists in /content/content.json');
+        // Connect to content.json file using File System Access API
+        async function connectToFile() {
+            try {
+                // Check if File System Access API is supported
+                if (!window.showOpenFilePicker) {
+                    alert('⚠️ Your browser doesn\'t support direct file saving. Files will download to your Downloads folder.');
+                    updateFileStatus(false);
+                    return;
+                }
+
+                // Let user pick the content.json file
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'JSON Files',
+                        accept: { 'application/json': ['.json'] }
+                    }],
+                    multiple: false
                 });
+
+                // Read the file
+                const file = await fileHandle.getFile();
+                const text = await file.text();
+                contentData = JSON.parse(text);
+
+                updateFileStatus(true, file.name);
+            } catch (error) {
+                console.error('Error loading content:', error);
+                if (error.name !== 'AbortError') { // Don't show error if user cancelled
+                    updateFileStatus(false);
+                }
+            }
+        }
+
+        // Update the file status indicator
+        function updateFileStatus(isConnected, fileName = null) {
+            const statusDiv = document.getElementById('file-status');
+            const indicator = statusDiv.querySelector('.status-indicator');
+            const textSpan = statusDiv.querySelector('span:last-child');
+
+            if (isConnected && fileName) {
+                statusDiv.className = 'file-status connected';
+                indicator.className = 'status-indicator connected';
+                textSpan.innerHTML = `Connected to: <span class="file-path">${fileName}</span> - Saving directly to disk`;
+            } else {
+                statusDiv.className = 'file-status disconnected';
+                indicator.className = 'status-indicator disconnected';
+                textSpan.textContent = 'Not connected - Changes will download to Downloads folder';
+            }
         }
 
         // Load demo page content
@@ -371,7 +472,7 @@
             `;
         }
 
-        // Load partner page content (NEW)
+        // Load partner page content
         function loadPartnerPage(pageKey) {
             if (!pageKey || !contentData.partners || !contentData.partners[pageKey]) return;
 
@@ -495,10 +596,25 @@
             }, 3000);
         }
 
-        function downloadJSON() {
+        async function downloadJSON() {
             const dataStr = JSON.stringify(contentData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
+            // If we have a file handle, save directly to the file
+            if (fileHandle) {
+                try {
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+                    console.log('✅ File saved successfully to disk!');
+                    return;
+                } catch (error) {
+                    console.error('Error saving file:', error);
+                    alert('❌ Could not save to file. Downloading instead...');
+                }
+            }
+
+            // Fallback: download to Downloads folder
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const exportFileDefaultName = 'content.json';
 
             const linkElement = document.createElement('a');
@@ -506,9 +622,6 @@
             linkElement.setAttribute('download', exportFileDefaultName);
             linkElement.click();
         }
-
-        // Auto-connect on page load
-        window.addEventListener('load', connectToFile);
     </script>
 </body>
 
