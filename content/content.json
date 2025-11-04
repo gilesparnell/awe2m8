@@ -130,16 +130,16 @@
       "pageTitle": "Mick Fanning Softboards - AI Demo | AWE2M8"
     },
     "rayWhiteUpperNorthShore": {
+      "pageTitle": "Ray White Upper North Shore - Database Reactivation Demo",
       "title": "Ray White Upper North Shore - Database Reactivation",
       "emoji": "🏠",
       "heroDescription": "Reconnect with past clients and dormant leads in your database. Our AI automatically reaches out via SMS to past buyers, sellers, and appraisal leads to identify those ready to transact now.",
-      "howItWorks": "Our AI agent reviews your CRM database and identifies past clients who haven't been contacted recently. It sends personalized SMS messages referencing their previous property transaction or inquiry, asks about their current property plans, and books qualified appointments directly into your calendar.",
+      "howItWorks": "Our AI agent reviews your CRM database (or simple CSV) and identifies past clients who haven't been contacted recently. It sends personalized SMS messages referencing their previous property transaction or inquiry, asks about their current property plans, and books qualified appointments directly into your calendar.",
       "whyItMatters": "<strong>Untapped Revenue:</strong> 70% of clients use a different agent for their next transaction simply because they weren't kept in touch with.<br><br><strong>Perfect Timing:</strong> AI identifies life events and timing signals to reach out at the right moment.<br><br><strong>Scalable Personal Touch:</strong> Maintain relationships at scale across thousands of contacts.<br><br><strong>Measurable ROI:</strong> Most agents see 3-5% of their database respond positively, resulting in multiple new listings per month with zero ad spend.",
       "ctaButtonText": "Talk to Our AI Agent",
       "ctaDescription": "Experience how our AI reconnects with past clients",
       "iframeUrl": "",
-      "videoUrl": "",
-      "pageTitle": "Ray White Upper North Shore - Database Reactivation Demo"
+      "videoUrl": ""
     }
   }
 }
