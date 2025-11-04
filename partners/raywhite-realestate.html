@@ -103,6 +103,18 @@
                     `;
                 }
 
+                // ✅ Now loads SMS URL
+                if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
+                    document.getElementById('sms-demo-link').href = content.smsAgentDemoUrl;
+                } else {
+                    // Gracefully disable if not configured
+                    smsLink.style.opacity = '0.5';
+                    smsLink.onclick = (e) => {
+                        e.preventDefault();
+                        alert('SMS Demo URL not configured yet');
+                    };
+                }
+
                 document.title = content.pageTitle || 'Ray White Demo - AWE2M8';
             })
             .catch(error => {
