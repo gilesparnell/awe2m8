@@ -82,6 +82,7 @@
             .then(data => {
                 const content = data.partners.rayWhiteUpperNorthShore;
 
+                // Update page content
                 document.getElementById('hero-title').innerHTML = `${content.emoji} ${content.title}`;
                 document.getElementById('hero-description').textContent = content.heroDescription;
                 document.getElementById('how-it-works').textContent = content.howItWorks;
@@ -90,10 +91,30 @@
                 document.getElementById('cta-title').textContent = content.ctaButtonText;
                 document.getElementById('cta-description').textContent = content.ctaDescription;
 
+                // Load iframe URL for voice/chat AI
                 if (content.iframeUrl && content.iframeUrl.trim() !== '') {
                     document.getElementById('demo-iframe').src = content.iframeUrl;
+                } else {
+                    // Hide iframe section if no URL
+                    document.querySelector('.cta-in-column').style.display = 'none';
                 }
 
+                // ✅ FIX: Load SMS demo URL
+                if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
+                    document.getElementById('sms-demo-link').href = content.smsAgentDemoUrl;
+                } else {
+                    // Disable link if no URL
+                    const smsLink = document.getElementById('sms-demo-link');
+                    smsLink.href = '#';
+                    smsLink.style.opacity = '0.5';
+                    smsLink.style.cursor = 'not-allowed';
+                    smsLink.onclick = (e) => {
+                        e.preventDefault();
+                        alert('SMS Demo URL not configured yet');
+                    };
+                }
+
+                // Load video URL
                 if (content.videoUrl && content.videoUrl.trim() !== '') {
                     document.getElementById('video-container').innerHTML = `
                         <iframe 
@@ -103,18 +124,7 @@
                     `;
                 }
 
-                // ✅ Now loads SMS URL
-                if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
-                    document.getElementById('sms-demo-link').href = content.smsAgentDemoUrl;
-                } else {
-                    // Gracefully disable if not configured
-                    smsLink.style.opacity = '0.5';
-                    smsLink.onclick = (e) => {
-                        e.preventDefault();
-                        alert('SMS Demo URL not configured yet');
-                    };
-                }
-
+                // Update page title
                 document.title = content.pageTitle || 'Ray White Demo - AWE2M8';
             })
             .catch(error => {
@@ -122,6 +132,7 @@
                 document.getElementById('hero-description').textContent = 'Error loading content.';
             });
 
+        // Handle iframe microphone permissions
         const frame = document.getElementById('demo-iframe');
         frame.addEventListener('load', () => {
             navigator.permissions.query({ name: 'microphone' })
