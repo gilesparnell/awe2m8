@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Pool Care | Pool Maintenance & Supplies</title>
+
+    <!-- Cache Buster -->
+    <script src="/js/cache-buster.js"></script>
+
+    <style>
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%230EA5E9" width="1200" height="600"/><path fill="%2306B6D4" opacity="0.3" d="M0,300 Q300,200 600,300 T1200,300 L1200,600 L0,600 Z"/></svg>') center/cover;
+            opacity: 0.2;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1530549387789-4c1017266635?w=1200&h=600&fit=crop') center/cover;
+            opacity: 0.15;
+            mix-blend-mode: overlay;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0EA5E9;
+            --primary-dark: #0284C7;
+            --secondary: #06B6D4;
+            --text-dark: #1E293B;
+            --text-light: #FFFFFF;
+            --bg-light: #F8FAFC;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 600px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%230EA5E9" width="1200" height="600"/><path fill="%2306B6D4" opacity="0.3" d="M0,300 Q300,200 600,300 T1200,300 L1200,600 L0,600 Z"/></svg>') center/cover;
+            opacity: 0.2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--text-light);
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+            color: var(--primary);
+        }
+
+        /* Services Section */
+        .services {
+            padding: 4rem 2rem;
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-dark);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(14, 165, 233, 0.2);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        /* Hours Section */
+        .hours {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .hours-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hours-card {
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .hours-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .hours-card p {
+            margin: 0.5rem 0;
+        }
+
+        /* AI Chat Button */
+        .chat-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            z-index: 1000;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(14, 165, 233, 0.6);
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .chat-interface.open {
+            display: flex;
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            background: var(--bg-light);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+
+        .quick-btn {
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        footer h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .chat-interface {
+                width: calc(100% - 2rem);
+                right: 1rem;
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Advanced Pool Care</h1>
+            <p>Your trusted partner for crystal-clear pools in North Narrabeen</p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary" onclick="openChat()">
+                    💬 Chat with our friendly (AI) Staff
+                </button>
+                <a href="tel:0299132566" class="btn btn-secondary">
+                    📞 Call Us
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">🏊</div>
+                    <h3>Pool Maintenance</h3>
+                    <p>Regular servicing to keep your pool sparkling clean all year round. Chemical balancing, cleaning,
+                        and equipment checks.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🛒</div>
+                    <h3>Pool Products</h3>
+                    <p>Quality chemicals, equipment, and accessories. Everything you need for perfect pool care at
+                        competitive prices.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🔧</div>
+                    <h3>Installation & Repairs</h3>
+                    <p>Professional installation of pumps, filters, and heaters. Expert repairs to keep your equipment
+                        running smoothly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hours Section -->
+    <section class="hours">
+        <div class="container">
+            <h2 class="section-title">Opening Hours</h2>
+            <div class="hours-grid">
+                <div class="hours-card">
+                    <h3>Summer Hours</h3>
+                    <p><strong>Mon-Fri:</strong> 8:00 AM - 5:30 PM</p>
+                    <p><strong>Sat:</strong> 8:00 AM - 3:00 PM</p>
+                    <p><strong>Sun:</strong> Closed</p>
+                </div>
+                <div class="hours-card">
+                    <h3>Winter Hours</h3>
+                    <p><strong>Mon-Fri:</strong> 8:00 AM - 5:00 PM</p>
+                    <p><strong>Sat:</strong> 8:00 AM - 1:00 PM</p>
+                    <p><strong>Sun:</strong> Closed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chat Button -->
+    <button class="chat-button" onclick="toggleChat()">
+        💬
+    </button>
+
+    <!-- Chat Interface -->
+    <div class="chat-interface" id="chatInterface">
+        <div class="chat-header">
+            <h3>Pool Care Assistant</h3>
+            <button class="chat-close" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message">
+                <strong>🤖 AI Assistant:</strong> Hi! I'm here to help with pool care questions, product info, and our
+                opening hours. How can I assist you today?
+            </div>
+        </div>
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="askQuestion('What are your hours?')">⏰ Hours</button>
+            <button class="quick-btn" onclick="askQuestion('Where are you located?')">📍 Location</button>
+            <button class="quick-btn" onclick="askQuestion('What services do you offer?')">🏊 Services</button>
+            <button class="quick-btn" onclick="askQuestion('How do I balance pool chemicals?')">⚗️ Chemical
+                Help</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <h3>Advanced Pool Care</h3>
+            <p>Shop 4 / 1 Powderworks Road, North Narrabeen NSW 2101</p>
+            <p>
+                <a href="tel:0299132566">02 9913 2566</a> |
+                <a href="mailto:info@advancedpoolcare.com.au">info@advancedpoolcare.com.au</a>
+            </p>
+            <p style="margin-top: 2rem; opacity: 0.8;">
+                © 2024 Advanced Pool Care. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Chat functionality
+        function toggleChat() {
+            const chat = document.getElementById('chatInterface');
+            chat.classList.toggle('open');
+        }
+
+        function openChat() {
+            document.getElementById('chatInterface').classList.add('open');
+        }
+
+        function askQuestion(question) {
+            const chatBody = document.getElementById('chatBody');
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message';
+            userMsg.style.background = '#E0F2FE';
+            userMsg.innerHTML = `<strong>You:</strong> ${question}`;
+            chatBody.appendChild(userMsg);
+
+            // Simulate AI response
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message';
+                aiMsg.innerHTML = `<strong>🤖 AI Assistant:</strong> ${getResponse(question)}`;
+                chatBody.appendChild(aiMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 500);
+        }
+
+        function getResponse(question) {
+            const responses = {
+                'What are your hours?': 'Summer hours: Mon-Fri 8am-5:30pm, Sat 8am-3pm. Winter hours: Mon-Fri 8am-5pm, Sat 8am-1pm. Closed Sundays.',
+                'Where are you located?': 'We\'re at Shop 4, 1 Powderworks Road, North Narrabeen NSW 2101. Easy parking available!',
+                'What services do you offer?': 'We offer pool maintenance, chemical supplies, equipment sales, installation, and repairs. Plus expert advice!',
+                'How do I balance pool chemicals?': 'Test your water regularly! Keep pH between 7.2-7.6, chlorine at 1-3ppm. Bring a water sample to our store for free testing!'
+            };
+            return responses[question] || 'That\'s a great question! Call us at 02 9913 2566 for detailed assistance.';
+        }
+    </script>
+</body>
+
+</html>
