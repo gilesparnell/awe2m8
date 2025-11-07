@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Database Reactivation | Ray White Upper North Shore</title>
+    <title>Database Reactivation | Ray White Upper North Shore</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
@@ -324,8 +324,8 @@
 
     <!-- Hero Section - Simplified -->
     <section class="rw-hero">
-        <h1>Customer Database Reactivation</h1>
-        <p>Reconnect with past clients and turn your dormant leads into Revenue. Check out our AI demos below</p>
+        <h1 id="hero-title">Database Reactivation</h1>
+        <p id="hero-description">Reconnect with past clients and dormant leads. Try our AI demos below.</p>
     </section>
 
     <!-- Demo Section - Now First! -->
@@ -412,6 +412,21 @@
             })
             .then(data => {
                 const content = data.partners.rayWhiteUpperNorthShore;
+
+                // Update page title
+                if (content.pageTitle) {
+                    document.title = content.pageTitle;
+                }
+
+                // Update hero title
+                if (content.title) {
+                    document.getElementById('hero-title').textContent = content.title;
+                }
+
+                // Update hero description
+                if (content.heroDescription) {
+                    document.getElementById('hero-description').textContent = content.heroDescription;
+                }
 
                 // Update Why It Matters
                 if (content.whyItMatters) {
