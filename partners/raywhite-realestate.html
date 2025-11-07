@@ -333,15 +333,15 @@
         <div class="rw-demo-grid">
             <!-- Voice AI Demo -->
             <div class="rw-demo-card">
-                <h3>🎙️ Voice AI Demo</h3>
-                <p>Talk to our database reactivation AI agent</p>
+                <h3 id="voice-demo-title">🎙️ Voice AI Demo</h3>
+                <p id="voice-demo-desc">Talk to our database reactivation AI agent</p>
                 <iframe id="demo-iframe" class="rw-demo-iframe" src="" allow="microphone"></iframe>
             </div>
 
             <!-- SMS Agent Demo -->
             <div class="rw-demo-card">
-                <h3>📱 SMS Agent Demo</h3>
-                <p>Experience how AI reactivates your database via text</p>
+                <h3 id="sms-demo-title">📱 SMS Agent Demo</h3>
+                <p id="sms-demo-desc">Experience how AI reactivates your database via text</p>
                 <a href="#" id="sms-demo-link" class="rw-btn">Start Conversation</a>
             </div>
         </div>
@@ -426,6 +426,22 @@
                 // Update hero description
                 if (content.heroDescription) {
                     document.getElementById('hero-description').textContent = content.heroDescription;
+                }
+
+                // Update Voice AI Demo section
+                if (content.voiceAIDemoTitle) {
+                    document.getElementById('voice-demo-title').textContent = content.voiceAIDemoTitle;
+                }
+                if (content.voiceAIDemoDescription) {
+                    document.getElementById('voice-demo-desc').textContent = content.voiceAIDemoDescription;
+                }
+
+                // Update SMS Demo section
+                if (content.smsDemoTitle) {
+                    document.getElementById('sms-demo-title').textContent = content.smsDemoTitle;
+                }
+                if (content.smsDemoDescription) {
+                    document.getElementById('sms-demo-desc').textContent = content.smsDemoDescription;
                 }
 
                 // Update Why It Matters
