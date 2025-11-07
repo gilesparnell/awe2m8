@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 AWE2M8 Content Editor v2</title>
+    <title>🎨 AWE2M8 Content Editor v3</title>
     <style>
         body {
             background: linear-gradient(135deg, #0a2e1f 0%, #051510 100%);
@@ -15,7 +15,7 @@
         }
 
         .editor-container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -110,25 +110,20 @@
             opacity: 0.8;
         }
 
-        .editor-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .editor-section {
+        .selector-section {
             background: rgba(0, 255, 0, 0.05);
             border: 2px solid rgba(0, 255, 0, 0.2);
             border-radius: 16px;
-            padding: 30px;
+            padding: 40px;
+            margin-bottom: 30px;
         }
 
-        .section-title {
+        .selector-label {
             color: #00ff00;
-            font-size: 1.5em;
-            margin-bottom: 20px;
+            font-size: 1.2em;
             font-weight: bold;
+            margin-bottom: 12px;
+            display: block;
         }
 
         .page-selector {
@@ -147,23 +142,42 @@
             border-color: #00ff00;
         }
 
-        .editor-form {
+        .page-selector:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .editor-section {
+            background: rgba(0, 255, 0, 0.05);
+            border: 2px solid rgba(0, 255, 0, 0.2);
+            border-radius: 16px;
+            padding: 40px;
             display: none;
             animation: fadeIn 0.3s;
         }
 
-        .editor-form.active {
+        .editor-section.active {
             display: block;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
+                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
+                transform: translateY(0);
             }
+        }
+
+        .section-title {
+            color: #00ff00;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-align: center;
         }
 
         .form-group {
@@ -212,13 +226,15 @@
         .save-btn {
             background: linear-gradient(135deg, #00ff00, #00cc00);
             color: #000;
-            padding: 12px 30px;
+            padding: 15px 40px;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1.1em;
             transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
         }
 
         .save-btn:hover {
@@ -234,6 +250,7 @@
             border-radius: 8px;
             margin-top: 20px;
             display: none;
+            text-align: center;
         }
 
         .success-message.show {
@@ -246,8 +263,8 @@
 <body>
     <div class="editor-container">
         <div class="editor-header">
-            <h1>🎨 AWE2M8 Content Editor v2</h1>
-            <p>Edit content for demo pages and industry-specific pages</p>
+            <h1>🎨 AWE2M8 Content Editor v3</h1>
+            <p>Streamlined editor for all your content needs</p>
             <button class="file-connect-btn" onclick="connectToFile()">
                 📁 Connect to Project File
             </button>
@@ -257,72 +274,65 @@
             </div>
         </div>
 
-        <div class="editor-grid">
-            <!-- Demo Pages Section -->
-            <div class="editor-section">
-                <h2 class="section-title">Demo Pages:</h2>
-                <select class="page-selector" id="demo-selector" onchange="loadDemoPage(this.value)">
-                    <option value="">-- Choose a demo --</option>
-                    <option value="voiceAI">🎙️ Voice AI</option>
-                    <option value="aiReceptionist">📞 AI Receptionist</option>
-                    <option value="reviewsAI">⭐ Reviews AI</option>
-                    <option value="databaseReactivation">💬 Database Reactivation</option>
-                    <option value="documentCollection">📄 Document Collection</option>
-                    <option value="ecommerce">🛒 E-commerce</option>
-                    <option value="outOfHours">🌙 Out of Hours</option>
-                    <option value="speedToLead">⚡ Speed to Lead</option>
-                </select>
+        <!-- Two-Step Selection -->
+        <div class="selector-section">
+            <label class="selector-label">Step 1: Choose Category</label>
+            <select class="page-selector" id="category-selector" onchange="loadCategoryOptions(this.value)">
+                <option value="">-- Select a category --</option>
+                <option value="demos">🎯 Agent Demos</option>
+                <option value="industries">🏭 Industries</option>
+                <option value="partners">🤝 Partner Demos</option>
+            </select>
 
-                <div id="demo-editor" class="editor-form">
-                    <!-- Form fields will be populated here -->
-                </div>
-            </div>
+            <label class="selector-label">Step 2: Choose Page</label>
+            <select class="page-selector" id="page-selector" disabled onchange="loadPageContent()">
+                <option value="">-- First select a category --</option>
+            </select>
+        </div>
 
-            <!-- Industry Pages Section -->
-            <div class="editor-section">
-                <h2 class="section-title">Industry Pages:</h2>
-                <select class="page-selector" id="industry-selector" onchange="loadIndustryPage(this.value)">
-                    <option value="">-- Choose an industry --</option>
-                    <option value="gyms">💪 Gyms & Fitness</option>
-                    <option value="fireSafety">🚒 Fire Safety</option>
-                </select>
-
-                <div id="industry-editor" class="editor-form">
-                    <!-- Form fields will be populated here -->
-                </div>
-            </div>
-
-            <!-- Partner Pages Section -->
-            <div class="editor-section">
-                <h2 class="section-title">Partner Pages:</h2>
-                <select class="page-selector" id="partner-selector" onchange="loadPartnerPage(this.value)">
-                    <option value="">-- Choose a partner --</option>
-                    <option value="mickFanningSoftboards">🏄 Mick Fanning Softboards</option>
-                    <option value="rayWhiteUpperNorthShore">🏠 Ray White Upper North Shore</option>
-                </select>
-
-                <div id="partner-editor" class="editor-form">
-                    <!-- Form fields will be populated here -->
-                </div>
-            </div>
+        <!-- Content Editor Section -->
+        <div id="content-editor" class="editor-section">
+            <!-- Dynamic content will load here -->
         </div>
     </div>
 
     <script>
         let contentData = {};
-        let fileHandle = null; // Store the file handle for saving
+        let fileHandle = null;
+        let currentCategory = '';
+        let currentPage = '';
 
-        // Connect to content.json file using File System Access API
+        // Category options
+        const categoryOptions = {
+            demos: [
+                { value: 'voiceAI', label: '🎙️ Voice AI' },
+                { value: 'aiReceptionist', label: '📞 AI Receptionist' },
+                { value: 'reviewsAI', label: '⭐ Reviews AI' },
+                { value: 'databaseReactivation', label: '💬 Database Reactivation' },
+                { value: 'documentCollection', label: '📄 Document Collection' },
+                { value: 'ecommerce', label: '🛒 E-commerce' },
+                { value: 'outOfHours', label: '🌙 Out of Hours' },
+                { value: 'speedToLead', label: '⚡ Speed to Lead' }
+            ],
+            industries: [
+                { value: 'gyms', label: '💪 Gyms & Fitness' },
+                { value: 'fireSafety', label: '🚒 Fire Safety' }
+            ],
+            partners: [
+                { value: 'mickFanningSoftboards', label: '🏄 Mick Fanning Softboards' },
+                { value: 'rayWhiteUpperNorthShore', label: '🏠 Ray White Upper North Shore' }
+            ]
+        };
+
+        // Connect to file
         async function connectToFile() {
             try {
-                // Check if File System Access API is supported
                 if (!window.showOpenFilePicker) {
                     alert('⚠️ Your browser doesn\'t support direct file saving. Files will download to your Downloads folder.');
                     updateFileStatus(false);
                     return;
                 }
 
-                // Let user pick the content.json file
                 [fileHandle] = await window.showOpenFilePicker({
                     types: [{
                         description: 'JSON Files',
@@ -331,7 +341,6 @@
                     multiple: false
                 });
 
-                // Read the file
                 const file = await fileHandle.getFile();
                 const text = await file.text();
                 contentData = JSON.parse(text);
@@ -339,13 +348,13 @@
                 updateFileStatus(true, file.name);
             } catch (error) {
                 console.error('Error loading content:', error);
-                if (error.name !== 'AbortError') { // Don't show error if user cancelled
+                if (error.name !== 'AbortError') {
                     updateFileStatus(false);
                 }
             }
         }
 
-        // Update the file status indicator
+        // Update file status
         function updateFileStatus(isConnected, fileName = null) {
             const statusDiv = document.getElementById('file-status');
             const indicator = statusDiv.querySelector('.status-indicator');
@@ -362,15 +371,63 @@
             }
         }
 
-        // Load demo page content
-        function loadDemoPage(pageKey) {
-            if (!pageKey || !contentData[pageKey]) return;
+        // Load category options
+        function loadCategoryOptions(category) {
+            currentCategory = category;
+            const pageSelector = document.getElementById('page-selector');
+            const editorSection = document.getElementById('content-editor');
+
+            if (!category) {
+                pageSelector.disabled = true;
+                pageSelector.innerHTML = '<option value="">-- First select a category --</option>';
+                editorSection.classList.remove('active');
+                return;
+            }
+
+            // Populate page selector
+            pageSelector.disabled = false;
+            pageSelector.innerHTML = '<option value="">-- Choose a page --</option>';
+
+            categoryOptions[category].forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.label;
+                pageSelector.appendChild(opt);
+            });
+
+            editorSection.classList.remove('active');
+        }
+
+        // Load page content
+        function loadPageContent() {
+            const pageSelector = document.getElementById('page-selector');
+            currentPage = pageSelector.value;
+
+            if (!currentPage) {
+                document.getElementById('content-editor').classList.remove('active');
+                return;
+            }
+
+            if (currentCategory === 'demos') {
+                loadDemoContent(currentPage);
+            } else if (currentCategory === 'industries') {
+                loadIndustryContent(currentPage);
+            } else if (currentCategory === 'partners') {
+                loadPartnerContent(currentPage);
+            }
+        }
+
+        // Load demo content
+        function loadDemoContent(pageKey) {
+            if (!contentData[pageKey]) return;
 
             const content = contentData[pageKey];
-            const editorDiv = document.getElementById('demo-editor');
+            const editorDiv = document.getElementById('content-editor');
             editorDiv.classList.add('active');
 
             editorDiv.innerHTML = `
+                <h2 class="section-title">${categoryOptions.demos.find(d => d.value === pageKey)?.label || pageKey}</h2>
+                
                 <div class="form-group">
                     <label>Page Title</label>
                     <input type="text" id="demo-title" value="${content.title || ''}">
@@ -433,20 +490,23 @@
                     <label>Video URL</label>
                     <input type="text" id="demo-video" value="${content.videoUrl || ''}">
                 </div>
+                
                 <button class="save-btn" onclick="saveDemoContent('${pageKey}')">💾 Save Changes</button>
-                <div class="success-message" id="demo-success">✅ Changes saved successfully!</div>
+                <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
 
-        // Load industry page content
-        function loadIndustryPage(pageKey) {
-            if (!pageKey || !contentData.industries || !contentData.industries[pageKey]) return;
+        // Load industry content
+        function loadIndustryContent(pageKey) {
+            if (!contentData.industries || !contentData.industries[pageKey]) return;
 
             const content = contentData.industries[pageKey];
-            const editorDiv = document.getElementById('industry-editor');
+            const editorDiv = document.getElementById('content-editor');
             editorDiv.classList.add('active');
 
             editorDiv.innerHTML = `
+                <h2 class="section-title">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
+                
                 <div class="form-group">
                     <label>Page Title</label>
                     <input type="text" id="ind-page-title" value="${content.pageTitle || ''}">
@@ -459,6 +519,8 @@
                     <label>Hero Subtitle</label>
                     <textarea id="ind-hero-subtitle">${content.heroSubtitle || ''}</textarea>
                 </div>
+                
+                <h3 class="section-divider">Solution 1</h3>
                 <div class="form-group">
                     <label>Solution 1 Title</label>
                     <input type="text" id="ind-sol1-title" value="${content.solution1Title || ''}">
@@ -475,6 +537,8 @@
                     <label>Database Reactivation Orb URL</label>
                     <input type="text" id="ind-db-orb" value="${content.databaseReactivationOrbUrl || ''}">
                 </div>
+                
+                <h3 class="section-divider">Solution 2</h3>
                 <div class="form-group">
                     <label>Solution 2 Title</label>
                     <input type="text" id="ind-sol2-title" value="${content.solution2Title || ''}">
@@ -487,7 +551,9 @@
                     <label>Voice AI Orb URL</label>
                     <input type="text" id="ind-voice-orb" value="${content.voiceAIOrbUrl || ''}">
                 </div>
+                
                 ${pageKey === 'fireSafety' ? `
+                <h3 class="section-divider">Solution 3</h3>
                 <div class="form-group">
                     <label>Solution 3 Title</label>
                     <input type="text" id="ind-sol3-title" value="${content.solution3Title || ''}">
@@ -497,20 +563,23 @@
                     <textarea id="ind-sol3-desc">${content.solution3Description || ''}</textarea>
                 </div>
                 ` : ''}
+                
                 <button class="save-btn" onclick="saveIndustryContent('${pageKey}')">💾 Save Changes</button>
-                <div class="success-message" id="industry-success">✅ Changes saved successfully!</div>
+                <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
 
-        // Load partner page content
-        function loadPartnerPage(pageKey) {
-            if (!pageKey || !contentData.partners || !contentData.partners[pageKey]) return;
+        // Load partner content
+        function loadPartnerContent(pageKey) {
+            if (!contentData.partners || !contentData.partners[pageKey]) return;
 
             const content = contentData.partners[pageKey];
-            const editorDiv = document.getElementById('partner-editor');
+            const editorDiv = document.getElementById('content-editor');
             editorDiv.classList.add('active');
 
             editorDiv.innerHTML = `
+                <h2 class="section-title">${categoryOptions.partners.find(p => p.value === pageKey)?.label || pageKey}</h2>
+                
                 <div class="form-group">
                     <label>Page Title</label>
                     <input type="text" id="part-page-title" value="${content.pageTitle || ''}">
@@ -527,6 +596,36 @@
                     <label>Hero Description</label>
                     <textarea id="part-hero">${content.heroDescription || ''}</textarea>
                 </div>
+                
+                <h3 class="section-divider">🎙️ Voice AI Demo Section</h3>
+                <div class="form-group">
+                    <label>Voice AI Demo Title</label>
+                    <input type="text" id="part-voice-title" value="${content.voiceAIDemoTitle || 'Voice AI Demo'}">
+                </div>
+                <div class="form-group">
+                    <label>Voice AI Demo Description</label>
+                    <textarea id="part-voice-desc">${content.voiceAIDemoDescription || 'Talk to our AI agent'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Iframe URL (Voice Orb)</label>
+                    <input type="text" id="part-iframe" value="${content.iframeUrl || ''}">
+                </div>
+                
+                <h3 class="section-divider">📱 SMS Demo Section</h3>
+                <div class="form-group">
+                    <label>SMS Demo Title</label>
+                    <input type="text" id="part-sms-title" value="${content.smsDemoTitle || 'SMS Demo'}">
+                </div>
+                <div class="form-group">
+                    <label>SMS Demo Description</label>
+                    <textarea id="part-sms-desc">${content.smsDemoDescription || 'Experience AI via SMS'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>SMS Agent Demo URL</label>
+                    <input type="text" id="part-sms-url" value="${content.smsAgentDemoUrl || ''}">
+                </div>
+                
+                <h3 class="section-divider">📄 Other Content</h3>
                 <div class="form-group">
                     <label>How It Works</label>
                     <textarea id="part-how">${content.howItWorks || ''}</textarea>
@@ -544,20 +643,12 @@
                     <textarea id="part-cta-desc">${content.ctaDescription || ''}</textarea>
                 </div>
                 <div class="form-group">
-                    <label>Iframe URL (Voice Orb)</label>
-                    <input type="text" id="part-iframe" value="${content.iframeUrl || ''}">
-                </div>
-                 <div class="form-group">
-                    <label>SMS Agent Demo URL</label>
-                    <input type="text" id="part-sms-url" value="${content.smsAgentDemoUrl || ''}">
-                </div>
-                <div class="form-group">
                     <label>Video URL</label>
                     <input type="text" id="part-video" value="${content.videoUrl || ''}">
                 </div>
-                <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes</button>
-                <div class="success-message" id="partner-success">✅ Changes saved successfully!</div>
                 
+                <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes</button>
+                <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
 
@@ -580,7 +671,7 @@
                 videoUrl: document.getElementById('demo-video').value
             };
 
-            showSuccessMessage('demo-success');
+            showSuccessMessage();
             downloadJSON();
         }
 
@@ -605,7 +696,7 @@
 
             contentData.industries[pageKey] = { ...contentData.industries[pageKey], ...updates };
 
-            showSuccessMessage('industry-success');
+            showSuccessMessage();
             downloadJSON();
         }
 
@@ -615,21 +706,25 @@
                 title: document.getElementById('part-title').value,
                 emoji: document.getElementById('part-emoji').value,
                 heroDescription: document.getElementById('part-hero').value,
+                voiceAIDemoTitle: document.getElementById('part-voice-title').value,
+                voiceAIDemoDescription: document.getElementById('part-voice-desc').value,
+                iframeUrl: document.getElementById('part-iframe').value,
+                smsDemoTitle: document.getElementById('part-sms-title').value,
+                smsDemoDescription: document.getElementById('part-sms-desc').value,
+                smsAgentDemoUrl: document.getElementById('part-sms-url').value,
                 howItWorks: document.getElementById('part-how').value,
                 whyItMatters: document.getElementById('part-why').value,
                 ctaButtonText: document.getElementById('part-cta-text').value,
                 ctaDescription: document.getElementById('part-cta-desc').value,
-                iframeUrl: document.getElementById('part-iframe').value,
-                smsAgentDemoUrl: document.getElementById('part-sms-url').value,
                 videoUrl: document.getElementById('part-video').value
             };
 
-            showSuccessMessage('partner-success');
+            showSuccessMessage();
             downloadJSON();
         }
 
-        function showSuccessMessage(elementId) {
-            const message = document.getElementById(elementId);
+        function showSuccessMessage() {
+            const message = document.getElementById('success-message');
             message.classList.add('show');
             setTimeout(() => {
                 message.classList.remove('show');
@@ -639,7 +734,6 @@
         async function downloadJSON() {
             const dataStr = JSON.stringify(contentData, null, 2);
 
-            // If we have a file handle, save directly to the file
             if (fileHandle) {
                 try {
                     const writable = await fileHandle.createWritable();
@@ -653,7 +747,6 @@
                 }
             }
 
-            // Fallback: download to Downloads folder
             const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
             const exportFileDefaultName = 'content.json';
 
