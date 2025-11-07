@@ -116,6 +116,91 @@
             border-radius: 16px;
             padding: 40px;
             margin-bottom: 30px;
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .selector-section.hidden {
+            opacity: 0;
+            max-height: 0;
+            padding: 0 40px;
+            margin-bottom: 0;
+            pointer-events: none;
+        }
+
+        .floating-selector-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            animation: gentlePulse 2s infinite;
+        }
+
+        .floating-selector-btn.visible {
+            display: flex;
+            animation: slideInUp 0.4s ease, gentlePulse 2s infinite 0.4s;
+        }
+
+        .floating-selector-btn:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 8px 30px rgba(0, 255, 0, 0.6);
+            animation: none;
+        }
+
+        .floating-selector-btn::before {
+            content: 'Change Page';
+            position: absolute;
+            right: 70px;
+            background: rgba(0, 255, 0, 0.9);
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .floating-selector-btn:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes gentlePulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 20px rgba(0, 255, 0, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 30px rgba(0, 255, 0, 0.7);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .selector-label {
@@ -294,6 +379,11 @@
         <div id="content-editor" class="editor-section">
             <!-- Dynamic content will load here -->
         </div>
+
+        <!-- Floating Button to Show Selector -->
+        <button id="floating-btn" class="floating-selector-btn" onclick="toggleSelector()">
+            ⚙️
+        </button>
     </div>
 
     <script>
@@ -377,6 +467,9 @@
             const pageSelector = document.getElementById('page-selector');
             const editorSection = document.getElementById('content-editor');
 
+            // Always show selector when changing category
+            showSelector();
+
             if (!category) {
                 pageSelector.disabled = true;
                 pageSelector.innerHTML = '<option value="">-- First select a category --</option>';
@@ -408,12 +501,50 @@
                 return;
             }
 
+            // Hide selector and show floating button
+            hideSelector();
+
             if (currentCategory === 'demos') {
                 loadDemoContent(currentPage);
             } else if (currentCategory === 'industries') {
                 loadIndustryContent(currentPage);
             } else if (currentCategory === 'partners') {
                 loadPartnerContent(currentPage);
+            }
+        }
+
+        // Hide selector
+        function hideSelector() {
+            document.getElementById('category-selector').parentElement.classList.add('hidden');
+            document.getElementById('floating-btn').classList.add('visible');
+
+            // Smooth scroll to top after a brief delay
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Show selector
+        function showSelector() {
+            document.getElementById('category-selector').parentElement.classList.remove('hidden');
+            document.getElementById('floating-btn').classList.remove('visible');
+
+            // Smooth scroll to selector
+            setTimeout(() => {
+                document.getElementById('category-selector').parentElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
+        }
+
+        // Toggle selector visibility
+        function toggleSelector() {
+            const selector = document.getElementById('category-selector').parentElement;
+            if (selector.classList.contains('hidden')) {
+                showSelector();
+            } else {
+                hideSelector();
             }
         }
 
