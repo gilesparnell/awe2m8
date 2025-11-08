@@ -406,7 +406,8 @@
             ],
             industries: [
                 { value: 'gyms', label: '💪 Gyms & Fitness' },
-                { value: 'fireSafety', label: '🚒 Fire Safety' }
+                { value: 'fireSafety', label: '🚒 Fire Safety' },
+                { value: 'solar', label: '☀️ Solar' }
             ],
             partners: [
                 { value: 'mickFanningSoftboards', label: '🏄 Mick Fanning Softboards' },
@@ -635,6 +636,123 @@
             const editorDiv = document.getElementById('content-editor');
             editorDiv.classList.add('active');
 
+            // Solar has a different structure
+            if (pageKey === 'solar') {
+                editorDiv.innerHTML = `
+                    <h2 class="section-title">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
+                    
+                    <div class="form-group">
+                        <label>Page Title</label>
+                        <input type="text" id="ind-page-title" value="${content.pageTitle || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Hero Title</label>
+                        <input type="text" id="ind-hero-title" value="${content.heroTitle || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Hero Subtitle</label>
+                        <textarea id="ind-hero-subtitle">${content.heroSubtitle || ''}</textarea>
+                    </div>
+                    
+                    <h3 class="section-divider">🎙️ Voice AI Demo Section</h3>
+                    <div class="form-group">
+                        <label>Voice AI Demo Title</label>
+                        <input type="text" id="ind-voice-title" value="${content.voiceAIDemoTitle || 'Voice AI Demo'}">
+                    </div>
+                    <div class="form-group">
+                        <label>Voice AI Demo Description</label>
+                        <textarea id="ind-voice-desc">${content.voiceAIDemoDescription || 'Experience AI conversations'}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Voice AI Orb URL</label>
+                        <input type="text" id="ind-voice-orb" value="${content.voiceAIOrbUrl || ''}">
+                    </div>
+                    
+                    <h3 class="section-divider">📱 SMS Demo Section</h3>
+                    <div class="form-group">
+                        <label>SMS Demo Title</label>
+                        <input type="text" id="ind-sms-title" value="${content.smsDemoTitle || 'SMS Demo'}">
+                    </div>
+                    <div class="form-group">
+                        <label>SMS Demo Description</label>
+                        <textarea id="ind-sms-desc">${content.smsDemoDescription || 'See AI via text'}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>SMS Agent Demo URL</label>
+                        <input type="text" id="ind-sms-url" value="${content.smsAgentDemoUrl || ''}">
+                    </div>
+                    
+                    <h3 class="section-divider">Solution 1: Database Reactivation</h3>
+                    <div class="form-group">
+                        <label>Solution 1 Title</label>
+                        <input type="text" id="ind-sol1-title" value="${content.solution1Title || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 1 - Card 1 Description</label>
+                        <textarea id="ind-sol1-desc1">${content.solution1Description1 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 1 - Card 2 Description</label>
+                        <textarea id="ind-sol1-desc2">${content.solution1Description2 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 1 - Card 3 Description</label>
+                        <textarea id="ind-sol1-desc3">${content.solution1Description3 || ''}</textarea>
+                    </div>
+                    
+                    <h3 class="section-divider">Solution 2: Lead Qualification</h3>
+                    <div class="form-group">
+                        <label>Solution 2 Title</label>
+                        <input type="text" id="ind-sol2-title" value="${content.solution2Title || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 2 - Card 1 Description</label>
+                        <textarea id="ind-sol2-desc1">${content.solution2Description1 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 2 - Card 2 Description</label>
+                        <textarea id="ind-sol2-desc2">${content.solution2Description2 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 2 - Card 3 Description</label>
+                        <textarea id="ind-sol2-desc3">${content.solution2Description3 || ''}</textarea>
+                    </div>
+                    
+                    <h3 class="section-divider">Solution 3: ROYA Integration</h3>
+                    <div class="form-group">
+                        <label>Solution 3 Title</label>
+                        <input type="text" id="ind-sol3-title" value="${content.solution3Title || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 3 - Card 1 Description</label>
+                        <textarea id="ind-sol3-desc1">${content.solution3Description1 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 3 - Card 2 Description</label>
+                        <textarea id="ind-sol3-desc2">${content.solution3Description2 || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Solution 3 - Card 3 Description</label>
+                        <textarea id="ind-sol3-desc3">${content.solution3Description3 || ''}</textarea>
+                    </div>
+                    
+                    <h3 class="section-divider">📄 Other Content</h3>
+                    <div class="form-group">
+                        <label>Why It Matters</label>
+                        <textarea id="ind-why">${content.whyItMatters || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Video URL</label>
+                        <input type="text" id="ind-video" value="${content.videoUrl || ''}">
+                    </div>
+                    
+                    <button class="save-btn" onclick="saveIndustryContent('${pageKey}')">💾 Save Changes</button>
+                    <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
+                `;
+                return;
+            }
+
+            // Regular industry structure (gyms, fireSafety, etc.)
             editorDiv.innerHTML = `
                 <h2 class="section-title">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
                 
@@ -807,6 +925,40 @@
         }
 
         function saveIndustryContent(pageKey) {
+            // Solar has a different structure
+            if (pageKey === 'solar') {
+                contentData.industries[pageKey] = {
+                    pageTitle: document.getElementById('ind-page-title').value,
+                    heroTitle: document.getElementById('ind-hero-title').value,
+                    heroSubtitle: document.getElementById('ind-hero-subtitle').value,
+                    voiceAIDemoTitle: document.getElementById('ind-voice-title').value,
+                    voiceAIDemoDescription: document.getElementById('ind-voice-desc').value,
+                    voiceAIOrbUrl: document.getElementById('ind-voice-orb').value,
+                    smsDemoTitle: document.getElementById('ind-sms-title').value,
+                    smsDemoDescription: document.getElementById('ind-sms-desc').value,
+                    smsAgentDemoUrl: document.getElementById('ind-sms-url').value,
+                    solution1Title: document.getElementById('ind-sol1-title').value,
+                    solution1Description1: document.getElementById('ind-sol1-desc1').value,
+                    solution1Description2: document.getElementById('ind-sol1-desc2').value,
+                    solution1Description3: document.getElementById('ind-sol1-desc3').value,
+                    solution2Title: document.getElementById('ind-sol2-title').value,
+                    solution2Description1: document.getElementById('ind-sol2-desc1').value,
+                    solution2Description2: document.getElementById('ind-sol2-desc2').value,
+                    solution2Description3: document.getElementById('ind-sol2-desc3').value,
+                    solution3Title: document.getElementById('ind-sol3-title').value,
+                    solution3Description1: document.getElementById('ind-sol3-desc1').value,
+                    solution3Description2: document.getElementById('ind-sol3-desc2').value,
+                    solution3Description3: document.getElementById('ind-sol3-desc3').value,
+                    whyItMatters: document.getElementById('ind-why').value,
+                    videoUrl: document.getElementById('ind-video').value
+                };
+
+                showSuccessMessage();
+                downloadJSON();
+                return;
+            }
+
+            // Regular industry structure
             const updates = {
                 pageTitle: document.getElementById('ind-page-title').value,
                 heroTitle: document.getElementById('ind-hero-title').value,

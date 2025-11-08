@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Solutions for Solar Companies</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="/js/cache-buster.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        /* Header - Solar Style */
+        .solar-header {
+            background: linear-gradient(135deg, #0B4F6C 0%, #145A7A 100%);
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .solar-header h1 {
+            color: #FDB813;
+            font-weight: 800;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Hero Banner */
+        .solar-hero {
+            background: linear-gradient(135deg, #0B4F6C 0%, #01BAEF 100%);
+            padding: 30px 40px 25px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .solar-hero h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #FDB813;
+        }
+
+        .solar-hero p {
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.5;
+            color: #ffffff;
+        }
+
+        /* Content Section */
+        .solar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .solar-section {
+            margin-bottom: 60px;
+        }
+
+        .solar-section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0B4F6C;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #FDB813;
+        }
+
+        /* Demo Section */
+        .solar-demo-section {
+            background: #F5F5F5;
+            padding: 35px 0;
+            margin-top: -1px;
+        }
+
+        .solar-demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .solar-demo-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(11, 79, 108, 0.15);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid #FDB813;
+        }
+
+        .solar-demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(11, 79, 108, 0.25);
+        }
+
+        .solar-demo-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #0B4F6C;
+        }
+
+        .solar-demo-card p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .solar-demo-iframe {
+            width: 100%;
+            max-width: 350px;
+            height: 160px;
+            border: none;
+            border-radius: 8px;
+            background: #f8f8f8;
+            margin: 0 auto 15px;
+            display: block;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .solar-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #FDB813;
+            color: #0B4F6C;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .solar-btn:hover {
+            background: #E5A610;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(253, 184, 19, 0.4);
+        }
+
+        /* Three Column Grid */
+        .solar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .solar-card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #FDB813;
+        }
+
+        .solar-card:hover {
+            box-shadow: 0 5px 25px rgba(11, 79, 108, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .solar-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0B4F6C;
+            margin-bottom: 15px;
+        }
+
+        .solar-card p {
+            color: #555555;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Video Container */
+        .solar-video-section {
+            margin: 80px 0;
+        }
+
+        .solar-video-container {
+            aspect-ratio: 16/9;
+            background: #f8f8f8;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(11, 79, 108, 0.2);
+            max-width: 900px;
+            margin: 30px auto 0;
+        }
+
+        .solar-video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Highlight Box */
+        .solar-highlight-box {
+            background: linear-gradient(135deg, #0B4F6C 0%, #145A7A 100%);
+            color: #ffffff;
+            padding: 50px;
+            border-radius: 12px;
+            border-left: 5px solid #FDB813;
+            margin: 60px 0;
+        }
+
+        .solar-highlight-box h3 {
+            color: #FDB813;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .solar-highlight-box p {
+            color: #e5e5e5;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .solar-footer {
+            background: #0B4F6C;
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .solar-footer p {
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+
+        .solar-footer a {
+            color: #FDB813;
+            text-decoration: none;
+        }
+
+        .solar-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .solar-header {
+                padding: 15px 20px;
+            }
+
+            .solar-hero {
+                padding: 40px 20px 30px;
+            }
+
+            .solar-demo-section {
+                padding: 40px 0;
+            }
+
+            .solar-demo-grid {
+                grid-template-columns: 1fr;
+                padding: 0 20px;
+                gap: 30px;
+            }
+
+            .solar-content {
+                padding: 0 20px;
+            }
+
+            .solar-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .solar-highlight-box {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Solar Header -->
+    <header class="solar-header">
+        <h1>☀️ AI for Solar</h1>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="solar-hero">
+        <h1 id="hero-title">AI-Powered Customer Engagement for Solar Companies</h1>
+        <p id="hero-subtitle">Maximize your solar installation opportunities with intelligent automation</p>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="solar-demo-section">
+        <div class="solar-demo-grid">
+            <!-- Voice AI Demo -->
+            <div class="solar-demo-card">
+                <h3 id="voice-demo-title">🎙️ Voice AI Demo</h3>
+                <p id="voice-demo-desc">Experience AI-powered customer conversations</p>
+                <iframe id="demo-iframe" class="solar-demo-iframe" src="" allow="microphone"></iframe>
+            </div>
+
+            <!-- SMS Agent Demo -->
+            <div class="solar-demo-card">
+                <h3 id="sms-demo-title">📱 SMS Agent Demo</h3>
+                <p id="sms-demo-desc">See how AI reactivates leads via text</p>
+                <a href="#" id="sms-demo-link" class="solar-btn">Start Conversation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="solar-content">
+        <!-- Solutions Grid -->
+        <section class="solar-section">
+            <h2 class="solar-section-title" id="solution1-title">Database Reactivation</h2>
+            <div class="solar-grid">
+                <div class="solar-card">
+                    <h3>☀️ Past Customers</h3>
+                    <p id="solution1-desc-1">Automatically reconnect with homeowners who inquired about solar but didn't
+                        proceed. Our AI reaches out at the perfect time when energy prices spike or government rebates
+                        become available.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>⚡ System Upgrades</h3>
+                    <p id="solution1-desc-2">Identify customers with older solar systems ready for upgrades or battery
+                        additions. AI agents proactively contact them about new technology and improved savings.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>🔄 Referral Generation</h3>
+                    <p id="solution1-desc-3">Engage satisfied customers to generate referrals from their neighbors and
+                        friends. AI makes it effortless for happy customers to recommend your services.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution 2 -->
+        <section class="solar-section">
+            <h2 class="solar-section-title" id="solution2-title">24/7 Lead Qualification</h2>
+            <div class="solar-grid">
+                <div class="solar-card">
+                    <h3>🌙 After-Hours Response</h3>
+                    <p id="solution2-desc-1">Never miss a lead. AI responds instantly to inquiries 24/7, qualifying
+                        prospects and booking consultations even when your team is offline.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>📊 Smart Qualification</h3>
+                    <p id="solution2-desc-2">AI asks the right questions about roof type, shading, energy usage, and
+                        budget to qualify leads before they reach your consultants.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>📅 Instant Booking</h3>
+                    <p id="solution2-desc-3">Qualified leads can book on-site consultations directly through AI
+                        conversations, syncing seamlessly with your team's calendar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution 3 -->
+        <section class="solar-section">
+            <h2 class="solar-section-title" id="solution3-title">CRM Integration</h2>
+            <div class="solar-grid">
+                <div class="solar-card">
+                    <h3>💼 Seamless Sync</h3>
+                    <p id="solution3-desc-1">Integrate with your existing CRM system. All AI conversations, lead data,
+                        and appointments automatically sync to your database.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>📈 Pipeline Management</h3>
+                    <p id="solution3-desc-2">Track every lead from initial contact through installation. AI updates lead
+                        stages, adds notes, and triggers follow-ups at optimal times.</p>
+                </div>
+
+                <div class="solar-card">
+                    <h3>🎯 Performance Analytics</h3>
+                    <p id="solution3-desc-3">Monitor conversion rates, response times, and ROI. See exactly how AI
+                        automation impacts your bottom line with detailed reporting.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why This Matters -->
+        <div class="solar-highlight-box">
+            <h3>Why This Matters for Solar Companies</h3>
+            <p id="why-it-matters">The solar industry moves fast, and homeowners have questions 24/7. Our AI automation
+                ensures you never miss an opportunity, whether it's reactivating a past inquiry, responding to a
+                midnight website form, or following up with installation customers about battery upgrades. Everything
+                stays organized and your team focuses on consultations and installations while AI handles the repetitive
+                engagement work.</p>
+        </div>
+
+        <!-- Video Section -->
+        <section class="solar-video-section">
+            <h2 class="solar-section-title">See It In Action</h2>
+            <div class="solar-video-container" id="video-container">
+                <div
+                    style="background: #f8f8f8; display: flex; align-items: center; justify-content: center; height: 100%; color: #999;">
+                    <p>📹 Video Demo Loading...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="solar-footer">
+        <p>&copy; 2024 AWE2M8 AI Solutions. All rights reserved.</p>
+        <p style="margin-top: 15px; font-size: 0.85rem;">Empowering Solar Companies with AI Automation</p>
+    </footer>
+
+    <script>
+        // Load content from content.json
+        fetch('../../content/content.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Content file not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const content = data.industries.solar;
+
+                // Update page title
+                if (content.pageTitle) {
+                    document.title = content.pageTitle;
+                }
+
+                // Update hero
+                if (content.heroTitle) {
+                    document.getElementById('hero-title').textContent = content.heroTitle;
+                }
+                if (content.heroSubtitle) {
+                    document.getElementById('hero-subtitle').textContent = content.heroSubtitle;
+                }
+
+                // Update Voice AI Demo section
+                if (content.voiceAIDemoTitle) {
+                    document.getElementById('voice-demo-title').textContent = content.voiceAIDemoTitle;
+                }
+                if (content.voiceAIDemoDescription) {
+                    document.getElementById('voice-demo-desc').textContent = content.voiceAIDemoDescription;
+                }
+
+                // Update SMS Demo section
+                if (content.smsDemoTitle) {
+                    document.getElementById('sms-demo-title').textContent = content.smsDemoTitle;
+                }
+                if (content.smsDemoDescription) {
+                    document.getElementById('sms-demo-desc').textContent = content.smsDemoDescription;
+                }
+
+                // Load Voice AI iframe
+                const voiceIframe = document.getElementById('demo-iframe');
+                if (content.voiceAIOrbUrl && content.voiceAIOrbUrl.trim() !== '') {
+                    voiceIframe.src = content.voiceAIOrbUrl;
+                } else {
+                    voiceIframe.parentElement.innerHTML = '<div style="color: #999; padding: 20px; text-align: center; font-size: 0.9em;">Voice AI URL not configured</div>';
+                }
+
+                // Load SMS demo URL
+                const smsLink = document.getElementById('sms-demo-link');
+                if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
+                    smsLink.href = content.smsAgentDemoUrl;
+                }
+
+                // Solution 1
+                if (content.solution1Title) {
+                    document.getElementById('solution1-title').textContent = content.solution1Title;
+                }
+                if (content.solution1Description1) {
+                    document.getElementById('solution1-desc-1').textContent = content.solution1Description1;
+                }
+                if (content.solution1Description2) {
+                    document.getElementById('solution1-desc-2').textContent = content.solution1Description2;
+                }
+                if (content.solution1Description3) {
+                    document.getElementById('solution1-desc-3').textContent = content.solution1Description3;
+                }
+
+                // Solution 2
+                if (content.solution2Title) {
+                    document.getElementById('solution2-title').textContent = content.solution2Title;
+                }
+                if (content.solution2Description1) {
+                    document.getElementById('solution2-desc-1').textContent = content.solution2Description1;
+                }
+                if (content.solution2Description2) {
+                    document.getElementById('solution2-desc-2').textContent = content.solution2Description2;
+                }
+                if (content.solution2Description3) {
+                    document.getElementById('solution2-desc-3').textContent = content.solution2Description3;
+                }
+
+                // Solution 3
+                if (content.solution3Title) {
+                    document.getElementById('solution3-title').textContent = content.solution3Title;
+                }
+                if (content.solution3Description1) {
+                    document.getElementById('solution3-desc-1').textContent = content.solution3Description1;
+                }
+                if (content.solution3Description2) {
+                    document.getElementById('solution3-desc-2').textContent = content.solution3Description2;
+                }
+                if (content.solution3Description3) {
+                    document.getElementById('solution3-desc-3').textContent = content.solution3Description3;
+                }
+
+                // Why It Matters
+                if (content.whyItMatters) {
+                    document.getElementById('why-it-matters').innerHTML = content.whyItMatters;
+                }
+
+                // Load video URL
+                if (content.videoUrl && content.videoUrl.trim() !== '') {
+                    document.getElementById('video-container').innerHTML = `
+                        <iframe 
+                            src="${content.videoUrl}" 
+                            allow="autoplay"
+                            style="width: 100%; height: 100%; border: none;"
+                        ></iframe>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+            });
+    </script>
+</body>
+
+</html>
