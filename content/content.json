@@ -114,6 +114,31 @@
       "solution2Description": "Fire safety inquiries are urgent and time-sensitive. When clients call about mandatory compliance, overdue inspections, or emergency testing, they need answers immediately—not voicemail. Our AI receptionist answers 24/7, answers FAQs about AS3745-2010 and AS1851 standards, provides pricing and books service consultations while your team focuses on inspections.",
       "solution3Title": "Automate Compliance Document Collection",
       "solution3Description": "Stop chasing clients for previous reports, equipment photos, or required forms. Our AI persistently follows up via SMS to collect necessary documentation for AFSS submissions, Occupation Certificates, and compliance reports—saving your admin team hours of manual follow-up and ensuring nothing falls through the cracks."
+    },
+    "solar": {
+      "pageTitle": "AI Solutions for Solar Companies",
+      "heroTitle": "AI-Powered Customer Engagement for Solar Companies",
+      "heroSubtitle": "Maximize your solar installation opportunities with intelligent automation",
+      "voiceAIDemoTitle": "🎙️ Voice AI Demo",
+      "voiceAIDemoDescription": "Experience AI-powered customer conversations",
+      "voiceAIOrbUrl": "",
+      "smsDemoTitle": "📱 SMS Agent Demo",
+      "smsDemoDescription": "See how AI reactivates leads via text",
+      "smsAgentDemoUrl": "",
+      "solution1Title": "Database Reactivation",
+      "solution1Description1": "Automatically reconnect with homeowners who inquired about solar but didn't proceed. Our AI reaches out at the perfect time when energy prices spike or government rebates become available.",
+      "solution1Description2": "Identify customers with older solar systems ready for upgrades or battery additions. AI agents proactively contact them about new technology and improved savings.",
+      "solution1Description3": "Engage satisfied customers to generate referrals from their neighbors and friends. AI makes it effortless for happy customers to recommend your services.",
+      "solution2Title": "24/7 Lead Qualification",
+      "solution2Description1": "Never miss a lead. AI responds instantly to inquiries 24/7, qualifying prospects and booking consultations even when your team is offline.",
+      "solution2Description2": "AI asks the right questions about roof type, shading, energy usage, and budget to qualify leads before they reach your consultants.",
+      "solution2Description3": "Qualified leads can book on-site consultations directly through AI conversations, syncing seamlessly with your team's calendar.",
+      "solution3Title": "CRM Integration",
+      "solution3Description1": "Integrate with your existing CRM system. All AI conversations, lead data, and appointments automatically sync to your database.",
+      "solution3Description2": "Track every lead from initial contact through installation. AI updates lead stages, adds notes, and triggers follow-ups at optimal times.",
+      "solution3Description3": "Monitor conversion rates, response times, and ROI. See exactly how AI automation impacts your bottom line with detailed reporting.",
+      "whyItMatters": "The solar industry moves fast, and homeowners have questions 24/7. Our AI automation ensures you never miss an opportunity, whether it's reactivating a past inquiry, responding to a midnight website form, or following up with installation customers about battery upgrades. Everything stays organized and your team focuses on consultations and installations while AI handles the repetitive engagement work.",
+      "videoUrl": ""
     }
   },
   "partners": {
