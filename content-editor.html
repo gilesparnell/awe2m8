@@ -130,7 +130,7 @@
 
         .floating-selector-btn {
             position: fixed;
-            bottom: 30px;
+            top: 30px;
             right: 30px;
             width: 60px;
             height: 60px;
@@ -150,7 +150,7 @@
 
         .floating-selector-btn.visible {
             display: flex;
-            animation: slideInUp 0.4s ease, gentlePulse 2s infinite 0.4s;
+            animation: slideInDown 0.4s ease, gentlePulse 2s infinite 0.4s;
         }
 
         .floating-selector-btn:hover {
@@ -162,7 +162,9 @@
         .floating-selector-btn::before {
             content: 'Change Page';
             position: absolute;
-            right: 70px;
+            left: -130px;
+            top: 50%;
+            transform: translateY(-50%);
             background: rgba(0, 255, 0, 0.9);
             color: #000;
             padding: 8px 15px;
@@ -191,10 +193,10 @@
             }
         }
 
-        @keyframes slideInUp {
+        @keyframes slideInDown {
             from {
                 opacity: 0;
-                transform: translateY(100px);
+                transform: translateY(-100px);
             }
 
             to {
@@ -551,7 +553,10 @@
 
         // Load demo content
         function loadDemoContent(pageKey) {
-            if (!contentData[pageKey]) return;
+            // Create empty structure if doesn't exist
+            if (!contentData[pageKey]) {
+                contentData[pageKey] = {};
+            }
 
             const content = contentData[pageKey];
             const editorDiv = document.getElementById('content-editor');
@@ -630,7 +635,13 @@
 
         // Load industry content
         function loadIndustryContent(pageKey) {
-            if (!contentData.industries || !contentData.industries[pageKey]) return;
+            // Create empty structure if doesn't exist
+            if (!contentData.industries) {
+                contentData.industries = {};
+            }
+            if (!contentData.industries[pageKey]) {
+                contentData.industries[pageKey] = {};
+            }
 
             const content = contentData.industries[pageKey];
             const editorDiv = document.getElementById('content-editor');
@@ -820,7 +831,13 @@
 
         // Load partner content
         function loadPartnerContent(pageKey) {
-            if (!contentData.partners || !contentData.partners[pageKey]) return;
+            // Create empty structure if doesn't exist
+            if (!contentData.partners) {
+                contentData.partners = {};
+            }
+            if (!contentData.partners[pageKey]) {
+                contentData.partners[pageKey] = {};
+            }
 
             const content = contentData.partners[pageKey];
             const editorDiv = document.getElementById('content-editor');
