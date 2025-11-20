@@ -32,16 +32,16 @@
             <div class="demo-grid"
                 style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 900px; margin: 0 auto;">
                 <div class="demo-box">
-                    <h3>📱 SMS Demo</h3>
-                    <p>Experience member reactivation texts</p>
+                    <h3 id="quick-sms-title">📱 SMS Demo</h3>
+                    <p id="quick-sms-description">Experience member reactivation texts</p>
                     <a href="#" id="quick-sms-demo-link" target="_blank" rel="noopener noreferrer" class="card-link">
                         Start Text Conversation →
                     </a>
                 </div>
 
                 <div class="demo-box">
-                    <h3>💬 Chat AI</h3>
-                    <p>Chat with our member support AI</p>
+                    <h3 id="quick-chat-title">💬 Chat AI</h3>
+                    <p id="quick-chat-description">Chat with our member support AI</p>
                     <div class="iframe-container" id="quick-orb-container">
                         <!-- Orb iframe will be loaded here -->
                     </div>
@@ -149,62 +149,100 @@
     </div>
 
     <script>
-        // Load content from JSON file
-        etch('/content/content.json')
-            .then(response => response.json())
-            .then(data => {
-                const gymData = data.industries?.gyms;
+        // Load content from JSON file - try multiple paths
+        async function loadContent() {
+            const possiblePaths = [
+                '../content/content.json',
+                './content/content.json',
+                '/content/content.json',
+                'content.json'
+            ];
 
-                if (gymData) {
-                    // Update hero
-                    if (gymData.heroTitle) {
-                        document.getElementById('hero-title').textContent = gymData.heroTitle;
-                    }
-                    if (gymData.heroSubtitle) {
-                        document.getElementById('hero-subtitle').textContent = gymData.heroSubtitle;
-                    }
+            for (const path of possiblePaths) {
+                try {
+                    console.log('Trying to load:', path);
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ Content loaded from:', path);
+                        console.log('Full data:', data);
 
-                    // Update Solution 1 (Database Reactivation)
-                    if (gymData.solution1Title) {
-                        document.getElementById('solution1-title').textContent = gymData.solution1Title;
-                    }
-                    if (gymData.solution1Description) {
-                        document.getElementById('solution1-description').textContent = gymData.solution1Description;
-                    }
+                        const gymData = data.industries?.gyms;
+                        console.log('Gym data:', gymData);
 
-                    // Load SMS demo link
-                    if (gymData.smsAgentDemoUrl) {
-                        document.getElementById('quick-sms-demo-link').href = gymData.smsAgentDemoUrl;
-                    }
+                        if (gymData) {
+                            // Update hero
+                            if (gymData.heroTitle) {
+                                document.getElementById('hero-title').textContent = gymData.heroTitle;
+                            }
+                            if (gymData.heroSubtitle) {
+                                document.getElementById('hero-subtitle').textContent = gymData.heroSubtitle;
+                            }
 
-                    // Load Database Reactivation orb
-                    if (gymData.databaseReactivationOrbUrl) {
-                        const orbHTML = `
-                            <iframe src="${gymData.databaseReactivationOrbUrl}" 
-                                    allow="microphone *; camera *; autoplay *; display-capture *"
-                                    style="width: 100%; height: 300px; border: none; border-radius: 10px;">
-                            </iframe>
-                        `;
-                        document.getElementById('quick-orb-container').innerHTML = orbHTML;
-                    }
+                            // Update Quick Demo Section - SMS
+                            if (gymData.quickSmsDemoTitle) {
+                                document.getElementById('quick-sms-title').textContent = gymData.quickSmsDemoTitle;
+                            }
+                            if (gymData.quickSmsDemoDescription) {
+                                document.getElementById('quick-sms-description').textContent = gymData.quickSmsDemoDescription;
+                            }
+                            if (gymData.smsAgentDemoUrl) {
+                                document.getElementById('quick-sms-demo-link').href = gymData.smsAgentDemoUrl;
+                                console.log('✅ SMS Demo URL set to:', gymData.smsAgentDemoUrl);
+                            }
 
-                    // Update Solution 2 (Voice AI)
-                    if (gymData.solution2Title) {
-                        document.getElementById('solution2-title').textContent = gymData.solution2Title;
-                    }
-                    if (gymData.solution2Description) {
-                        document.getElementById('solution2-description').textContent = gymData.solution2Description;
-                    }
+                            // Update Quick Demo Section - Chat AI
+                            if (gymData.quickChatAITitle) {
+                                document.getElementById('quick-chat-title').textContent = gymData.quickChatAITitle;
+                            }
+                            if (gymData.quickChatAIDescription) {
+                                document.getElementById('quick-chat-description').textContent = gymData.quickChatAIDescription;
+                            }
+                            if (gymData.databaseReactivationOrbUrl) {
+                                const orbHTML = `
+                                    <iframe src="${gymData.databaseReactivationOrbUrl}" 
+                                            allow="microphone *; camera *; autoplay *; display-capture *"
+                                            style="width: 100%; height: 300px; border: none; border-radius: 10px;">
+                                    </iframe>
+                                `;
+                                document.getElementById('quick-orb-container').innerHTML = orbHTML;
+                                console.log('✅ Orb URL set to:', gymData.databaseReactivationOrbUrl);
+                            }
 
-                    // Update page title
-                    if (gymData.pageTitle) {
-                        document.title = gymData.pageTitle;
+                            // Update Solution 1 (Database Reactivation)
+                            if (gymData.solution1Title) {
+                                document.getElementById('solution1-title').textContent = gymData.solution1Title;
+                            }
+                            if (gymData.solution1Description) {
+                                document.getElementById('solution1-description').textContent = gymData.solution1Description;
+                            }
+
+                            // Update Solution 2 (Voice AI)
+                            if (gymData.solution2Title) {
+                                document.getElementById('solution2-title').textContent = gymData.solution2Title;
+                            }
+                            if (gymData.solution2Description) {
+                                document.getElementById('solution2-description').textContent = gymData.solution2Description;
+                            }
+
+                            // Update page title
+                            if (gymData.pageTitle) {
+                                document.title = gymData.pageTitle;
+                            }
+                        } else {
+                            console.error('❌ No gyms data found in industries object');
+                        }
+                        return; // Successfully loaded, exit function
                     }
+                } catch (error) {
+                    console.log('Failed to load from:', path, error);
                 }
-            })
-            .catch(error => {
-                console.error('Error loading content:', error);
-            });
+            }
+
+            console.error('❌ Could not load content.json from any path');
+        }
+
+        loadContent();
     </script>
 
     <script src="/js/interactive-base.js"></script>

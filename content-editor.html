@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 AWE2M8 Content Editor v3</title>
+    <title>🎨 AWE2M8 Content Editor v4</title>
     <style>
         body {
             background: linear-gradient(135deg, #0a2e1f 0%, #051510 100%);
@@ -350,8 +350,8 @@
 <body>
     <div class="editor-container">
         <div class="editor-header">
-            <h1>🎨 AWE2M8 Content Editor v3</h1>
-            <p>Streamlined editor for all your content needs</p>
+            <h1>🎨 AWE2M8 Content Editor v4</h1>
+            <p>Complete control over all your content</p>
             <button class="file-connect-btn" onclick="connectToFile()">
                 📁 Connect to Project File
             </button>
@@ -729,7 +729,7 @@
                         <textarea id="ind-sol2-desc3">${content.solution2Description3 || ''}</textarea>
                     </div>
                     
-                    <h3 class="section-divider">Solution 3: ROYA Integration</h3>
+                    <h3 class="section-divider">Solution 3: CRM Integration</h3>
                     <div class="form-group">
                         <label>Solution 3 Title</label>
                         <input type="text" id="ind-sol3-title" value="${content.solution3Title || ''}">
@@ -778,6 +778,24 @@
                 <div class="form-group">
                     <label>Hero Subtitle</label>
                     <textarea id="ind-hero-subtitle">${content.heroSubtitle || ''}</textarea>
+                </div>
+                
+                <h3 class="section-divider">🔥 Quick Demo Section (Top of Page)</h3>
+                <div class="form-group">
+                    <label>SMS Demo Title</label>
+                    <input type="text" id="ind-quick-sms-title" value="${content.quickSmsDemoTitle || '📱 SMS Demo'}">
+                </div>
+                <div class="form-group">
+                    <label>SMS Demo Description</label>
+                    <textarea id="ind-quick-sms-desc">${content.quickSmsDemoDescription || 'See how AI reactivates clients'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Chat AI Title</label>
+                    <input type="text" id="ind-quick-chat-title" value="${content.quickChatAITitle || '💬 Chat AI'}">
+                </div>
+                <div class="form-group">
+                    <label>Chat AI Description</label>
+                    <textarea id="ind-quick-chat-desc">${content.quickChatAIDescription || 'Chat with our AI'}</textarea>
                 </div>
                 
                 <h3 class="section-divider">Solution 1</h3>
@@ -975,11 +993,15 @@
                 return;
             }
 
-            // Regular industry structure
+            // Regular industry structure - with new quick demo fields
             const updates = {
                 pageTitle: document.getElementById('ind-page-title').value,
                 heroTitle: document.getElementById('ind-hero-title').value,
                 heroSubtitle: document.getElementById('ind-hero-subtitle').value,
+                quickSmsDemoTitle: document.getElementById('ind-quick-sms-title').value,
+                quickSmsDemoDescription: document.getElementById('ind-quick-sms-desc').value,
+                quickChatAITitle: document.getElementById('ind-quick-chat-title').value,
+                quickChatAIDescription: document.getElementById('ind-quick-chat-desc').value,
                 solution1Title: document.getElementById('ind-sol1-title').value,
                 solution1Description: document.getElementById('ind-sol1-desc').value,
                 smsAgentDemoUrl: document.getElementById('ind-sms-url').value,

@@ -31,16 +31,16 @@
             <div class="demo-grid"
                 style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 900px; margin: 0 auto;">
                 <div class="demo-box">
-                    <h3>📱 SMS Demo</h3>
-                    <p>See how AI reactivates clients due for renewals</p>
+                    <h3 id="quick-sms-title">📱 SMS Demo</h3>
+                    <p id="quick-sms-description">See how AI reactivates clients due for renewals</p>
                     <a href="#" id="quick-sms-demo-link" target="_blank" rel="noopener noreferrer" class="card-link">
                         Start Text Conversation →
                     </a>
                 </div>
 
                 <div class="demo-box">
-                    <h3>💬 Chat AI</h3>
-                    <p>Chat with our compliance support AI</p>
+                    <h3 id="quick-chat-title">💬 Chat AI</h3>
+                    <p id="quick-chat-description">Chat with our compliance support AI</p>
                     <div class="iframe-container" id="quick-orb-container">
                         <!-- Orb iframe will be loaded here -->
                     </div>
@@ -220,23 +220,25 @@
                                 document.getElementById('hero-subtitle').textContent = fireSafetyData.heroSubtitle;
                             }
 
-                            // Update Solution 1 (Database Reactivation)
-                            if (fireSafetyData.solution1Title) {
-                                document.getElementById('solution1-title').textContent = fireSafetyData.solution1Title;
+                            // Update Quick Demo Section - SMS
+                            if (fireSafetyData.quickSmsDemoTitle) {
+                                document.getElementById('quick-sms-title').textContent = fireSafetyData.quickSmsDemoTitle;
                             }
-                            if (fireSafetyData.solution1Description) {
-                                document.getElementById('solution1-description').textContent = fireSafetyData.solution1Description;
+                            if (fireSafetyData.quickSmsDemoDescription) {
+                                document.getElementById('quick-sms-description').textContent = fireSafetyData.quickSmsDemoDescription;
                             }
-
-                            // Load SMS demo link
                             if (fireSafetyData.smsAgentDemoUrl) {
                                 document.getElementById('quick-sms-demo-link').href = fireSafetyData.smsAgentDemoUrl;
                                 console.log('✅ SMS Demo URL set to:', fireSafetyData.smsAgentDemoUrl);
-                            } else {
-                                console.warn('⚠️ smsAgentDemoUrl not found in fireSafety data');
                             }
 
-                            // Load Database Reactivation orb
+                            // Update Quick Demo Section - Chat AI
+                            if (fireSafetyData.quickChatAITitle) {
+                                document.getElementById('quick-chat-title').textContent = fireSafetyData.quickChatAITitle;
+                            }
+                            if (fireSafetyData.quickChatAIDescription) {
+                                document.getElementById('quick-chat-description').textContent = fireSafetyData.quickChatAIDescription;
+                            }
                             if (fireSafetyData.databaseReactivationOrbUrl) {
                                 const orbHTML = `
                                     <iframe src="${fireSafetyData.databaseReactivationOrbUrl}" 
@@ -246,6 +248,14 @@
                                 `;
                                 document.getElementById('quick-orb-container').innerHTML = orbHTML;
                                 console.log('✅ Orb URL set to:', fireSafetyData.databaseReactivationOrbUrl);
+                            }
+
+                            // Update Solution 1 (Database Reactivation)
+                            if (fireSafetyData.solution1Title) {
+                                document.getElementById('solution1-title').textContent = fireSafetyData.solution1Title;
+                            }
+                            if (fireSafetyData.solution1Description) {
+                                document.getElementById('solution1-description').textContent = fireSafetyData.solution1Description;
                             }
 
                             // Update Solution 2 (Voice AI)
