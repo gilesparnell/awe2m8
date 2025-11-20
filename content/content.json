@@ -105,15 +105,16 @@
     "fireSafety": {
       "pageTitle": "Automating your Fire Safety Compliance",
       "heroTitle": "Automating your Fire Safety Compliance",
-      "heroSubtitle": "At AWE2M8 we would like to listern to your business challenges, with a view to helping reduce costs, streamline operations, and improve efficiencies. We can do this through business process optimisation, and the use of AI, Voice and Text.\n\nBy leveraging automationm, we could automate all your compliance follow-ups, book inspections 24/7, and turn your client database into predictable recurring revenue.",
+      "heroSubtitle": "At AWE2M8 we specialise in listening to your business challenges, with a view to increasing revenue, reducing costs, streamlining operations, and introducing efficiencies. We do this through business process optimisation with the help of AI, Voice and Text.\n\nAs an example by leveraging automation, we could automate all your compliance follow-ups, book inspections 24/7, and turn your old, cold client database into predictable recurring revenue.",
       "solution1Title": "Automate Mandatory Compliance Follow-Up",
       "solution1Description": "Your existing client database is sitting on massive recurring revenue. Every client needs annual AFSS statements, 6-month extinguisher checks, and routine testing. Our AI automatically reaches out via SMS when renewals are due, qualifies clients, handles objections, and books inspections directly into your calendar—turning compliance obligations into scheduled revenue.",
-      "smsAgentDemoUrl": "https://agentdemo.ai/welcome/i8uUDBIWOu",
-      "databaseReactivationOrbUrl": "https://iframes.ai/o/1761186736891x501526879500238850",
+      "smsAgentDemoUrl": "https://agentdemo.ai/welcome/N9V4oMMgsb",
+      "databaseReactivationOrbUrl": "",
       "solution2Title": "Never Miss An Urgent Compliance Call",
       "solution2Description": "Fire safety inquiries are urgent and time-sensitive. When clients call about mandatory compliance, overdue inspections, or emergency testing, they need answers immediately—not voicemail. Our AI receptionist answers 24/7, answers FAQs about AS3745-2010 and AS1851 standards, provides pricing and books service consultations while your team focuses on inspections.",
       "solution3Title": "Automate Compliance Document Collection",
-      "solution3Description": "Stop chasing clients for previous reports, equipment photos, or required forms. Our AI persistently follows up via SMS to collect necessary documentation for AFSS submissions, Occupation Certificates, and compliance reports—saving your admin team hours of manual follow-up and ensuring nothing falls through the cracks."
+      "solution3Description": "Stop chasing clients for previous reports, equipment photos, or required forms. Our AI persistently follows up via SMS to collect necessary documentation for AFSS submissions, Occupation Certificates, and compliance reports—saving your admin team hours of manual follow-up and ensuring nothing falls through the cracks.",
+      "voiceAIOrbUrl": "https://iframes.ai/o/1761186736891x501526879500238850"
     },
     "solar": {
       "pageTitle": "AI Solutions for Solar Companies",
