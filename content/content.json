@@ -171,7 +171,7 @@
       "voiceAIOrbUrl": "https://iframes.ai/o/1762597584835x505353369393561600?",
       "smsDemoTitle": "📱 SMS Agent Demo",
       "smsDemoDescription": "See how AI customer database reactivation, via text can generate revenue for you",
-      "smsAgentDemoUrl": "",
+      "smsAgentDemoUrl": "#",
       "solution1Title": "Database Reactivation",
       "solution1Description1": "Automatically reconnect with homeowners who inquired about solar but didn't proceed. Our AI reaches out at the perfect time when energy prices spike or government rebates become available.",
       "solution1Description2": "Identify customers with older solar systems ready for upgrades or battery additions. AI agents proactively contact them about new technology and improved savings.",
@@ -186,6 +186,51 @@
       "solution3Description3": "Monitor conversion rates, response times, and ROI. See exactly how AI automation impacts your bottom line with detailed reporting.",
       "whyItMatters": "The solar industry moves fast, and homeowners have questions 24/7. Our AI automation ensures you never miss an opportunity, whether it's reactivating a past inquiry, responding to a midnight website form, or following up with installation customers about battery upgrades. Everything stays organized and your team focuses on consultations and installations while AI handles the repetitive engagement work.",
       "videoUrl": ""
+    },
+    "realestate": {
+      "pageTitle": "AI Solutions for Real Estate",
+      "heroTitle": "🏠 AI Solutions for Real Estate",
+      "heroSubtitle": "Qualify leads instantly and schedule viewings automatically.",
+      "quickSmsDemoTitle": "📱 SMS Demo",
+      "quickSmsDemoDescription": "Experience lead qualification via text",
+      "quickChatAITitle": "💬 Chat AI",
+      "quickChatAIDescription": "Chat with our real estate assistant",
+      "solution1Title": "Qualify Leads Instantly",
+      "solution1Description": "Our AI engages with every lead immediately, asking the right questions to determine their needs and readiness to buy or sell.",
+      "solution2Title": "Schedule Viewings Automatically",
+      "solution2Description": "Qualified leads can book viewings directly into your calendar, saving you time and ensuring you never miss an opportunity.",
+      "smsAgentDemoUrl": "#",
+      "databaseReactivationOrbUrl": ""
+    },
+    "coaching": {
+      "pageTitle": "AI Solutions for Coaching & Consulting",
+      "heroTitle": "🎯 AI Solutions for Coaching & Consulting",
+      "heroSubtitle": "Book discovery calls and manage client communications effortlessly.",
+      "quickSmsDemoTitle": "📱 SMS Demo",
+      "quickSmsDemoDescription": "Experience client onboarding via text",
+      "quickChatAITitle": "💬 Chat AI",
+      "quickChatAIDescription": "Chat with our coaching assistant",
+      "solution1Title": "Automate Discovery Calls",
+      "solution1Description": "Let AI handle the initial conversation and booking of discovery calls, so you can focus on delivering value to your clients.",
+      "solution2Title": "Client Management",
+      "solution2Description": "Keep track of client progress and communications automatically with our intelligent AI assistant.",
+      "smsAgentDemoUrl": "#",
+      "databaseReactivationOrbUrl": ""
+    },
+    "education": {
+      "pageTitle": "AI Solutions for Education & Training",
+      "heroTitle": "🎓 AI Solutions for Education & Training",
+      "heroSubtitle": "Handle enrollment inquiries and course information 24/7.",
+      "quickSmsDemoTitle": "📱 SMS Demo",
+      "quickSmsDemoDescription": "Experience student enrollment via text",
+      "quickChatAITitle": "💬 Chat AI",
+      "quickChatAIDescription": "Chat with our education assistant",
+      "solution1Title": "24/7 Enrollment Support",
+      "solution1Description": "Answer student questions about courses, fees, and schedules instantly, any time of day or night.",
+      "solution2Title": "Course Information",
+      "solution2Description": "Provide detailed information about your curriculum and requirements without tying up your administrative staff.",
+      "smsAgentDemoUrl": "#",
+      "databaseReactivationOrbUrl": ""
     }
   },
   "partners": {
@@ -222,6 +267,21 @@
       "ctaButtonText": "Ray Whites Virtual Receptionist",
       "ctaDescription": "Experience how a trained-on-your-data Voice AI secretary could help you generate revenue- Always on, always answering, 24/7, never sleeps, always making books",
       "videoUrl": "https://drive.google.com/file/d/1NE5YK_NSYAJ_4V9CSXZBro418X-ckQNc/preview"
+    },
+    "patricksmortgages": {
+      "pageTitle": "Patricks Mortgage's - AI Demo",
+      "officeName": "Patricks Mortgage's",
+      "title": "AI Automation for Mortgage Brokers",
+      "heroDescription": "Streamline your mortgage process and focus on what truly matters – building client relationships – while saving time and money.",
+      "voiceAIDemoTitle": "Voice AI Assistant",
+      "voiceAIDemoDescription": "Our Voice AI Assistant is available 24/7 to handle client inquiries and book appointments, ensuring you never miss an opportunity.",
+      "iframeUrl": "",
+      "smsDemoTitle": "SMS Assistant",
+      "smsDemoDescription": "Instantly provide potential clients with quotes and updates via our SMS Assistant, enhancing customer satisfaction and engagement.",
+      "smsAgentDemoUrl": "#",
+      "videoUrl": "",
+      "whyItMatters": "<ul><li><strong>Efficiency Boost:</strong> Automate repetitive tasks and focus on strategic growth.</li><li><strong>24/7 Availability:</strong> Never miss a client inquiry with round-the-clock AI support.</li><li><strong>Cost Effective:</strong> Reduce overhead costs while increasing productivity.</li></ul>",
+      "howItWorks": "Our AI solutions integrate seamlessly with your existing systems to automate client interactions and streamline operations. Set up is quick and support is available to ensure smooth operation."
     }
   }
 }
