@@ -162,31 +162,6 @@
       "solution3Description": "Stop chasing clients for previous reports, equipment photos, or required forms. Our AI persistently follows up via SMS to collect necessary documentation for AFSS submissions, Occupation Certificates, and compliance reports—saving your admin team hours of manual follow-up and ensuring nothing falls through the cracks.",
       "voiceAIOrbUrl": ""
     },
-    "solar": {
-      "pageTitle": "AI Solutions for Solar Companies",
-      "heroTitle": "How can AI automation help you reduce you costs, and significantly increase your revenue ",
-      "heroSubtitle": "Maximize your solar installation opportunities with intelligent automation",
-      "voiceAIDemoTitle": "Virtual Receptionist",
-      "voiceAIDemoDescription": "Experience how an AI-powered virtual assistant can support your business, and help your revenue grow",
-      "voiceAIOrbUrl": "https://iframes.ai/o/1762597584835x505353369393561600?",
-      "smsDemoTitle": "📱 SMS Agent Demo",
-      "smsDemoDescription": "See how AI customer database reactivation, via text can generate revenue for you",
-      "smsAgentDemoUrl": "#",
-      "solution1Title": "Database Reactivation",
-      "solution1Description1": "Automatically reconnect with homeowners who inquired about solar but didn't proceed. Our AI reaches out at the perfect time when energy prices spike or government rebates become available.",
-      "solution1Description2": "Identify customers with older solar systems ready for upgrades or battery additions. AI agents proactively contact them about new technology and improved savings.",
-      "solution1Description3": "Engage satisfied customers to generate referrals from their neighbors and friends. AI makes it effortless for happy customers to recommend your services.",
-      "solution2Title": "24/7 Lead Qualification",
-      "solution2Description1": "Never miss a lead. AI responds instantly to inquiries 24/7, qualifying prospects and booking consultations even when your team is offline.",
-      "solution2Description2": "AI asks the right questions about roof type, shading, energy usage, and budget to qualify leads before they reach your consultants.",
-      "solution2Description3": "Qualified leads can book on-site consultations directly through AI conversations, syncing seamlessly with your team's calendar.",
-      "solution3Title": "CRM Integration",
-      "solution3Description1": "Integrate with your existing CRM system. All AI conversations, lead data, and appointments automatically sync to your database.",
-      "solution3Description2": "Track every lead from initial contact through installation. AI updates lead stages, adds notes, and triggers follow-ups at optimal times.",
-      "solution3Description3": "Monitor conversion rates, response times, and ROI. See exactly how AI automation impacts your bottom line with detailed reporting.",
-      "whyItMatters": "The solar industry moves fast, and homeowners have questions 24/7. Our AI automation ensures you never miss an opportunity, whether it's reactivating a past inquiry, responding to a midnight website form, or following up with installation customers about battery upgrades. Everything stays organized and your team focuses on consultations and installations while AI handles the repetitive engagement work.",
-      "videoUrl": ""
-    },
     "realestate": {
       "pageTitle": "AI Solutions for Real Estate",
       "heroTitle": "🏠 AI Solutions for Real Estate",
@@ -234,23 +209,6 @@
     }
   },
   "partners": {
-    "mickFanningSoftboards": {
-      "title": "Mick Fanning Softboards - AI Implementation",
-      "emoji": "🏄",
-      "heroDescription": "AI transformation roadmap for measurable growth and operational excellence",
-      "howItWorks": "",
-      "whyItMatters": "",
-      "ctaButtonText": "Try Voice Demo",
-      "ctaDescription": "Experience our AI in action",
-      "voiceAIDemoTitle": "Voice AI Demo",
-      "voiceAIDemoDescription": "Talk to our AI agent",
-      "smsDemoTitle": "SMS Demo",
-      "smsDemoDescription": "Experience AI via text message",
-      "iframeUrl": "",
-      "smsAgentDemoUrl": "",
-      "videoUrl": "",
-      "pageTitle": "Mick Fanning Softboards - AI Demo | AWE2M8"
-    },
     "rayWhiteUpperNorthShore": {
       "pageTitle": "Customer Database Reactivation - Demo",
       "title": "Customer Database Reactivation - Demo",
@@ -281,22 +239,9 @@
       "smsAgentDemoUrl": "#",
       "videoUrl": "",
       "whyItMatters": "<ul><li><strong>Efficiency Boost:</strong> Automate repetitive tasks and focus on strategic growth.</li><li><strong>24/7 Availability:</strong> Never miss a client inquiry with round-the-clock AI support.</li><li><strong>Cost Effective:</strong> Reduce overhead costs while increasing productivity.</li></ul>",
-      "howItWorks": "Our AI solutions integrate seamlessly with your existing systems to automate client interactions and streamline operations. Set up is quick and support is available to ensure smooth operation."
-    },
-    "patricksmortagemrokerage": {
-      "pageTitle": "Patricks Mortage Mrokerage - AI Demo",
-      "officeName": "Patricks Mortage Mrokerage",
-      "title": "AI-Powered Solutions for Mortgage Brokerage",
-      "heroDescription": "Revolutionize your mortgage process with AI automation, saving you time and money while enhancing client satisfaction.",
-      "voiceAIDemoTitle": "Voice AI Assistant",
-      "voiceAIDemoDescription": "Our Voice AI Assistant is available 24/7 to seamlessly book appointments, answer queries, and provide personalized support, ensuring your clients never miss an opportunity.",
-      "iframeUrl": "",
-      "smsDemoTitle": "SMS Assistant",
-      "smsDemoDescription": "With our SMS Assistant, instantly send quotes, reminders, and updates, keeping your clients informed and engaged with just a few taps.",
-      "smsAgentDemoUrl": "#",
-      "videoUrl": "",
-      "whyItMatters": "<ul><li><strong>Efficiency:</strong> Automate routine tasks to focus on what truly matters - building client relationships.</li><li><strong>Availability:</strong> Provide round-the-clock support with AI, ensuring clients receive help whenever they need it.</li><li><strong>Scalability:</strong> Easily manage increased client demands without expanding your team.</li></ul>",
-      "howItWorks": "Integrate AI tools into your existing systems to streamline operations, enhance client interactions, and boost productivity with minimal setup required."
+      "howItWorks": "Our AI solutions integrate seamlessly with your existing systems to automate client interactions and streamline operations. Set up is quick and support is available to ensure smooth operation.",
+      "logoUrl": "",
+      "ctaButtonText": ""
     }
   }
 }

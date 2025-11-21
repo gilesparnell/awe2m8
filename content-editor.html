@@ -1,3 +1,4 @@
+AsouXA
 <!DOCTYPE html>
 <html lang="en">
 
@@ -864,9 +865,12 @@
             editorDiv.style.display = 'block';
 
             editorDiv.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 class="section-title">${categoryOptions.demos.find(d => d.value === pageKey)?.label || pageKey}</h2>
-                    <button onclick="regenerateAIContent('${pageKey}', 'demo')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+                    <h2 class="section-title" style="margin:0; flex:1;">${categoryOptions.demos.find(d => d.value === pageKey)?.label || pageKey}</h2>
+                    <div style="display:flex; gap: 10px;">
+                        <button onclick="deletePage('${pageKey}', 'demos')" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                        <button onclick="regenerateAIContent('${pageKey}', 'demo')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -932,10 +936,7 @@
                     <input type="text" id="demo-video" value="${content.videoUrl || ''}">
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="save-btn" onclick="saveDemoContent('${pageKey}')" style="flex: 2;">💾 Save Changes</button>
-                    <button class="delete-btn" onclick="deletePage('${pageKey}', 'demos')" style="flex: 1; background: #ff4444; color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer;">🗑️ Delete Page</button>
-                </div>
+                <button class="save-btn" onclick="saveDemoContent('${pageKey}')">💾 Save Changes</button>
                 <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
@@ -958,9 +959,12 @@
             // Solar has a different structure
             if (pageKey === 'solar') {
                 editorDiv.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h2 class="section-title">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
-                        <button onclick="regenerateAIContent('${pageKey}', 'industry')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+                        <h2 class="section-title" style="margin:0; flex:1;">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
+                        <div style="display:flex; gap: 10px;">
+                            <button onclick="deletePage('${pageKey}', 'industries')" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                            <button onclick="regenerateAIContent('${pageKey}', 'industry')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -1068,10 +1072,7 @@
                         <input type="text" id="ind-video" value="${content.videoUrl || ''}">
                     </div>
                     
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="save-btn" onclick="saveIndustryContent('${pageKey}')" style="flex: 2;">💾 Save Changes</button>
-                        <button class="delete-btn" onclick="deletePage('${pageKey}', 'industries')" style="flex: 1; background: #ff4444; color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer;">🗑️ Delete Page</button>
-                    </div>
+                        <button class="save-btn" onclick="saveIndustryContent('${pageKey}')">💾 Save Changes</button>
                     <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
                 `;
                 return;
@@ -1079,7 +1080,13 @@
 
             // Regular industry structure (gyms, fireSafety, etc.)
             editorDiv.innerHTML = `
-                <h2 class="section-title">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap: 10px; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin:0; flex:1;">${categoryOptions.industries.find(i => i.value === pageKey)?.label || pageKey}</h2>
+                    <div style="display:flex; gap: 10px;">
+                        <button onclick="deletePage('${pageKey}', 'industries')" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                        <button onclick="regenerateAIContent('${pageKey}', 'industry')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                    </div>
+                </div>
                 
                 <div class="form-group">
                     <label>Page Title</label>
@@ -1152,10 +1159,7 @@
                     <input type="text" id="ind-dbr-orb" value="${content.databaseReactivationOrbUrl || ''}">
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="save-btn" onclick="saveIndustryContent('${pageKey}')" style="flex: 2;">💾 Save Changes</button>
-                    <button class="delete-btn" onclick="deletePage('${pageKey}', 'industries')" style="flex: 1; background: #ff4444; color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer;">🗑️ Delete Page</button>
-                </div>
+                    <button class="save-btn" onclick="saveIndustryContent('${pageKey}')">💾 Save Changes</button>
                 <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
@@ -1176,9 +1180,12 @@
             editorDiv.style.display = 'block';
 
             editorDiv.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 class="section-title">${categoryOptions.partners.find(p => p.value === pageKey)?.label || pageKey}</h2>
-                    <button onclick="regenerateAIContent('${pageKey}', 'partner')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap: 10px;">
+                    <h2 class="section-title" style="margin:0; flex:1;">${categoryOptions.partners.find(p => p.value === pageKey)?.label || pageKey}</h2>
+                    <div style="display:flex; gap: 10px;">
+                        <button onclick="deletePage('${pageKey}', 'partners')" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">🗑️ Delete</button>
+                        <button onclick="regenerateAIContent('${pageKey}', 'partner')" style="background: linear-gradient(135deg, #ff00ff, #cc00cc); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">✨ Regenerate with AI</button>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -1250,10 +1257,7 @@
                     <input type="text" id="ptnr-cta" value="${content.ctaButtonText || ''}">
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="save-btn" onclick="savePartnerContent('${pageKey}')" style="flex: 2;">💾 Save Changes</button>
-                    <button class="delete-btn" onclick="deletePage('${pageKey}', 'partners')" style="flex: 1; background: #ff4444; color: white; border: none; border-radius: 30px; font-weight: bold; cursor: pointer;">🗑️ Delete Page</button>
-                </div>
+                    <button class="save-btn" onclick="savePartnerContent('${pageKey}')">💾 Save Changes</button>
                 <div class="success-message" id="success-message">✅ Changes saved successfully!</div>
             `;
         }
