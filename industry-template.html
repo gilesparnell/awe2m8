@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industry Demo - AWE2M8</title>
+    <link rel="stylesheet" href="css/demo-styles.css">
+</head>
+
+<body>
+    <div class="header">
+        <a href="https://awe2m8.ai" class="logo">
+            <img src="images/AWE2M8Logo.png" alt="AWE2M8.ai">
+        </a>
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <div class="demo-section">
+        <!-- Hero Section -->
+        <div class="industry-hero">
+            <h1 id="hero-title">Loading...</h1>
+            <p class="subtitle" id="hero-subtitle">Loading...</p>
+        </div>
+
+        <!-- Quick Access Demos - 2 Columns Only -->
+        <section style="margin-bottom: 40px;">
+            <h2 style="text-align: center; margin-bottom: 30px;">Try Our AI Solutions</h2>
+            <div class="demo-grid"
+                style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 900px; margin: 0 auto;">
+                <div class="demo-box">
+                    <h3 id="quick-sms-title">📱 SMS Demo</h3>
+                    <p id="quick-sms-description">Experience member reactivation texts</p>
+                    <a href="#" id="quick-sms-demo-link" target="_blank" rel="noopener noreferrer" class="card-link">
+                        Start Text Conversation →
+                    </a>
+                </div>
+
+                <div class="demo-box">
+                    <h3 id="quick-chat-title">💬 Chat AI</h3>
+                    <p id="quick-chat-description">Chat with our member support AI</p>
+                    <div class="iframe-container" id="quick-orb-container">
+                        <!-- Orb iframe will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution 1 -->
+        <section class="solution-section">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">🔄</div>
+                    <h2 class="solution-title" id="solution1-title">Loading...</h2>
+                </div>
+
+                <p class="solution-description" id="solution1-description">Loading...</p>
+            </div>
+        </section>
+
+        <!-- Solution 2 -->
+        <section class="solution-section">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">📞</div>
+                    <h2 class="solution-title" id="solution2-title">Loading...</h2>
+                </div>
+
+                <p class="solution-description" id="solution2-description">Loading...</p>
+            </div>
+        </section>
+
+        <!-- Solution 3 (Optional) -->
+        <section class="solution-section" id="solution3-section" style="display: none;">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">📄</div>
+                    <h2 class="solution-title" id="solution3-title">Loading...</h2>
+                </div>
+
+                <p class="solution-description" id="solution3-description">Loading...</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Helper to get query params
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const industryId = getQueryParam('id');
+
+        if (!industryId) {
+            document.body.innerHTML = '<h1 style="color:white; text-align:center; margin-top:50px;">Error: No industry ID specified</h1>';
+        } else {
+            fetch('content/content.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Content file not found');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const content = data.industries[industryId];
+
+                    if (!content) {
+                        document.body.innerHTML = `<h1 style="color:white; text-align:center; margin-top:50px;">Error: Industry "${industryId}" not found</h1>`;
+                        return;
+                    }
+
+                    // Update Page Title
+                    if (content.pageTitle) document.title = content.pageTitle;
+
+                    // Update Hero
+                    if (content.heroTitle) document.getElementById('hero-title').textContent = content.heroTitle;
+                    if (content.heroSubtitle) document.getElementById('hero-subtitle').textContent = content.heroSubtitle;
+
+                    // Update Quick Demo Section - SMS
+                    if (content.quickSmsDemoTitle) document.getElementById('quick-sms-title').textContent = content.quickSmsDemoTitle;
+                    if (content.quickSmsDemoDescription) document.getElementById('quick-sms-description').textContent = content.quickSmsDemoDescription;
+                    if (content.smsAgentDemoUrl) {
+                        document.getElementById('quick-sms-demo-link').href = content.smsAgentDemoUrl;
+                    } else {
+                        document.getElementById('quick-sms-demo-link').style.display = 'none';
+                    }
+
+                    // Update Quick Demo Section - Chat AI
+                    if (content.quickChatAITitle) document.getElementById('quick-chat-title').textContent = content.quickChatAITitle;
+                    if (content.quickChatAIDescription) document.getElementById('quick-chat-description').textContent = content.quickChatAIDescription;
+
+                    // Handle Orb URL (Voice AI)
+                    // Note: Some industries use 'databaseReactivationOrbUrl' and others 'voiceAIOrbUrl' for the orb. 
+                    // We should check which one is populated or if there's a convention. 
+                    // Looking at gyms.json, it uses databaseReactivationOrbUrl for the orb container.
+                    // But solar uses voiceAIOrbUrl. Let's try to find one that is set.
+
+                    const orbUrl = content.databaseReactivationOrbUrl || content.voiceAIOrbUrl;
+
+                    if (orbUrl) {
+                        const orbHTML = `
+                            <iframe src="${orbUrl}" 
+                                    allow="microphone *; camera *; autoplay *; display-capture *"
+                                    style="width: 100%; height: 300px; border: none; border-radius: 10px;">
+                            </iframe>
+                        `;
+                        document.getElementById('quick-orb-container').innerHTML = orbHTML;
+                    } else {
+                        document.getElementById('quick-orb-container').innerHTML = '<p style="text-align:center; padding:20px; opacity:0.7;">No interactive demo available.</p>';
+                    }
+
+                    // Update Solution 1
+                    if (content.solution1Title) document.getElementById('solution1-title').textContent = content.solution1Title;
+                    if (content.solution1Description) document.getElementById('solution1-description').textContent = content.solution1Description;
+                    // Handle array of descriptions if present (like in solar)
+                    if (content.solution1Description1) {
+                        let desc = `<p>${content.solution1Description1}</p>`;
+                        if (content.solution1Description2) desc += `<p>${content.solution1Description2}</p>`;
+                        if (content.solution1Description3) desc += `<p>${content.solution1Description3}</p>`;
+                        document.getElementById('solution1-description').innerHTML = desc;
+                    }
+
+
+                    // Update Solution 2
+                    if (content.solution2Title) document.getElementById('solution2-title').textContent = content.solution2Title;
+                    if (content.solution2Description) document.getElementById('solution2-description').textContent = content.solution2Description;
+                    if (content.solution2Description1) {
+                        let desc = `<p>${content.solution2Description1}</p>`;
+                        if (content.solution2Description2) desc += `<p>${content.solution2Description2}</p>`;
+                        if (content.solution2Description3) desc += `<p>${content.solution2Description3}</p>`;
+                        document.getElementById('solution2-description').innerHTML = desc;
+                    }
+
+                    // Update Solution 3
+                    if (content.solution3Title) {
+                        document.getElementById('solution3-section').style.display = 'block';
+                        document.getElementById('solution3-title').textContent = content.solution3Title;
+                        if (content.solution3Description) document.getElementById('solution3-description').textContent = content.solution3Description;
+                        if (content.solution3Description1) {
+                            let desc = `<p>${content.solution3Description1}</p>`;
+                            if (content.solution3Description2) desc += `<p>${content.solution3Description2}</p>`;
+                            if (content.solution3Description3) desc += `<p>${content.solution3Description3}</p>`;
+                            document.getElementById('solution3-description').innerHTML = desc;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading content:', error);
+                    document.getElementById('hero-title').textContent = 'Error loading content';
+                });
+        }
+    </script>
+
+    <script src="js/interactive-base.js"></script>
+    <script src="js/dark-mode.js"></script>
+    <script src="js/core-effects.js"></script>
+</body>
+
+</html>

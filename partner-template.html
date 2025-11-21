@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Demo - AWE2M8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="js/cache-buster.js"></script>
+
+    <style>
+        /* Base Partner Styles - Defaulting to a clean look, can be overridden */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .partner-header {
+            background: #000000;
+            /* Default black */
+            padding: 15px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .partner-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .partner-logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .partner-office-name {
+            color: #F6D200;
+            /* Default accent */
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Hero */
+        .partner-hero {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 30px 40px 25px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .partner-hero h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #F6D200;
+            /* Default accent */
+        }
+
+        .partner-hero p {
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.5;
+            color: #e5e5e5;
+        }
+
+        /* Content */
+        .partner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .partner-section {
+            margin-bottom: 60px;
+        }
+
+        .partner-section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #F6D200;
+            /* Default accent */
+        }
+
+        /* Demo Section */
+        .partner-demo-section {
+            background: #f8f8f8;
+            padding: 35px 0;
+            margin-top: -1px;
+        }
+
+        .partner-demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .partner-demo-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .partner-demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .partner-demo-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #000000;
+        }
+
+        .partner-demo-card p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .partner-demo-iframe {
+            width: 100%;
+            max-width: 350px;
+            height: 160px;
+            border: none;
+            border-radius: 8px;
+            background: #f8f8f8;
+            margin: 0 auto 15px;
+            display: block;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .partner-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #F6D200;
+            /* Default accent */
+            color: #000000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .partner-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Grid */
+        .partner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .partner-card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .partner-card:hover {
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .partner-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .partner-card p {
+            color: #555555;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Video */
+        .partner-video-section {
+            margin: 80px 0;
+        }
+
+        .partner-video-container {
+            aspect-ratio: 16/9;
+            background: #f8f8f8;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 30px auto 0;
+        }
+
+        .partner-video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Highlight Box */
+        .partner-highlight-box {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: #ffffff;
+            padding: 50px;
+            border-radius: 12px;
+            border-left: 5px solid #F6D200;
+            /* Default accent */
+            margin: 60px 0;
+        }
+
+        .partner-highlight-box h3 {
+            color: #F6D200;
+            /* Default accent */
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .partner-highlight-box p {
+            color: #e5e5e5;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .partner-footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .partner-footer p {
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .partner-header {
+                padding: 15px 20px;
+            }
+
+            .partner-logo-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .partner-hero {
+                padding: 40px 20px 30px;
+            }
+
+            .partner-demo-section {
+                padding: 40px 0;
+            }
+
+            .partner-demo-grid {
+                grid-template-columns: 1fr;
+                padding: 0 20px;
+                gap: 30px;
+            }
+
+            .partner-content {
+                padding: 0 20px;
+            }
+
+            .partner-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partner-highlight-box {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="partner-header">
+        <div class="partner-logo-container">
+            <img id="partner-logo" class="partner-logo" src="" alt="Partner Logo" style="display: none;">
+            <span id="partner-office-name" class="partner-office-name"></span>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="partner-hero">
+        <h1 id="hero-title">Loading...</h1>
+        <p id="hero-description">Loading...</p>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="partner-demo-section">
+        <div class="partner-demo-grid">
+            <!-- Voice AI Demo -->
+            <div class="partner-demo-card">
+                <h3 id="voice-demo-title">🎙️ Voice AI Demo</h3>
+                <p id="voice-demo-desc">Talk to our AI agent</p>
+                <iframe id="demo-iframe" class="partner-demo-iframe" src="" allow="microphone"></iframe>
+            </div>
+
+            <!-- SMS Agent Demo -->
+            <div class="partner-demo-card">
+                <h3 id="sms-demo-title">📱 SMS Agent Demo</h3>
+                <p id="sms-demo-desc">Experience AI via text</p>
+                <a href="#" id="sms-demo-link" class="partner-btn">Start Conversation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="partner-content">
+        <!-- Why This Matters -->
+        <div class="partner-highlight-box">
+            <h3>Why This Matters</h3>
+            <p id="why-it-matters">Loading...</p>
+        </div>
+
+        <!-- Video Section -->
+        <section class="partner-video-section" id="video-section" style="display: none;">
+            <h2 class="partner-section-title">See How It Works</h2>
+            <div class="partner-video-container" id="video-container">
+                <!-- Video iframe will be injected here -->
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="partner-section">
+            <h2 class="partner-section-title">How It Works</h2>
+            <div class="partner-grid">
+                <div class="partner-card">
+                    <h3>📊 Database Analysis</h3>
+                    <p id="how-it-works-1">Our AI agent reviews your CRM database and identifies past clients who
+                        haven't been contacted recently.</p>
+                </div>
+
+                <div class="partner-card">
+                    <h3>💬 Personalized Outreach</h3>
+                    <p id="how-it-works-2">The AI sends personalized SMS messages referencing their previous
+                        interactions.</p>
+                </div>
+
+                <div class="partner-card">
+                    <h3>📅 Automatic Scheduling</h3>
+                    <p id="how-it-works-3">When leads respond positively, the conversation naturally guides them toward
+                        scheduling a call.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="partner-footer">
+        <p style="margin-top: 15px; font-size: 0.85rem;">Powered by AWE2M8 AI Solutions</p>
+    </footer>
+
+    <script>
+        // Helper to get query params
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const partnerId = getQueryParam('id');
+
+        if (!partnerId) {
+            document.body.innerHTML = '<h1 style="color:black; text-align:center; margin-top:50px;">Error: No partner ID specified</h1>';
+        } else {
+            fetch('content/content.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Content file not found');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const content = data.partners[partnerId];
+
+                    if (!content) {
+                        document.body.innerHTML = `<h1 style="color:black; text-align:center; margin-top:50px;">Error: Partner "${partnerId}" not found</h1>`;
+                        return;
+                    }
+
+                    // Update Page Title
+                    if (content.pageTitle) document.title = content.pageTitle;
+
+                    // Update Header
+                    if (content.logoUrl) {
+                        const logo = document.getElementById('partner-logo');
+                        logo.src = content.logoUrl;
+                        logo.style.display = 'block';
+                    }
+                    // For Ray White specifically, we might want to hardcode the logo if it's not in JSON, 
+                    // or better, add it to JSON. For now, let's check if it's Ray White ID and set default.
+                    if (partnerId === 'rayWhiteUpperNorthShore' && !content.logoUrl) {
+                        const logo = document.getElementById('partner-logo');
+                        logo.src = 'images/Ray_White.png'; // Assuming this path exists relative to template
+                        logo.style.display = 'block';
+                    }
+
+                    if (content.officeName) {
+                        document.getElementById('partner-office-name').textContent = content.officeName;
+                    } else if (partnerId === 'rayWhiteUpperNorthShore') {
+                        document.getElementById('partner-office-name').textContent = 'Upper North Shore';
+                    }
+
+                    // Update Hero
+                    if (content.title) document.getElementById('hero-title').textContent = content.title;
+                    if (content.heroDescription) document.getElementById('hero-description').textContent = content.heroDescription;
+
+                    // Update Voice AI Demo
+                    if (content.voiceAIDemoTitle) document.getElementById('voice-demo-title').textContent = content.voiceAIDemoTitle;
+                    if (content.voiceAIDemoDescription) document.getElementById('voice-demo-desc').textContent = content.voiceAIDemoDescription;
+
+                    const voiceIframe = document.getElementById('demo-iframe');
+                    if (content.iframeUrl && content.iframeUrl.trim() !== '') {
+                        voiceIframe.src = content.iframeUrl;
+                    } else {
+                        voiceIframe.parentElement.innerHTML = '<div style="color: #999; padding: 20px; text-align: center; font-size: 0.9em;">Voice AI URL not configured</div>';
+                    }
+
+                    // Update SMS Demo
+                    if (content.smsDemoTitle) document.getElementById('sms-demo-title').textContent = content.smsDemoTitle;
+                    if (content.smsDemoDescription) document.getElementById('sms-demo-desc').textContent = content.smsDemoDescription;
+
+                    const smsLink = document.getElementById('sms-demo-link');
+                    if (content.smsAgentDemoUrl && content.smsAgentDemoUrl.trim() !== '') {
+                        smsLink.href = content.smsAgentDemoUrl;
+                    } else {
+                        smsLink.style.display = 'none';
+                    }
+
+                    // Update Why It Matters
+                    if (content.whyItMatters) document.getElementById('why-it-matters').innerHTML = content.whyItMatters;
+
+                    // Update Video
+                    if (content.videoUrl && content.videoUrl.trim() !== '') {
+                        document.getElementById('video-section').style.display = 'block';
+                        document.getElementById('video-container').innerHTML = `
+                            <iframe 
+                                src="${content.videoUrl}" 
+                                allow="autoplay"
+                                style="width: 100%; height: 100%; border: none;"
+                            ></iframe>
+                        `;
+                    }
+
+                    // Update How It Works (if specific fields exist, otherwise keep defaults)
+                    // Note: The JSON doesn't seem to have granular 'howItWorks' steps for partners, 
+                    // but Ray White page had them hardcoded. We might want to add them to JSON later.
+                    // For now, we'll leave the defaults in the HTML or maybe hide the section if not needed.
+
+                })
+                .catch(error => {
+                    console.error('Error loading content:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>
