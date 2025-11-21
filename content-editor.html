@@ -723,7 +723,10 @@
                         `<strong>${sourceData.solution2Title}</strong><br>${sourceData.solution2Description}`
                         : 'AI Automation helps you scale.'),
 
-                howItWorks: sourceData.howItWorks || 'Our AI integrates seamlessly with your existing systems.'
+                howItWorks: sourceData.howItWorks || 'Our AI integrates seamlessly with your existing systems.',
+
+                // Store AI Context
+                aiNiche: isAI ? document.getElementById('new-client-niche').value : null
             };
 
             if (!contentData.partners) contentData.partners = {};
@@ -1504,7 +1507,13 @@
                 return;
             }
 
-            const niche = prompt("Enter the Industry / Niche for this page (e.g. Dentist, Gym):");
+            // Check for existing AI Context
+            let existingNiche = '';
+            if (contentData[type === 'demos' ? 'demos' : (type === 'industries' ? 'industries' : 'partners')][pageKey]?.aiNiche) {
+                existingNiche = contentData[type === 'demos' ? 'demos' : (type === 'industries' ? 'industries' : 'partners')][pageKey].aiNiche;
+            }
+
+            const niche = prompt("Enter the Industry / Niche for this page:", existingNiche);
             if (!niche) return;
 
             const button = document.querySelector(`button[onclick="regenerateAIContent('${pageKey}', '${type}')"]`);
@@ -1514,6 +1523,12 @@
 
             try {
                 const content = await callOpenAI(apiKey, niche, pageKey);
+
+                // Save the niche for next time
+                if (!contentData[type === 'demos' ? 'demos' : (type === 'industries' ? 'industries' : 'partners')][pageKey]) {
+                    contentData[type === 'demos' ? 'demos' : (type === 'industries' ? 'industries' : 'partners')][pageKey] = {};
+                }
+                contentData[type === 'demos' ? 'demos' : (type === 'industries' ? 'industries' : 'partners')][pageKey].aiNiche = niche;
 
                 // Update fields based on type
                 if (type === 'demo') {
