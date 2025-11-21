@@ -282,6 +282,21 @@
       "videoUrl": "",
       "whyItMatters": "<ul><li><strong>Efficiency Boost:</strong> Automate repetitive tasks and focus on strategic growth.</li><li><strong>24/7 Availability:</strong> Never miss a client inquiry with round-the-clock AI support.</li><li><strong>Cost Effective:</strong> Reduce overhead costs while increasing productivity.</li></ul>",
       "howItWorks": "Our AI solutions integrate seamlessly with your existing systems to automate client interactions and streamline operations. Set up is quick and support is available to ensure smooth operation."
+    },
+    "patricksmortagemrokerage": {
+      "pageTitle": "Patricks Mortage Mrokerage - AI Demo",
+      "officeName": "Patricks Mortage Mrokerage",
+      "title": "AI-Powered Solutions for Mortgage Brokerage",
+      "heroDescription": "Revolutionize your mortgage process with AI automation, saving you time and money while enhancing client satisfaction.",
+      "voiceAIDemoTitle": "Voice AI Assistant",
+      "voiceAIDemoDescription": "Our Voice AI Assistant is available 24/7 to seamlessly book appointments, answer queries, and provide personalized support, ensuring your clients never miss an opportunity.",
+      "iframeUrl": "",
+      "smsDemoTitle": "SMS Assistant",
+      "smsDemoDescription": "With our SMS Assistant, instantly send quotes, reminders, and updates, keeping your clients informed and engaged with just a few taps.",
+      "smsAgentDemoUrl": "#",
+      "videoUrl": "",
+      "whyItMatters": "<ul><li><strong>Efficiency:</strong> Automate routine tasks to focus on what truly matters - building client relationships.</li><li><strong>Availability:</strong> Provide round-the-clock support with AI, ensuring clients receive help whenever they need it.</li><li><strong>Scalability:</strong> Easily manage increased client demands without expanding your team.</li></ul>",
+      "howItWorks": "Integrate AI tools into your existing systems to streamline operations, enhance client interactions, and boost productivity with minimal setup required."
     }
   }
 }
