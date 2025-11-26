@@ -341,6 +341,13 @@
                 <p id="sms-demo-desc">Experience AI via text</p>
                 <a href="#" id="sms-demo-link" class="partner-btn">Start Conversation</a>
             </div>
+
+            <!-- Chat Bot Demo -->
+            <div class="partner-demo-card">
+                <h3 id="chat-demo-title">💬 Chat Bot Demo</h3>
+                <p id="chat-demo-desc">Chat with our AI assistant</p>
+                <a href="#" id="chat-demo-link" class="partner-btn">Start Chat</a>
+            </div>
         </div>
     </section>
 
@@ -464,6 +471,17 @@
                         smsLink.href = content.smsAgentDemoUrl;
                     } else {
                         smsLink.style.display = 'none';
+                    }
+
+                    // Update Chat Bot Demo
+                    if (content.chatBotDemoTitle) document.getElementById('chat-demo-title').textContent = content.chatBotDemoTitle;
+                    if (content.chatBotDemoDescription) document.getElementById('chat-demo-desc').textContent = content.chatBotDemoDescription;
+
+                    const chatLink = document.getElementById('chat-demo-link');
+                    if (content.chatBotDemoUrl && content.chatBotDemoUrl.trim() !== '') {
+                        chatLink.href = content.chatBotDemoUrl;
+                    } else {
+                        chatLink.style.display = 'none';
                     }
 
                     // Update Why It Matters
