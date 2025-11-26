@@ -17,8 +17,16 @@ export const ChatBlock: React.FC<{ data: ModuleData }> = ({ data }) => {
                                         <head>
                                             <style>
                                                 body { margin: 0; padding: 0; background: transparent; height: 100vh; width: 100vw; overflow: hidden; }
-                                                /* Force widget to be visible if needed */
                                             </style>
+                                            <script>
+                                                // Reset chat session state for a fresh demo experience
+                                                try {
+                                                    localStorage.clear();
+                                                    sessionStorage.clear();
+                                                } catch (e) {
+                                                    console.log('Storage clear skipped');
+                                                }
+                                            </script>
                                         </head>
                                         <body>
                                             ${data.config.url}
@@ -26,7 +34,7 @@ export const ChatBlock: React.FC<{ data: ModuleData }> = ({ data }) => {
                                         </html>
                                     `}
                                     className="w-full h-full border-0"
-                                    allow="microphone; camera; autoplay; encrypted-media; fullscreen"
+                                    allow="microphone; camera; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write; forms; popups"
                                     allowFullScreen
                                 />
                             ) : (
