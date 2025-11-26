@@ -44,10 +44,14 @@ export async function POST(request: Request) {
           CRITICAL for "why_it_matters":
           - Generate 3-4 specific, quantifiable metrics that show the ROI of the selected use cases (${useCaseContext}).
           - Format as HTML with <div> tags for each metric.
-          - Each metric should have a <strong> tag with a bold statistic (e.g., "87% increase in lead capture") followed by explanatory text.
+          - Each metric MUST include:
+            1. A <strong> tag with the statistic AND a superscript asterisk (e.g., "<strong>87% increase in lead capture*</strong>")
+            2. Explanatory text describing the benefit
+            3. A <small> tag at the end with the source citation (e.g., "<small>*Source: Harvard Business Review, 2023</small>")
+          - Use credible sources: industry reports, research studies, or reputable publications (e.g., McKinsey, Gartner, HBR, Forrester)
           - Focus on business impact: revenue increase, time saved, customer satisfaction, conversion rates.
           - Make metrics specific to the ${niche} industry when possible.
-          - Example format: "<div><strong>3X Faster Response Times</strong> - Respond to customer inquiries in under 30 seconds, dramatically improving conversion rates.</div>"
+          - Example format: "<div><strong>3X Faster Response Times*</strong> - Respond to customer inquiries in under 30 seconds, dramatically improving conversion rates. <small>*Source: Salesforce State of Service Report, 2024</small></div>"
           
           Return a JSON object where keys are the module types and values are objects with { title, content }.`
                 },

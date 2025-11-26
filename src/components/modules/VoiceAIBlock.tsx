@@ -21,7 +21,8 @@ export const VoiceAIBlock: React.FC<{ data: ModuleData }> = ({ data }) => {
                             <iframe
                                 src={data.config.iframeUrl}
                                 className="w-full h-full"
-                                allow="microphone"
+                                allow="microphone; camera; autoplay; encrypted-media; fullscreen"
+                                allowFullScreen
                             />
                         ) : (
                             <div className="text-center p-12">
