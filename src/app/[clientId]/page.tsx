@@ -3,12 +3,33 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { ModuleRenderer } from '@/components/modules/ModuleRenderer';
 import { DemoNavigation } from '@/components/DemoNavigation';
+import { Metadata } from 'next';
 
 interface PageData {
     id: string;
     clientName: string;
     niche: string;
     modules: any[];
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ clientId: string }> }): Promise<Metadata> {
+    const { clientId } = await params;
+
+    const docRef = doc(db, 'clients', clientId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+        return {
+            title: 'Demo Not Found | AWE2M8',
+        };
+    }
+
+    const data = docSnap.data() as PageData;
+
+    return {
+        title: `${data.clientName} - AI Solutions Demo | AWE2M8`,
+        description: `Personalized AI automation demo for ${data.clientName}. See how Voice AI, SMS agents, and chatbots can transform your ${data.niche} business.`,
+    };
 }
 
 export default async function ClientPage({ params }: { params: Promise<{ clientId: string }> }) {
