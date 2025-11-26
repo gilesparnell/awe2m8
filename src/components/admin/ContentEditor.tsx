@@ -25,26 +25,24 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     const handleSmartPaste = (input: string): string => {
         const cleanInput = input.trim();
 
-        // 1. Try to find Assistant ID from script tag (data-assistant-id="...")
-        // Allow for spaces around = and different quote types
-        const idMatch = cleanInput.match(/data-assistant-id\s*=\s*["']([^"']+)["']/);
-        if (idMatch && idMatch[1]) {
-            return `https://iframes.ai/o/${idMatch[1]}?color=&icon=`;
+        // 1. If it's a Chat Widget script (contains data-assistant-id and <script), return the WHOLE THING.
+        // We now handle raw scripts in the ChatBlock component.
+        if (cleanInput.includes('data-assistant-id') && cleanInput.includes('<script')) {
+            return cleanInput;
         }
 
-        // 2. Try to find src from iframe tag (src="...")
+        // 2. Try to find src from iframe tag (src="...") - For Voice Orb
         // Allow for spaces around =
         const srcMatch = cleanInput.match(/src\s*=\s*["']([^"']+)["']/);
         if (srcMatch && srcMatch[1]) {
             const url = srcMatch[1];
             // Only use the src if it looks like an iframe URL (not a JS script)
-            // This prevents grabbing the wrong src from a script tag if ID match failed
             if (url.includes('iframes.ai') || url.includes('retell')) {
                 return url;
             }
         }
 
-        // 3. If it looks like a raw ID (alphanumeric, >15 chars), construct URL
+        // 3. If it looks like a raw ID (alphanumeric, >15 chars), construct URL (Fallback)
         if (/^[a-zA-Z0-9]+$/.test(cleanInput) && cleanInput.length > 15 && !cleanInput.includes('http')) {
             return `https://iframes.ai/o/${cleanInput}?color=&icon=`;
         }
