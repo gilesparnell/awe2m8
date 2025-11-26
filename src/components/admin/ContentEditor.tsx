@@ -23,21 +23,29 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
 
     // Smart Paste Logic
     const handleSmartPaste = (input: string): string => {
+        const cleanInput = input.trim();
+
         // 1. Try to find Assistant ID from script tag (data-assistant-id="...")
-        const idMatch = input.match(/data-assistant-id=["']([^"']+)["']/);
+        // Allow for spaces around = and different quote types
+        const idMatch = cleanInput.match(/data-assistant-id\s*=\s*["']([^"']+)["']/);
         if (idMatch && idMatch[1]) {
             return `https://iframes.ai/o/${idMatch[1]}?color=&icon=`;
         }
 
         // 2. Try to find src from iframe tag (src="...")
-        const srcMatch = input.match(/src=["']([^"']+)["']/);
+        // Allow for spaces around =
+        const srcMatch = cleanInput.match(/src\s*=\s*["']([^"']+)["']/);
         if (srcMatch && srcMatch[1]) {
-            return srcMatch[1];
+            const url = srcMatch[1];
+            // Only use the src if it looks like an iframe URL (not a JS script)
+            // This prevents grabbing the wrong src from a script tag if ID match failed
+            if (url.includes('iframes.ai') || url.includes('retell')) {
+                return url;
+            }
         }
 
         // 3. If it looks like a raw ID (alphanumeric, >15 chars), construct URL
-        const cleanInput = input.trim();
-        if (/^[a-zA-Z0-9]+$/.test(cleanInput) && cleanInput.length > 15) {
+        if (/^[a-zA-Z0-9]+$/.test(cleanInput) && cleanInput.length > 15 && !cleanInput.includes('http')) {
             return `https://iframes.ai/o/${cleanInput}?color=&icon=`;
         }
 
