@@ -715,6 +715,10 @@ AsouXA
                 smsDemoDescription: sourceData.smsDemoDescription || 'Experience AI via text',
                 smsAgentDemoUrl: smsUrl || sourceData.smsAgentDemoUrl || '#',
 
+                chatBotDemoTitle: sourceData.chatBotDemoTitle || 'Chat Bot',
+                chatBotDemoDescription: sourceData.chatBotDemoDescription || 'Chat with our AI assistant',
+                chatBotDemoUrl: document.getElementById('new-chat-url').value || sourceData.chatBotDemoUrl || '#',
+
                 videoUrl: sourceData.videoUrl || '',
 
                 // Combine solutions into "Why It Matters" if copying from Industry
@@ -1238,6 +1242,20 @@ AsouXA
                     <label>SMS Link URL</label>
                     <input type="text" id="ptnr-sms-url" value="${content.smsAgentDemoUrl || ''}">
                 </div>
+
+                <h3 class="section-divider">💬 Chat Bot Demo</h3>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="ptnr-chat-title" value="${content.chatBotDemoTitle || 'Chat Bot'}">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="ptnr-chat-desc">${content.chatBotDemoDescription || 'Chat with our AI assistant'}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Chat Bot URL</label>
+                    <input type="text" id="ptnr-chat-url" value="${content.chatBotDemoUrl || ''}">
+                </div>
                 
                 <h3 class="section-divider">📄 Other Content</h3>
                 <div class="form-group">
@@ -1367,6 +1385,10 @@ AsouXA
             content.smsDemoTitle = document.getElementById('ptnr-sms-title').value;
             content.smsDemoDescription = document.getElementById('ptnr-sms-desc').value;
             content.smsAgentDemoUrl = document.getElementById('ptnr-sms-url').value;
+
+            content.chatBotDemoTitle = document.getElementById('ptnr-chat-title').value;
+            content.chatBotDemoDescription = document.getElementById('ptnr-chat-desc').value;
+            content.chatBotDemoUrl = document.getElementById('ptnr-chat-url').value;
 
             content.whyItMatters = document.getElementById('ptnr-why').value;
             content.howItWorks = document.getElementById('ptnr-how').value;
@@ -1564,6 +1586,8 @@ AsouXA
                     document.getElementById('ptnr-voice-desc').value = content.voiceAIDemoDescription;
                     document.getElementById('ptnr-sms-title').value = content.smsDemoTitle;
                     document.getElementById('ptnr-sms-desc').value = content.smsDemoDescription;
+                    document.getElementById('ptnr-chat-title').value = content.chatBotDemoTitle;
+                    document.getElementById('ptnr-chat-desc').value = content.chatBotDemoDescription;
                     document.getElementById('ptnr-why').value = content.whyItMatters;
                     document.getElementById('ptnr-how').value = content.howItWorks;
                 }
@@ -1593,6 +1617,8 @@ AsouXA
                     "voiceAIDemoDescription": "Description of how the voice agent helps (e.g. books appointments 24/7).",
                     "smsDemoTitle": "SMS Assistant",
                     "smsDemoDescription": "Description of SMS capabilities (e.g. instant quotes).",
+                    "chatBotDemoTitle": "Chat Assistant",
+                    "chatBotDemoDescription": "Description of chat capabilities (e.g. instant answers).",
                     "whyItMatters": "HTML string with 3 bullet points using <strong> tags for titles, explaining benefits.",
                     "howItWorks": "Brief explanation of the process."
                 }

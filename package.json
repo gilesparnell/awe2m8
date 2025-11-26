@@ -1,19 +1,33 @@
 {
-    "name": "awe2m8-testing",
-    "version": "1.0.0",
-    "description": "Testing framework for AWE2M8 project",
-    "scripts": {
-        "test": "node test-runner.js",
-        "test:quick": "node test-runner.js --quick",
-        "precommit": "node test-runner.js --quick",
-        "setup:hooks": "cp pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit && echo 'Pre-commit hook installed!'"
-    },
-    "keywords": [
-        "testing",
-        "validation",
-        "ci",
-        "cd"
-    ],
-    "author": "AWE2M8",
-    "license": "ISC"
+  "name": "next-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "clsx": "^2.1.1",
+    "firebase": "^12.6.0",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.555.0",
+    "next": "16.0.4",
+    "openai": "^6.9.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
 }
