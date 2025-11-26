@@ -33,6 +33,7 @@ export default function AdminPage() {
         setSelectedModules,
         handleModeChange,
         loadPageForEditing,
+        handleDeletePage,
         handleAnalyze,
         handleGenerate,
         handleSave,
@@ -67,6 +68,7 @@ export default function AdminPage() {
                         loading={loading}
                         onSelectPage={setSelectedPageId}
                         onLoadPage={() => loadPageForEditing(selectedPageId)}
+                        onDeletePage={handleDeletePage}
                     />
                 )}
 
