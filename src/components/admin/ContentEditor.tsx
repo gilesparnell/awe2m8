@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Wand2 } from 'lucide-react';
 
 interface ContentEditorProps {
     mode: 'create' | 'edit';
@@ -20,6 +20,31 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
     onCancel,
     onSave
 }) => {
+
+    // Smart Paste Logic
+    const handleSmartPaste = (input: string): string => {
+        // 1. Try to find Assistant ID from script tag (data-assistant-id="...")
+        const idMatch = input.match(/data-assistant-id=["']([^"']+)["']/);
+        if (idMatch && idMatch[1]) {
+            return `https://iframes.ai/o/${idMatch[1]}?color=&icon=`;
+        }
+
+        // 2. Try to find src from iframe tag (src="...")
+        const srcMatch = input.match(/src=["']([^"']+)["']/);
+        if (srcMatch && srcMatch[1]) {
+            return srcMatch[1];
+        }
+
+        // 3. If it looks like a raw ID (alphanumeric, >15 chars), construct URL
+        const cleanInput = input.trim();
+        if (/^[a-zA-Z0-9]+$/.test(cleanInput) && cleanInput.length > 15) {
+            return `https://iframes.ai/o/${cleanInput}?color=&icon=`;
+        }
+
+        // 4. Fallback: return original input (trimmed)
+        return cleanInput;
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center">
@@ -58,15 +83,21 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
                             {/* URL Configuration for specific module types */}
                             {module.type === 'voice_ai' && (
                                 <div>
-                                    <label className="block text-xs text-gray-500 mb-1 uppercase">Voice AI Demo URL (iframe)</label>
-                                    <input
-                                        type="url"
+                                    <label className="block text-xs text-gray-500 mb-1 uppercase flex items-center gap-2">
+                                        Voice AI Demo Code <Wand2 className="w-3 h-3 text-purple-400" />
+                                    </label>
+                                    <textarea
                                         value={module.config?.iframeUrl || ''}
-                                        onChange={(e) => onUpdateModuleConfig(idx, 'iframeUrl', e.target.value)}
-                                        placeholder="https://iframes.ai/o/..."
-                                        className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-sm focus:border-green-500 outline-none"
+                                        onChange={(e) => {
+                                            const smartUrl = handleSmartPaste(e.target.value);
+                                            onUpdateModuleConfig(idx, 'iframeUrl', smartUrl);
+                                        }}
+                                        placeholder="Paste the FULL script tag or iframe code from Assistable here..."
+                                        className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-xs focus:border-green-500 outline-none h-24"
                                     />
-                                    <p className="text-xs text-gray-600 mt-1">Paste the iframe src URL from Assistable.ai</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        ✨ <strong>Smart Paste:</strong> Paste the entire code block. We'll extract the ID automatically.
+                                    </p>
                                 </div>
                             )}
 
@@ -85,15 +116,26 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
 
                             {module.type === 'chat_bot' && (
                                 <div>
-                                    <label className="block text-xs text-gray-500 mb-1 uppercase">Chat Bot iframe URL</label>
-                                    <input
-                                        type="url"
+                                    <label className="block text-xs text-gray-500 mb-1 uppercase flex items-center gap-2">
+                                        Chat Bot Code <Wand2 className="w-3 h-3 text-purple-400" />
+                                    </label>
+                                    <textarea
                                         value={module.config?.url || ''}
-                                        onChange={(e) => onUpdateModuleConfig(idx, 'url', e.target.value)}
-                                        placeholder="https://iframes.ai/o/?color=&icon="
-                                        className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-sm focus:border-green-500 outline-none"
+                                        onChange={(e) => {
+                                            const smartUrl = handleSmartPaste(e.target.value);
+                                            onUpdateModuleConfig(idx, 'url', smartUrl);
+                                        }}
+                                        placeholder="Paste the FULL script tag or iframe code from Assistable here..."
+                                        className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-xs focus:border-green-500 outline-none h-24"
                                     />
-                                    <p className="text-xs text-gray-600 mt-1">Paste the iframe src URL from Assistable.ai</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        ✨ <strong>Smart Paste:</strong> Paste the entire code block. We'll extract the ID automatically.
+                                    </p>
+                                    {module.config?.url === "https://iframes.ai/o/?color=&icon=" && (
+                                        <p className="text-red-400 text-xs mt-1 font-bold">
+                                            ⚠️ Warning: Missing Agent ID. Please paste the code that includes 'data-assistant-id'.
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         </div>
