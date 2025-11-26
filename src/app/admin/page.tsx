@@ -1,16 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModuleType } from '@/types';
-import { Loader2, Check, Sparkles, Globe, ArrowRight, AlertCircle } from 'lucide-react';
+import { Loader2, Check, Sparkles, Globe, ArrowRight, AlertCircle, Edit, BookOpen } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, getDoc } from 'firebase/firestore';
 
 export default function AdminPage() {
+    const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [url, setUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [step, setStep] = useState<'input' | 'selection' | 'review' | 'preview'>('input');
+
+    // For editing existing pages
+    const [existingPages, setExistingPages] = useState<any[]>([]);
+    const [selectedPageId, setSelectedPageId] = useState('');
 
     // Analysis Data
     const [clientName, setClientName] = useState('');
@@ -23,6 +28,48 @@ export default function AdminPage() {
     // Generated Content
     const [generatedModules, setGeneratedModules] = useState<any[]>([]);
     const [generatedPageId, setGeneratedPageId] = useState('');
+
+    // Load existing pages for edit mode
+    useEffect(() => {
+        if (mode === 'edit') {
+            loadExistingPages();
+        }
+    }, [mode]);
+
+    const loadExistingPages = async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, 'clients'));
+            const pages = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setExistingPages(pages);
+        } catch (err) {
+            console.error('Failed to load pages:', err);
+        }
+    };
+
+    const loadPageForEditing = async (pageId: string) => {
+        setLoading(true);
+        try {
+            const docRef = doc(db, 'clients', pageId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setClientName(data.clientName);
+                setNiche(data.niche);
+                setGeneratedModules(data.modules);
+                setGeneratedPageId(pageId);
+                setStep('review');
+            }
+        } catch (err) {
+            setError('Failed to load page for editing');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleAnalyze = async () => {
         setLoading(true);
@@ -40,9 +87,7 @@ export default function AdminPage() {
             setClientName(data.clientName);
             setNiche(data.niche);
 
-            // Pre-select recommended modules if returned, otherwise keep defaults
             if (data.recommendedModules) {
-                // Always keep Hero and WhyItMatters
                 const recommended = new Set(['hero', 'why_it_matters', ...data.recommendedModules]);
                 setSelectedModules(Array.from(recommended) as ModuleType[]);
             }
@@ -68,7 +113,7 @@ export default function AdminPage() {
                     niche,
                     url,
                     modules: selectedModules,
-                    instructions: customInstructions // Pass custom instructions
+                    instructions: customInstructions
                 })
             });
 
@@ -76,7 +121,7 @@ export default function AdminPage() {
 
             const data = await res.json();
             setGeneratedModules(data.modules);
-            setStep('review'); // Go to review step instead of preview
+            setStep('review');
         } catch (err) {
             setError('Failed to generate content. Please try again.');
             console.error(err);
@@ -88,17 +133,16 @@ export default function AdminPage() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            // Generate ID
-            const pageId = clientName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const pageId = generatedPageId || clientName.toLowerCase().replace(/[^a-z0-9]/g, '-');
             setGeneratedPageId(pageId);
 
-            // Save to Firestore
             await setDoc(doc(db, 'clients', pageId), {
                 id: pageId,
                 clientName,
                 niche,
                 modules: generatedModules,
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             });
 
             setStep('preview');
@@ -110,14 +154,12 @@ export default function AdminPage() {
         }
     };
 
-    // Helper to update a specific module's content
     const updateModule = (index: number, field: string, value: string) => {
         const newModules = [...generatedModules];
         newModules[index] = { ...newModules[index], [field]: value };
         setGeneratedModules(newModules);
     };
 
-    // Helper to update module config (for URLs)
     const updateModuleConfig = (index: number, configKey: string, value: string) => {
         const newModules = [...generatedModules];
         newModules[index] = {
@@ -125,6 +167,19 @@ export default function AdminPage() {
             config: { ...newModules[index].config, [configKey]: value }
         };
         setGeneratedModules(newModules);
+    };
+
+    const resetForm = () => {
+        setStep('input');
+        setUrl('');
+        setClientName('');
+        setNiche('');
+        setSelectedModules(['hero', 'voice_ai', 'sms_agent', 'chat_bot', 'why_it_matters']);
+        setCustomInstructions('');
+        setGeneratedModules([]);
+        setGeneratedPageId('');
+        setSelectedPageId('');
+        setError('');
     };
 
     return (
@@ -135,10 +190,47 @@ export default function AdminPage() {
                         Internal Tool
                     </div>
                     <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600 tracking-tight">
-                        AWE2M8 Sales Engine
+                        AWE2M8 Sales Demo Prep
                     </h1>
-                    <p className="text-gray-400 mt-4 text-lg">Generate high-converting demo pages in seconds.</p>
+                    <p className="text-gray-400 mt-4 text-lg max-w-2xl mx-auto">
+                        Create personalized AI demo pages for prospects in minutes. Our AI analyzes their website and generates custom sales content.
+                    </p>
                 </header>
+
+                {/* Instructions Panel */}
+                <div className="bg-blue-900/10 border border-blue-800/30 rounded-2xl p-6 mb-8">
+                    <div className="flex items-start gap-3">
+                        <BookOpen className="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" />
+                        <div>
+                            <h3 className="text-blue-300 font-bold mb-2">How to Use This Tool</h3>
+                            <ol className="text-gray-400 text-sm space-y-2 list-decimal list-inside">
+                                <li><strong className="text-white">Enter URL:</strong> Paste the prospect's website URL and click "Analyze"</li>
+                                <li><strong className="text-white">Select Modules:</strong> Choose which AI solutions to showcase (Voice AI, SMS, Chat, etc.)</li>
+                                <li><strong className="text-white">Generate Content:</strong> Our AI writes personalized sales copy based on their business</li>
+                                <li><strong className="text-white">Review & Edit:</strong> Fine-tune the content and add demo links</li>
+                                <li><strong className="text-white">Publish:</strong> Save and share the live demo page with your prospect</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mode Selector */}
+                <div className="flex gap-4 mb-8">
+                    <button
+                        onClick={() => { setMode('create'); resetForm(); }}
+                        className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${mode === 'create' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    >
+                        <Sparkles className="w-5 h-5" />
+                        Create New Page
+                    </button>
+                    <button
+                        onClick={() => { setMode('edit'); resetForm(); }}
+                        className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${mode === 'edit' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    >
+                        <Edit className="w-5 h-5" />
+                        Edit Existing Page
+                    </button>
+                </div>
 
                 {error && (
                     <div className="bg-red-900/20 border border-red-500/50 text-red-200 p-4 rounded-xl mb-8 flex items-center gap-3">
@@ -147,8 +239,33 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* Step 1: Input */}
-                {step === 'input' && (
+                {/* Edit Mode: Page Selector */}
+                {mode === 'edit' && step === 'input' && (
+                    <div className="bg-gray-900/50 border border-gray-800 rounded-3xl p-10 max-w-2xl mx-auto backdrop-blur-sm shadow-2xl">
+                        <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-wide">Select Page to Edit</label>
+                        <select
+                            value={selectedPageId}
+                            onChange={(e) => setSelectedPageId(e.target.value)}
+                            className="w-full bg-black border border-gray-700 rounded-xl py-4 px-4 text-white focus:ring-2 focus:ring-green-500 outline-none transition-all mb-4"
+                        >
+                            <option value="">-- Select a page --</option>
+                            {existingPages.map(page => (
+                                <option key={page.id} value={page.id}>{page.clientName} ({page.id})</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={() => loadPageForEditing(selectedPageId)}
+                            disabled={!selectedPageId || loading}
+                            className="w-full bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-900/20"
+                        >
+                            {loading ? <Loader2 className="animate-spin" /> : <Edit className="w-5 h-5" />}
+                            Load Page for Editing
+                        </button>
+                    </div>
+                )}
+
+                {/* Create Mode: URL Input */}
+                {mode === 'create' && step === 'input' && (
                     <div className="bg-gray-900/50 border border-gray-800 rounded-3xl p-10 max-w-2xl mx-auto backdrop-blur-sm shadow-2xl">
                         <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-wide">Client Website URL</label>
                         <div className="flex gap-4">
@@ -188,7 +305,6 @@ export default function AdminPage() {
                         </div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {/* Checkboxes for modules */}
                             {['hero', 'voice_ai', 'sms_agent', 'chat_bot', 'why_it_matters'].map((mod) => (
                                 <label key={mod} className={`group flex items-center gap-4 p-5 rounded-2xl border cursor-pointer transition-all ${selectedModules.includes(mod as ModuleType) ? 'bg-green-900/10 border-green-500/50 shadow-lg shadow-green-900/10' : 'bg-gray-900/50 border-gray-800 hover:border-gray-700'}`}>
                                     <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${selectedModules.includes(mod as ModuleType) ? 'bg-green-500 border-green-500' : 'border-gray-600 bg-gray-800 group-hover:border-gray-500'}`}>
@@ -278,9 +394,10 @@ export default function AdminPage() {
                                                     type="url"
                                                     value={module.config?.iframeUrl || ''}
                                                     onChange={(e) => updateModuleConfig(idx, 'iframeUrl', e.target.value)}
-                                                    placeholder="https://vapi.ai/embed/..."
+                                                    placeholder="https://iframes.ai/o/..."
                                                     className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-sm focus:border-green-500 outline-none"
                                                 />
+                                                <p className="text-xs text-gray-600 mt-1">Paste the iframe src URL from Assistable.ai</p>
                                             </div>
                                         )}
 
@@ -299,14 +416,15 @@ export default function AdminPage() {
 
                                         {module.type === 'chat_bot' && (
                                             <div>
-                                                <label className="block text-xs text-gray-500 mb-1 uppercase">Chat Bot Link URL</label>
+                                                <label className="block text-xs text-gray-500 mb-1 uppercase">Chat Bot iframe URL</label>
                                                 <input
                                                     type="url"
                                                     value={module.config?.url || ''}
                                                     onChange={(e) => updateModuleConfig(idx, 'url', e.target.value)}
-                                                    placeholder="https://your-chatbot.com"
+                                                    placeholder="https://iframes.ai/o/?color=&icon="
                                                     className="w-full bg-black border border-gray-700 rounded-lg p-3 text-blue-400 font-mono text-sm focus:border-green-500 outline-none"
                                                 />
+                                                <p className="text-xs text-gray-600 mt-1">Paste the iframe src URL from Assistable.ai</p>
                                             </div>
                                         )}
                                     </div>
@@ -316,10 +434,10 @@ export default function AdminPage() {
 
                         <div className="flex justify-center gap-4 pt-8 pb-12">
                             <button
-                                onClick={() => setStep('selection')}
+                                onClick={() => mode === 'create' ? setStep('selection') : resetForm()}
                                 className="px-8 py-4 rounded-xl border border-gray-700 hover:bg-gray-800 transition-all font-bold text-gray-300"
                             >
-                                Don't like this copy? Get AI to try again
+                                {mode === 'create' ? "Don't like this copy? Get AI to try again" : "Cancel"}
                             </button>
                             <button
                                 onClick={handleSave}
@@ -327,7 +445,7 @@ export default function AdminPage() {
                                 className="bg-white text-black text-xl px-12 py-5 rounded-full font-bold shadow-xl shadow-white/10 transition-all hover:scale-105 flex items-center gap-3"
                             >
                                 {loading ? <Loader2 className="animate-spin w-6 h-6" /> : <Check className="w-6 h-6" />}
-                                Save & Publish
+                                {mode === 'edit' ? 'Update & Publish' : 'Save & Publish'}
                             </button>
                         </div>
                     </div>
@@ -340,27 +458,29 @@ export default function AdminPage() {
                             <Check className="w-12 h-12" />
                         </div>
                         <div>
-                            <h2 className="text-4xl font-bold text-white mb-2">Content Generated!</h2>
-                            <p className="text-gray-400 text-lg">Your demo page is ready to be viewed.</p>
+                            <h2 className="text-4xl font-bold text-white mb-2">{mode === 'edit' ? 'Page Updated!' : 'Page Published!'}</h2>
+                            <p className="text-gray-400 text-lg">Your demo page is now live and ready to share.</p>
                         </div>
 
                         <div className="bg-gray-900 rounded-xl p-6 max-w-md mx-auto border border-gray-800">
-                            <p className="text-sm text-gray-500 mb-2 uppercase font-bold">Local Preview URL</p>
+                            <p className="text-sm text-gray-500 mb-2 uppercase font-bold">Live Demo URL</p>
                             <a
-                                href={`/${generatedPageId}`}
+                                href={`https://demos.awe2m8.ai/${generatedPageId}`}
                                 target="_blank"
-                                className="flex items-center justify-center gap-2 text-green-400 font-mono bg-black p-3 rounded-lg hover:text-green-300 transition-colors"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 text-green-400 font-mono bg-black p-3 rounded-lg hover:text-green-300 transition-colors text-sm break-all"
                             >
-                                <Globe className="w-4 h-4" />
-                                localhost:3000/{generatedPageId}
+                                <Globe className="w-4 h-4 flex-shrink-0" />
+                                demos.awe2m8.ai/{generatedPageId}
                             </a>
                         </div>
 
                         <div className="flex justify-center gap-4 pt-4">
-                            <button onClick={() => setStep('selection')} className="px-8 py-4 rounded-xl border border-gray-700 hover:bg-gray-800 transition-all font-bold text-gray-300">Back</button>
+                            <button onClick={resetForm} className="px-8 py-4 rounded-xl border border-gray-700 hover:bg-gray-800 transition-all font-bold text-gray-300">Create Another</button>
                             <a
-                                href={`/${generatedPageId}`}
+                                href={`https://demos.awe2m8.ai/${generatedPageId}`}
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="px-10 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2 shadow-lg shadow-white/10"
                             >
                                 View Live Page <ArrowRight className="w-5 h-5" />
