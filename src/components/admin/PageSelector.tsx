@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Edit } from 'lucide-react';
+import { Loader2, Edit, Trash2 } from 'lucide-react';
 
 interface PageSelectorProps {
     pages: any[];
@@ -7,6 +7,7 @@ interface PageSelectorProps {
     loading: boolean;
     onSelectPage: (pageId: string) => void;
     onLoadPage: () => void;
+    onDeletePage: (pageId: string) => void;
 }
 
 export const PageSelector: React.FC<PageSelectorProps> = ({
@@ -14,7 +15,8 @@ export const PageSelector: React.FC<PageSelectorProps> = ({
     selectedPageId,
     loading,
     onSelectPage,
-    onLoadPage
+    onLoadPage,
+    onDeletePage
 }) => {
     return (
         <div className="bg-gray-900/50 border border-gray-800 rounded-3xl p-10 max-w-2xl mx-auto backdrop-blur-sm shadow-2xl">
@@ -33,14 +35,26 @@ export const PageSelector: React.FC<PageSelectorProps> = ({
                     </option>
                 ))}
             </select>
-            <button
-                onClick={onLoadPage}
-                disabled={!selectedPageId || loading}
-                className="w-full bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-900/20"
-            >
-                {loading ? <Loader2 className="animate-spin" /> : <Edit className="w-5 h-5" />}
-                Load Page for Editing
-            </button>
+
+            <div className="flex gap-4">
+                <button
+                    onClick={onLoadPage}
+                    disabled={!selectedPageId || loading}
+                    className="flex-1 bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-900/20"
+                >
+                    {loading ? <Loader2 className="animate-spin" /> : <Edit className="w-5 h-5" />}
+                    Load Page
+                </button>
+
+                <button
+                    onClick={() => onDeletePage(selectedPageId)}
+                    disabled={!selectedPageId || loading}
+                    className="bg-red-900/20 hover:bg-red-900/40 border border-red-900/50 text-red-400 px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Delete Page"
+                >
+                    <Trash2 className="w-5 h-5" />
+                </button>
+            </div>
         </div>
     );
 };

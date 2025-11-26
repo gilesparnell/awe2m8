@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ModuleType } from '@/types';
 import { db } from '@/lib/firebase';
-import { doc, setDoc, collection, getDocs, getDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, getDocs, getDoc } from 'firebase/firestore';
 
 export const useAdminState = () => {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -186,6 +186,27 @@ export const useAdminState = () => {
         resetForm();
     };
 
+    const handleDeletePage = async (pageId: string) => {
+        if (!pageId) return;
+
+        if (!window.confirm('Are you sure you want to delete this page? This cannot be undone.')) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await deleteDoc(doc(db, 'clients', pageId));
+            // Reload pages list
+            await loadExistingPages();
+            setSelectedPageId('');
+        } catch (err) {
+            setError('Failed to delete page.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         // State
         mode,
@@ -211,6 +232,7 @@ export const useAdminState = () => {
         // Actions
         handleModeChange,
         loadPageForEditing,
+        handleDeletePage,
         handleAnalyze,
         handleGenerate,
         handleSave,
