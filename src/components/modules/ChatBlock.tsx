@@ -7,14 +7,36 @@ export const ChatBlock: React.FC<{ data: ModuleData }> = ({ data }) => {
             <div className="max-w-7xl mx-auto">
                 <div className="grid lg:grid-cols-2 gap-16 items-start">
                     {/* Chat Demo */}
-                    <div className="order-2 lg:order-1 border border-stone-200 bg-stone-100 aspect-square flex items-center justify-center">
+                    <div className="order-2 lg:order-1 border border-stone-200 bg-stone-100 aspect-square flex items-center justify-center relative overflow-hidden">
                         {data.config?.url ? (
-                            <iframe
-                                src={data.config.url}
-                                className="w-full h-full"
-                                allow="microphone; camera; autoplay; encrypted-media; fullscreen"
-                                allowFullScreen
-                            />
+                            data.config.url.includes('<script') ? (
+                                <iframe
+                                    srcDoc={`
+                                        <!DOCTYPE html>
+                                        <html>
+                                        <head>
+                                            <style>
+                                                body { margin: 0; padding: 0; background: transparent; height: 100vh; width: 100vw; overflow: hidden; }
+                                                /* Force widget to be visible if needed */
+                                            </style>
+                                        </head>
+                                        <body>
+                                            ${data.config.url}
+                                        </body>
+                                        </html>
+                                    `}
+                                    className="w-full h-full border-0"
+                                    allow="microphone; camera; autoplay; encrypted-media; fullscreen"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <iframe
+                                    src={data.config.url}
+                                    className="w-full h-full"
+                                    allow="microphone; camera; autoplay; encrypted-media; fullscreen"
+                                    allowFullScreen
+                                />
+                            )
                         ) : (
                             <div className="text-center p-12">
                                 <div className="w-20 h-20 border-2 border-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
