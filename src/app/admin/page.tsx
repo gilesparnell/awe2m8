@@ -56,10 +56,11 @@ export default function AdminPage() {
             <div className="max-w-4xl mx-auto">
                 <AdminHeader />
 
-                <div className="flex justify-end mb-6">
-                    <Link href="/admin/twilio" className="flex items-center gap-2 px-4 py-2 bg-blue-900/20 hover:bg-blue-900/40 border border-blue-800/30 rounded-lg text-blue-300 text-sm font-medium transition-all group">
-                        <span className="group-hover:text-blue-200">Manage Twilio Bundles</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right w-4 h-4 group-hover:translate-x-1 transition-transform"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                <div className="flex justify-center mb-8">
+                    <Link href="/admin/twilio" className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-white font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                        <span>Open Twilio Bundle Manager</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right w-4 h-4 ml-1 opacity-70"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                     </Link>
                 </div>
 
