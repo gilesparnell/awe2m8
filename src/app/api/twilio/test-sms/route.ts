@@ -1,0 +1,21 @@
+import { NextResponse } from 'next/server';
+import twilio from 'twilio';
+
+export async function POST(request: Request) {
+    const { accountSid, authToken } = await request.json();
+    const client = twilio(accountSid, authToken);
+    
+    try {
+        const notifyNumbers = ['+61401027141', '+61404283605'];
+        const results = await Promise.all(notifyNumbers.map(number => 
+            client.messages.create({
+                body: '🔔 Status: Bundle Created. This is a TEST message from AWE2M8 Admin.',
+                from: 'AWE2M8',
+                to: number
+            })
+        ));
+        return NextResponse.json({ success: true, sids: results.map(m => m.sid) });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+}
