@@ -49,9 +49,10 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
         setStatus('Initializing...');
 
         try {
-            if (!credentials.accountSid || !credentials.authToken) {
-                throw new Error("Missing credentials. See Configuration.");
-            }
+            // Relaxed check: We allow empty credentials here because the backend will fallback to Env Vars.
+            // if (!credentials.accountSid || !credentials.authToken) {
+            //     throw new Error("Missing credentials. See Configuration.");
+            // }
             if (!subAccountSid.startsWith('AC')) {
                 throw new Error("Please enter a valid Sub-Account SID (starts with AC)");
             }
