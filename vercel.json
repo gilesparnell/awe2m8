@@ -1,0 +1,8 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/check-bundles",
+            "schedule": "*/10 * * * *"
+        }
+    ]
+}
