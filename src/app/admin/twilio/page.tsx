@@ -35,10 +35,12 @@ export default function TwilioAdminPage() {
             <div className="max-w-4xl mx-auto">
                 {/* Custom Header similar to AdminHeader */}
                 <header className="mb-12 text-center relative">
-                    <Link href="/admin" className="absolute left-0 top-0 flex items-center gap-2 text-gray-500 hover:text-white transition-colors">
-                        <ChevronLeft className="w-5 h-5" />
-                        Back to Dashboard
-                    </Link>
+                    <div className="mb-6">
+                        <Link href="/admin" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
+                            <ChevronLeft className="w-4 h-4" />
+                            Back to Tools
+                        </Link>
+                    </div>
 
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-900/30 border border-blue-800 rounded-full text-blue-400 text-xs font-bold uppercase tracking-wider mb-4 mt-8 md:mt-0">
                         A2P 10DLC Compliance

@@ -2,131 +2,90 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ModuleType } from '@/types';
-import { useAdminState } from '@/hooks/useAdminState';
-import { AdminHeader, InstructionsPanel } from '@/components/admin/AdminHeader';
-import { ModeSelector } from '@/components/admin/ModeSelector';
-import { PageSelector } from '@/components/admin/PageSelector';
-import { URLInput } from '@/components/admin/URLInput';
-import { ModuleSelector } from '@/components/admin/ModuleSelector';
-import { ContentEditor } from '@/components/admin/ContentEditor';
-import { SuccessScreen } from '@/components/admin/SuccessScreen';
-import { ErrorAlert } from '@/components/admin/ErrorAlert';
+import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings } from 'lucide-react';
 
-export default function AdminPage() {
-    const {
-        mode,
-        url,
-        loading,
-        error,
-        step,
-        existingPages,
-        selectedPageId,
-        clientName,
-        niche,
-        selectedModules,
-        customInstructions,
-        generatedModules,
-        generatedPageId,
-        setUrl,
-        setSelectedPageId,
-        setCustomInstructions,
-        setSelectedModules,
-        handleModeChange,
-        loadPageForEditing,
-        handleDeletePage,
-        handleAnalyze,
-        handleGenerate,
-        handleSave,
-        updateModule,
-        updateModuleConfig,
-        resetForm
-    } = useAdminState();
-
-    const handleModuleToggle = (module: ModuleType, checked: boolean) => {
-        if (checked) {
-            setSelectedModules([...selectedModules, module]);
-        } else {
-            setSelectedModules(selectedModules.filter(m => m !== module));
-        }
-    };
-
+export default function AdminDashboard() {
     return (
-        <div className="min-h-screen bg-gray-950 text-white p-8 font-sans">
-            <div className="max-w-4xl mx-auto">
-                <AdminHeader />
+        <div className="min-h-screen bg-gray-950 text-white font-sans p-8">
+            <div className="max-w-5xl mx-auto">
+                {/* Header */}
+                <header className="mb-12 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-4">
+                        Internal Tools
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+                            AWE2M8
+                        </span>{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
+                            Command Center
+                        </span>
+                    </h1>
+                    <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                        Select a tool to manage sales demos, compliance, or system configurations.
+                    </p>
+                </header>
 
-                <div className="flex justify-center mb-8">
-                    <Link href="/admin/twilio" className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl text-white font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-                        <span>Open Twilio Bundle Manager & SMS</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right w-4 h-4 ml-1 opacity-70"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                {/* Tools Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    {/* Tool 1: Sales Demo Builder */}
+                    <Link href="/admin/demos" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-green-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-green-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-green-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-500/20 transition-colors">
+                                <MonitorPlay className="w-6 h-6 text-green-400 group-hover:text-green-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">Sales Demo Builder</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Generate personalized AI demo pages, analyze prospect websites, and manage content modules.
+                            </p>
+                            <div className="flex items-center text-green-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        {/* Background Decoration */}
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-green-500/10 rounded-full blur-3xl group-hover:bg-green-500/20 transition-all"></div>
                     </Link>
+
+                    {/* Tool 2: Twilio Compliance */}
+                    <Link href="/admin/twilio" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-blue-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
+                                <ShieldCheck className="w-6 h-6 text-blue-400 group-hover:text-blue-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Twilio Bundle Manager</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Manage A2P 10DLC regulatory bundles, submit compliance documents, and check approval status.
+                            </p>
+                            <div className="flex items-center text-blue-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
+                    </Link>
+
+                    {/* Tool 3: Placeholder / System Config */}
+                    <div className="group relative overflow-hidden bg-gray-900/50 border border-gray-800 rounded-2xl p-6 opacity-60">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mb-4">
+                                <Settings className="w-6 h-6 text-gray-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-400 mb-2">System Settings</h3>
+                            <p className="text-gray-500 text-sm mb-4">
+                                Global API configurations and system monitoring tools.
+                            </p>
+                            <div className="flex items-center text-gray-600 text-sm font-bold cursor-not-allowed">
+                                Coming Soon
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <InstructionsPanel />
-
-                <ModeSelector mode={mode} onModeChange={handleModeChange} />
-
-                <ErrorAlert message={error} />
-
-                {/* Edit Mode: Page Selector */}
-                {mode === 'edit' && step === 'input' && (
-                    <PageSelector
-                        pages={existingPages}
-                        selectedPageId={selectedPageId}
-                        loading={loading}
-                        onSelectPage={setSelectedPageId}
-                        onLoadPage={() => loadPageForEditing(selectedPageId)}
-                        onDeletePage={handleDeletePage}
-                    />
-                )}
-
-                {/* Create Mode: URL Input */}
-                {mode === 'create' && step === 'input' && (
-                    <URLInput
-                        url={url}
-                        loading={loading}
-                        onUrlChange={setUrl}
-                        onAnalyze={handleAnalyze}
-                    />
-                )}
-
-                {/* Step 2: Module Selection */}
-                {step === 'selection' && (
-                    <ModuleSelector
-                        clientName={clientName}
-                        niche={niche}
-                        selectedModules={selectedModules}
-                        customInstructions={customInstructions}
-                        loading={loading}
-                        onModuleToggle={handleModuleToggle}
-                        onInstructionsChange={setCustomInstructions}
-                        onGenerate={handleGenerate}
-                    />
-                )}
-
-                {/* Step 3: Review & Edit */}
-                {step === 'review' && (
-                    <ContentEditor
-                        mode={mode}
-                        modules={generatedModules}
-                        loading={loading}
-                        onUpdateModule={updateModule}
-                        onUpdateModuleConfig={updateModuleConfig}
-                        onCancel={mode === 'create' ? () => handleModeChange('create') : resetForm}
-                        onSave={handleSave}
-                    />
-                )}
-
-                {/* Step 4: Success */}
-                {step === 'preview' && (
-                    <SuccessScreen
-                        mode={mode}
-                        pageId={generatedPageId}
-                        onReset={resetForm}
-                    />
-                )}
+                {/* Footer / Stats */}
+                <div className="mt-16 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                    <p>Internal Tools v2.0 • Secure Access Only</p>
+                </div>
             </div>
         </div>
     );
