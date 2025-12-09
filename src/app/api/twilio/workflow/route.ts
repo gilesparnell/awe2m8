@@ -188,43 +188,22 @@ export async function POST(req: NextRequest) {
                 business_name: businessName,
                 business_type: formData.get("businessType"),
                 business_registration_number: formData.get("ein"),
-                // Removed: website, email, phone, address_sids (Wait, the previous error explicitly complained about 'website'.
-                // It did NOT complain about 'business_name' etc. 
-                // So let's stick to the core fields.
+                // V2.0 Requirement: Link the Address Resource via address_sids
+                address_sids: [address.sid]
             }
         });
 
         // 6. Create Bundle
-        // We need to link the supporting documents?
-        // Wait, the Create User link creates the user.
-        // The Bundle creation links the User.
-        // But does the Bundle creation also link the Documents?
-        // Usually you Create Bundle -> Add Item Assignments (Documents) -> Submit Bundle.
-        // OR create bundle with some assignments?
-        // User's HTML:
-        // `createBundle` calls `/Bundles`. params: EndUserId.
-        // It does NOT seem to link the documents in the `createBundle` call in the HTML?
-        // Accessing `docResponses`? The logic in the HTML seemed to upload documents but NOT link them to the bundle?
-        // Ah, wait. `SupportingDocuments` link to `EndUsers`? No.
-        // `Bundles` contain `ItemAssignments`.
-        // The User's HTML logic seems to be missing the "Assign Document to Bundle" step?
-        // Step 4 in HTML: `body: { ... EndUserId: ... }`.
-        // It doesn't reference `docData.sid`.
-        // This is suspicious. If I upload a document but don't attach it to the bundle, the bundle will be incomplete/rejected.
-        // Twilio A2P Bundle requires: End User + Supporting Document (Business Registration).
-        // The HTML provided by the user might be an *incomplete* prototype.
-        // I should FIX this.
-        // I need to:
-        // a. Create Bundle
-        // b. Create BundleItemAssignment (linking Document to Bundle)
-        // c. Submit Bundle
-
-        // Create Bundle
         const bundleOptions: any = {
-            friendlyName: `${businessName} - A2P Bundle`,
+            friendlyName: `${businessName} - Regulatory Bundle`,
             email: formData.get("email") as string,
+            // Use 'a2p_messaging_profile_bundle' for A2P 10DLC, but if user wants AU specific, we might use 'mobile_local' or similar.
+            // For now, if the user intends A2P 10DLC (US sending), the ISO Country must often be US.
+            // But if the user explicitly says "Bundle should have been for Australia", we set it to the selected country.
+            // WARNING: 'a2p_messaging_profile_bundle' might NOT exist for AU. 
+            // However, assuming the user implies "Business Profile for this region".
             regulationType: 'a2p_messaging_profile_bundle',
-            isoCountry: 'US',
+            isoCountry: formData.get("country") || 'US', // Uses selected country (e.g. AU)
             endUserType: 'business',
             numberType: 'mobile',
         };

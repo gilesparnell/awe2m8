@@ -194,6 +194,16 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                                 <label className="block text-gray-400 text-xs font-bold mb-1">Postal Code</label>
                                 <input name="postalCode" value={businessInfo.postalCode} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
                             </div>
+                            <div className="col-span-3 mt-2">
+                                <label className="block text-gray-400 text-xs font-bold mb-1">Country</label>
+                                <select name="country" value={businessInfo.country} onChange={(e: any) => handleInputChange(e)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none appearance-none">
+                                    <option value="AU">Australia (AU)</option>
+                                    <option value="US">United States (US)</option>
+                                    <option value="GB">United Kingdom (GB)</option>
+                                    <option value="CA">Canada (CA)</option>
+                                    <option value="NZ">New Zealand (NZ)</option>
+                                </select>
+                            </div>
                         </div>
 
                     </div>
