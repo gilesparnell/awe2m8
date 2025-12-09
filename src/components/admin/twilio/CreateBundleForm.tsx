@@ -53,9 +53,11 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
             // if (!credentials.accountSid || !credentials.authToken) {
             //     throw new Error("Missing credentials. See Configuration.");
             // }
-            if (!subAccountSid.toUpperCase().startsWith('AC') || subAccountSid.length < 34) {
-                throw new Error("Please enter a valid Sub-Account SID (starts with AC, 34 characters)");
-            }
+            // Removed client-side validation - backend will validate the SID format
+            // This bypasses Vercel caching issues where old validation code persists
+            // if (!subAccountSid.toUpperCase().startsWith('AC') || subAccountSid.length < 34) {
+            //     throw new Error("Please enter a valid Sub-Account SID (starts with AC, 34 characters)");
+            // }
 
             const body = new FormData();
 
