@@ -88,25 +88,23 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
                         <Save className="w-5 h-5" />
                         {saved ? 'Saved!' : 'Save Configuration'}
                     </button>
-                    {saved && (
-                        <button
-                            onClick={async () => {
-                                try {
-                                    const res = await fetch('/api/twilio/test-sms', {
-                                        method: 'POST',
-                                        body: JSON.stringify({ accountSid: sid, authToken: token }),
-                                        headers: { 'Content-Type': 'application/json' }
-                                    });
-                                    const data = await res.json();
-                                    if (data.success) alert('Test SMS Sent!');
-                                    else alert('Failed: ' + data.error);
-                                } catch (e) { alert('Error sending test SMS'); }
-                            }}
-                            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-3 px-6 rounded-xl transition-all border border-gray-700"
-                        >
-                            Test SMS
-                        </button>
-                    )}
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await fetch('/api/twilio/test-sms', {
+                                    method: 'POST',
+                                    body: JSON.stringify({ accountSid: sid, authToken: token }),
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+                                const data = await res.json();
+                                if (data.success) alert('Test SMS Sent!');
+                                else alert('Failed: ' + data.error);
+                            } catch (e) { alert('Error sending test SMS'); }
+                        }}
+                        className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-3 px-6 rounded-xl transition-all border border-gray-700"
+                    >
+                        Test SMS
+                    </button>
                 </div>
             </div>
         </div>
