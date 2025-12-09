@@ -50,7 +50,7 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
                 <Lock className="w-5 h-5 flex-shrink-0" />
                 <div>
                     <p className="mb-2">
-                        Credentials found in <code>TWILIO_ACCOUNT_SID</code> and <code>TWILIO_AUTH_TOKEN</code> environment variables will be used automatically.
+                        Credentials found in the (Vercel) Server environment settings <code>TWILIO_ACCOUNT_SID</code> and <code>TWILIO_AUTH_TOKEN</code> environment variables will be used automatically.
                     </p>
                     <p className="text-blue-400/70">
                         You can override them here for this browser session only. Leave blank to use server defaults.
