@@ -235,58 +235,60 @@ export async function POST(req: NextRequest) {
         }
 
         console.log('Creating Regulatory Bundle...');
-        // 6. Create Bundle using TrustHub API
+        // 6. Create Bundle - Different API based on country
         let bundle;
+        const country = formData.get("country") as string || 'AU';
+
         try {
-            const country = formData.get("country") as string || 'AU';
-
-            // First, get the list of available policies
-            const policies = await targetClient.trusthub.v1.policies.list({ limit: 20 });
-            console.log('Available policies:', policies.map(p => ({ sid: p.sid, name: p.friendlyName })));
-
-            // Select the appropriate policy based on country and business type
-            let selectedPolicy;
-
             if (country === 'AU') {
-                // For Australia, prioritize Mobile for SMS/Voice, fallback to Toll-Free
-                selectedPolicy = policies.find(p =>
-                    p.friendlyName?.includes('Australia') &&
-                    p.friendlyName?.includes('Mobile') &&
-                    p.friendlyName?.includes('Business')
-                ) || policies.find(p =>
-                    p.friendlyName?.includes('Australia') &&
-                    p.friendlyName?.includes('Business')
-                );
-            } else if (country === 'US') {
-                // For US, look for A2P 10DLC or Primary Business Profile
-                selectedPolicy = policies.find(p =>
-                    p.friendlyName?.includes('A2P') ||
-                    p.friendlyName?.includes('Primary Business')
-                );
-            } else if (country === 'IE') {
-                // For Ireland
-                selectedPolicy = policies.find(p => p.friendlyName === 'Ireland: Mobile - Business');
-            } else if (country === 'BR') {
-                // For Brazil
-                selectedPolicy = policies.find(p => p.friendlyName === 'Brazil: Mobile - Business');
+                // Australia uses Regulatory Compliance API with specific regulation type
+                console.log('Using Regulatory Compliance API for Australia...');
+                bundle = await targetClient.numbers.v2.regulatoryCompliance.bundles.create({
+                    friendlyName: `${businessName} - Regulatory Bundle`,
+                    email: formData.get("email") as string,
+                    // regulationType is set via the regulation parameter
+                    isoCountry: 'AU',
+                    endUserType: 'business',
+                    numberType: 'mobile',
+                    regulation: 'primary_customer_profile_bundle_australia'
+                } as any); // Type assertion needed for regulation parameter
+                console.log(`Bundle created successfully: ${bundle.sid}`);
+            } else {
+                // Other countries use TrustHub API
+                console.log('Using TrustHub API for non-AU countries...');
+                const policies = await targetClient.trusthub.v1.policies.list({ limit: 20 });
+                console.log('Available policies:', policies.map(p => ({ sid: p.sid, name: p.friendlyName })));
+
+                // Select the appropriate policy based on country
+                let selectedPolicy;
+
+                if (country === 'US') {
+                    selectedPolicy = policies.find(p =>
+                        p.friendlyName?.includes('A2P') ||
+                        p.friendlyName?.includes('Primary Business')
+                    );
+                } else if (country === 'IE') {
+                    selectedPolicy = policies.find(p => p.friendlyName === 'Ireland: Mobile - Business');
+                } else if (country === 'BR') {
+                    selectedPolicy = policies.find(p => p.friendlyName === 'Brazil: Mobile - Business');
+                }
+
+                const policySid = selectedPolicy?.sid || policies[0]?.sid;
+
+                if (!policySid) {
+                    throw new Error('No TrustHub policies available for this account');
+                }
+
+                console.log(`Selected policy for ${country}: ${selectedPolicy?.friendlyName || policies[0]?.friendlyName} (${policySid})`);
+
+                bundle = await targetClient.trusthub.v1.trustProducts.create({
+                    friendlyName: `${businessName} - Regulatory Bundle`,
+                    email: formData.get("email") as string,
+                    policySid: policySid,
+                    statusCallback: ''
+                });
+                console.log(`Bundle created successfully: ${bundle.sid}`);
             }
-
-            // Fallback to first policy if no match found
-            const policySid = selectedPolicy?.sid || policies[0]?.sid;
-
-            if (!policySid) {
-                throw new Error('No TrustHub policies available for this account');
-            }
-
-            console.log(`Selected policy for ${country}: ${selectedPolicy?.friendlyName || policies[0]?.friendlyName} (${policySid})`);
-
-            bundle = await targetClient.trusthub.v1.trustProducts.create({
-                friendlyName: `${businessName} - Regulatory Bundle`,
-                email: formData.get("email") as string,
-                policySid: policySid,
-                statusCallback: '' // Optional callback URL
-            });
-            console.log(`Bundle created successfully: ${bundle.sid}`);
         } catch (bundleError: any) {
             console.error('Bundle creation failed:', {
                 message: bundleError.message,
@@ -298,31 +300,68 @@ export async function POST(req: NextRequest) {
         }
 
 
-        // Assign End User to TrustHub Bundle
-        await targetClient.trusthub.v1.trustProducts(bundle.sid)
-            .trustProductsEntityAssignments.create({ objectSid: endUser.sid });
+        // Assign items to bundle - Different API based on country
+        if (country === 'AU') {
+            // Australia uses Regulatory Compliance API
+            console.log('Assigning items using Regulatory Compliance API...');
 
-        // Assign Address to TrustHub Bundle
-        await targetClient.trusthub.v1.trustProducts(bundle.sid)
-            .trustProductsEntityAssignments.create({ objectSid: address.sid });
+            // Assign End User
+            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                .itemAssignments.create({ objectSid: endUser.sid });
 
-        // Assign Documents to TrustHub Bundle
-        if (docIds['businessDoc']) {
+            // Assign Address
+            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                .itemAssignments.create({ objectSid: address.sid });
+
+            // Assign Documents
+            if (docIds['businessDoc']) {
+                await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                    .itemAssignments.create({ objectSid: docIds['businessDoc'] });
+            }
+            if (docIds['addressDoc']) {
+                await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                    .itemAssignments.create({ objectSid: docIds['addressDoc'] });
+            }
+            if (docIds['repDoc']) {
+                await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                    .itemAssignments.create({ objectSid: docIds['repDoc'] });
+            }
+        } else {
+            // Other countries use TrustHub API
+            console.log('Assigning items using TrustHub API...');
+
+            // Assign End User to TrustHub Bundle
             await targetClient.trusthub.v1.trustProducts(bundle.sid)
-                .trustProductsEntityAssignments.create({ objectSid: docIds['businessDoc'] });
-        }
-        if (docIds['addressDoc']) {
+                .trustProductsEntityAssignments.create({ objectSid: endUser.sid });
+
+            // Assign Address to TrustHub Bundle
             await targetClient.trusthub.v1.trustProducts(bundle.sid)
-                .trustProductsEntityAssignments.create({ objectSid: docIds['addressDoc'] });
-        }
-        if (docIds['repDoc']) {
-            await targetClient.trusthub.v1.trustProducts(bundle.sid)
-                .trustProductsEntityAssignments.create({ objectSid: docIds['repDoc'] });
+                .trustProductsEntityAssignments.create({ objectSid: address.sid });
+
+            // Assign Documents to TrustHub Bundle
+            if (docIds['businessDoc']) {
+                await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                    .trustProductsEntityAssignments.create({ objectSid: docIds['businessDoc'] });
+            }
+            if (docIds['addressDoc']) {
+                await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                    .trustProductsEntityAssignments.create({ objectSid: docIds['addressDoc'] });
+            }
+            if (docIds['repDoc']) {
+                await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                    .trustProductsEntityAssignments.create({ objectSid: docIds['repDoc'] });
+            }
         }
 
-        // 7. Submit Bundle for Review
-        const submitted = await targetClient.trusthub.v1.trustProducts(bundle.sid)
-            .update({ status: 'pending-review' });
+        // 7. Submit Bundle for Review - Different API based on country
+        let submitted;
+        if (country === 'AU') {
+            submitted = await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                .update({ status: 'pending-review' });
+        } else {
+            submitted = await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                .update({ status: 'pending-review' });
+        }
 
         // 8. Send SMS Notification (Approvals are manual, so we notify on SUBMISSION for now,
         // or setup a StatusCallback. Since StatusCallback requires a public URL webhook, 
