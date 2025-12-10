@@ -53,7 +53,7 @@ export async function GET(request: Request) {
                     // Deduplication: Check Master Message History
                     // We check the PARENT account's message history because that's where we send notifications FROM.
                     const messages = await client.messages.list({
-                        from: 'AWE2M8',
+                        from: '+61485009296',
                         limit: 30
                     });
 
@@ -67,10 +67,15 @@ export async function GET(request: Request) {
 
                     console.log(`Cron: Notifying for ${bundle.friendlyName} in Account ${account.sid}`);
 
+                    // Use the SMS account that owns the phone number
+                    const smsAccountSid = process.env.TWILIO_SMS_ACCOUNT_SID || accountSid;
+                    const smsAuthToken = process.env.TWILIO_SMS_AUTH_TOKEN || authToken;
+                    const smsClient = twilio(smsAccountSid, smsAuthToken);
+
                     await Promise.all(notifyNumbers.map(number =>
-                        client.messages.create({
-                            body: `Great News. Regulatory Bundle Approved.\n\nAccount: ${account.sid}\nBundle: ${bundle.friendlyName}`,
-                            from: 'AWE2M8',
+                        smsClient.messages.create({
+                            body: `🎉 Great News! Regulatory Bundle Approved.\n\nClient: ${account.friendlyName}\nBundle: ${bundle.friendlyName}\n\nYour Twilio phone numbers are now ready to use!`,
+                            from: '+61485009296',
                             to: number
                         })
                     ));

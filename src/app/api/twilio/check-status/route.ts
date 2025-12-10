@@ -39,11 +39,19 @@ export async function POST(request: Request) {
 
             if (shouldSend) {
                 try {
+                    // Use the SMS account that owns the phone number
+                    const smsAccountSid = process.env.TWILIO_SMS_ACCOUNT_SID || accountSid;
+                    const smsAuthToken = process.env.TWILIO_SMS_AUTH_TOKEN || authToken;
+                    const smsClient = twilio(smsAccountSid, smsAuthToken);
+
+                    // Fetch account details to get friendly name
+                    const account = await client.api.accounts(bundle.accountSid).fetch();
+
                     const notifyNumbers = ['+61401027141', '+61404283605'];
                     await Promise.all(notifyNumbers.map(number =>
-                        client.messages.create({
-                            body: `Great News. Regulatory Bundle Approved.\n\nAccount: ${bundle.accountSid}\nBundle: ${bundle.friendlyName}`,
-                            from: 'AWE2M8',
+                        smsClient.messages.create({
+                            body: `🎉 Great News! Regulatory Bundle Approved.\n\nClient: ${account.friendlyName}\nBundle: ${bundle.friendlyName}\n\nYour Twilio phone numbers are now ready to use!`,
+                            from: '+61485009296',
                             to: number
                         })
                     ));
