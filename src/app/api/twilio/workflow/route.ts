@@ -248,8 +248,15 @@ export async function POST(req: NextRequest) {
             let selectedPolicy;
 
             if (country === 'AU') {
-                // For Australia, use "Australia: Toll-Free - Business"
-                selectedPolicy = policies.find(p => p.friendlyName === 'Australia: Toll-Free - Business');
+                // For Australia, prioritize Mobile for SMS/Voice, fallback to Toll-Free
+                selectedPolicy = policies.find(p =>
+                    p.friendlyName?.includes('Australia') &&
+                    p.friendlyName?.includes('Mobile') &&
+                    p.friendlyName?.includes('Business')
+                ) || policies.find(p =>
+                    p.friendlyName?.includes('Australia') &&
+                    p.friendlyName?.includes('Business')
+                );
             } else if (country === 'US') {
                 // For US, look for A2P 10DLC or Primary Business Profile
                 selectedPolicy = policies.find(p =>
@@ -271,7 +278,7 @@ export async function POST(req: NextRequest) {
                 throw new Error('No TrustHub policies available for this account');
             }
 
-            console.log(`Using policySid: ${policySid} (${selectedPolicy?.friendlyName || policies[0]?.friendlyName})`);
+            console.log(`Selected policy for ${country}: ${selectedPolicy?.friendlyName || policies[0]?.friendlyName} (${policySid})`);
 
             bundle = await targetClient.trusthub.v1.trustProducts.create({
                 friendlyName: `${businessName} - Regulatory Bundle`,
