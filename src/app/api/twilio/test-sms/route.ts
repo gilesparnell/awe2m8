@@ -2,26 +2,29 @@ import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 
 export async function POST(request: Request) {
-    let { accountSid, authToken } = await request.json();
+    // For SMS sending, we need to use the account that owns the phone number
+    // The phone number +61485009296 belongs to a specific account
+    // Use TWILIO_SMS_ACCOUNT_SID and TWILIO_SMS_AUTH_TOKEN if available
+    const smsAccountSid = process.env.TWILIO_SMS_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID;
+    const smsAuthToken = process.env.TWILIO_SMS_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN;
 
-    // Fallback to Server Environment Variables if not provided by client
-    if (!accountSid || !authToken) {
-        accountSid = process.env.TWILIO_ACCOUNT_SID;
-        authToken = process.env.TWILIO_AUTH_TOKEN;
+    if (!smsAccountSid || !smsAuthToken) {
+        return NextResponse.json({
+            success: false,
+            error: "Missing SMS account credentials. Please configure TWILIO_SMS_ACCOUNT_SID and TWILIO_SMS_AUTH_TOKEN environment variables."
+        }, { status: 401 });
     }
 
-    if (!accountSid || !authToken) {
-        return NextResponse.json({ success: false, error: "Missing Twilio Credentials (ENV or Body)" }, { status: 401 });
-    }
-
-    const client = twilio(accountSid, authToken);
+    // Use the account that owns the phone number for sending
+    const client = twilio(smsAccountSid, smsAuthToken);
 
     try {
         // Use specific phone number for SMS sending
         // Phone: +61485009296 (Australian number for AWE2M8)
+        // This number must belong to the account specified by smsAccountSid
         const fromNumber = '+61485009296';
 
-        console.log(`Using Twilio number: ${fromNumber} for test SMS`);
+        console.log(`Using Twilio number: ${fromNumber} for test SMS from account: ${smsAccountSid}`);
 
         const notifyNumbers = ['+61401027141', '+61404283605'];
         const results = await Promise.all(notifyNumbers.map(number =>
@@ -36,7 +39,8 @@ export async function POST(request: Request) {
             success: true,
             sids: results.map(m => m.sid),
             from: fromNumber,
-            sentTo: notifyNumbers
+            sentTo: notifyNumbers,
+            accountUsed: smsAccountSid
         });
     } catch (error: any) {
         console.error('Test SMS Error:', error);
