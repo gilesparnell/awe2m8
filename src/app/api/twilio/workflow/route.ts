@@ -253,7 +253,23 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error("Workflow Error:", error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        console.error("Workflow Error Details:", {
+            message: error.message,
+            code: error.code,
+            moreInfo: error.moreInfo,
+            status: error.status,
+            stack: error.stack
+        });
+
+        // Return more detailed error message
+        const errorMessage = error.code
+            ? `Twilio Error ${error.code}: ${error.message}${error.moreInfo ? ` (${error.moreInfo})` : ''}`
+            : error.message || 'An unknown error occurred';
+
+        return NextResponse.json({
+            success: false,
+            error: errorMessage,
+            details: error.code ? { code: error.code, moreInfo: error.moreInfo } : undefined
+        }, { status: 500 });
     }
 }

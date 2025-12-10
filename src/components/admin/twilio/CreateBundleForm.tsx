@@ -123,13 +123,6 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
 
     return (
         <div className="animate-in fade-in duration-500 max-w-2xl mx-auto">
-            {error && (
-                <div className="bg-red-900/20 border border-red-800 text-red-200 p-4 rounded-xl flex items-center gap-3 mb-6">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 shadow-xl">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-800/50">
@@ -280,6 +273,16 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                             <span><strong>Docs:</strong> AWE2M8 Business Address.pdf</span>
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="bg-red-900/20 border border-red-800 text-red-200 p-4 rounded-xl flex items-center gap-3 mb-4">
+                            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                            <div className="flex-1">
+                                <div className="font-bold mb-1">Error</div>
+                                <div className="text-sm">{error}</div>
+                            </div>
+                        </div>
+                    )}
 
                     <button
                         type="submit"
