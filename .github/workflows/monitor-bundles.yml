@@ -11,7 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Cron Endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Warning: CRON_SECRET not set in repository secrets"
+            exit 0
+          fi
           curl -X GET https://demos.awe2m8.ai/api/cron/check-bundles \
-          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          -H "Authorization: Bearer $CRON_SECRET" \
           --fail || echo "Ping failed but continuing to avoid workflow error"
