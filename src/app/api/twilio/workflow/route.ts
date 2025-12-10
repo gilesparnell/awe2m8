@@ -238,10 +238,23 @@ export async function POST(req: NextRequest) {
         // 6. Create Bundle using TrustHub API
         let bundle;
         try {
+            // First, get the list of available policies to find the right one
+            const policies = await targetClient.trusthub.v1.policies.list({ limit: 20 });
+            console.log('Available policies:', policies.map(p => ({ sid: p.sid, name: p.friendlyName })));
+
+            // Use the first available policy (usually the primary business profile)
+            const policySid = policies[0]?.sid;
+
+            if (!policySid) {
+                throw new Error('No TrustHub policies available for this account');
+            }
+
+            console.log(`Using policySid: ${policySid}`);
+
             bundle = await targetClient.trusthub.v1.trustProducts.create({
                 friendlyName: `${businessName} - Regulatory Bundle`,
                 email: formData.get("email") as string,
-                policySid: 'RNb0d4771c2c98518d837b5c0b0ca5c4', // A2P 10DLC Messaging Profile Bundle
+                policySid: policySid,
                 statusCallback: '' // Optional callback URL
             });
             console.log(`Bundle created successfully: ${bundle.sid}`);
