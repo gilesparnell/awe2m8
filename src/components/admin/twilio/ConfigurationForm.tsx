@@ -97,9 +97,14 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
                                     headers: { 'Content-Type': 'application/json' }
                                 });
                                 const data = await res.json();
-                                if (data.success) alert('Test SMS Sent!');
-                                else alert('Failed: ' + data.error);
-                            } catch (e) { alert('Error sending test SMS'); }
+                                if (data.success) {
+                                    alert(`✅ Test SMS Sent Successfully!\n\nFrom: ${data.from}\nTo: ${data.sentTo.join(', ')}\nMessage SIDs: ${data.sids.join(', ')}`);
+                                } else {
+                                    alert(`❌ Failed to send test SMS:\n\n${data.error}`);
+                                }
+                            } catch (e: any) {
+                                alert(`❌ Error sending test SMS:\n\n${e.message}`);
+                            }
                         }}
                         className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-3 px-6 rounded-xl transition-all border border-gray-700"
                     >
