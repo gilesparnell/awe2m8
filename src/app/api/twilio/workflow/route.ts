@@ -179,16 +179,29 @@ export async function POST(req: NextRequest) {
         // Let's try creating a Twilio Address Resource first.
 
         console.log('Creating Address Resource...');
-        // Create Address Resource
-        const address = await targetClient.addresses.create({
-            customerName: businessName,
-            street: formData.get("street") as string,
-            city: formData.get("city") as string,
-            region: formData.get("state") as string,
-            postalCode: formData.get("postalCode") as string,
-            isoCountry: formData.get("country") as string,
-            friendlyName: `${businessName} - HQ`
-        });
+        // Create Address Resource using PARENT client
+        // Addresses are account-level resources and should be created on the parent account
+        let address;
+        try {
+            address = await client.addresses.create({
+                customerName: businessName,
+                street: formData.get("street") as string,
+                city: formData.get("city") as string,
+                region: formData.get("state") as string,
+                postalCode: formData.get("postalCode") as string,
+                isoCountry: formData.get("country") as string,
+                friendlyName: `${businessName} - HQ`
+            });
+            console.log(`Address created successfully: ${address.sid}`);
+        } catch (addressError: any) {
+            console.error('Address creation failed:', {
+                message: addressError.message,
+                code: addressError.code,
+                moreInfo: addressError.moreInfo,
+                details: addressError.details
+            });
+            throw new Error(`Failed to create address: ${addressError.message}`);
+        }
 
         const endUser = await targetClient.numbers.v2.regulatoryCompliance.endUsers.create({
             friendlyName: businessName,
