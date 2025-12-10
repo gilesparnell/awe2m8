@@ -40,6 +40,9 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Missing Twilio credentials" }, { status: 401 });
         }
 
+        const friendlyName = url.searchParams.get("friendlyName");
+        const limit = parseInt(url.searchParams.get("limit") || "50", 10);
+
         console.log(`Fetching bundles for ${subAccountSid || 'Master Account'}...`);
 
         // If subAccountSid is provided, we act on behalf of that account
@@ -48,9 +51,15 @@ export async function GET(req: NextRequest) {
             ? twilio(accountSid, authToken, { accountSid: subAccountSid })
             : twilio(accountSid, authToken);
 
-        const bundles = await client.numbers.v2.regulatoryCompliance.bundles.list({
-            limit: 20,
-        });
+        const listParams: any = {
+            limit: Math.min(limit, 100), // Cap at 100
+        };
+
+        if (friendlyName) {
+            listParams.friendlyName = friendlyName;
+        }
+
+        const bundles = await client.numbers.v2.regulatoryCompliance.bundles.list(listParams);
 
         console.log(`Found ${bundles.length} bundles.`);
 
