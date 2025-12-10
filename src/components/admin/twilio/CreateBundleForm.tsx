@@ -36,6 +36,13 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
     const [subAccountSid, setSubAccountSid] = useState('');
     const [successData, setSuccessData] = useState<{ bundleSid: string; status: string } | null>(null);
 
+    // Progress tracking
+    const [progressSteps, setProgressSteps] = useState<Array<{
+        name: string;
+        status: 'pending' | 'loading' | 'success' | 'error';
+        message?: string;
+    }>>([]);
+
     // Editable State
     const [businessInfo, setBusinessInfo] = useState(DEFAULT_BUSINESS_INFO);
 
@@ -73,21 +80,47 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
         setBusinessInfo(prev => ({ ...prev, [name]: value }));
     };
 
+    const updateProgress = (stepName: string, status: 'loading' | 'success' | 'error', message?: string) => {
+        setProgressSteps(prev => {
+            const existing = prev.find(s => s.name === stepName);
+            if (existing) {
+                return prev.map(s => s.name === stepName ? { ...s, status, message } : s);
+            }
+            return [...prev, { name: stepName, status, message }];
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         setStatus('Initializing...');
 
+        // Initialize progress steps
+        setProgressSteps([
+            { name: 'Validating Input', status: 'pending' },
+            { name: 'Uploading Documents', status: 'pending' },
+            { name: 'Creating Address', status: 'pending' },
+            { name: 'Creating End User', status: 'pending' },
+            { name: 'Creating Bundle', status: 'pending' },
+            { name: 'Submitting for Review', status: 'pending' }
+        ]);
+
         try {
+            updateProgress('Validating Input', 'loading');
+
             // Relaxed check: We allow empty credentials here because the backend will fallback to Env Vars.
             // if (!credentials.accountSid || !credentials.authToken) {
             //     throw new Error("Missing credentials. See Configuration.");
             // }
             // Validate Sub-Account SID format (case-insensitive)
             if (!subAccountSid || !subAccountSid.toUpperCase().startsWith('AC') || subAccountSid.length !== 34) {
+                updateProgress('Validating Input', 'error', 'Invalid Sub-Account SID format');
                 throw new Error("Please enter a valid Sub-Account SID (must start with AC and be 34 characters)");
             }
+
+            updateProgress('Validating Input', 'success');
+            updateProgress('Uploading Documents', 'loading');
 
             const body = new FormData();
 
@@ -121,7 +154,8 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                 }
             }
 
-            setStatus('Submitting bundle to Twilio...');
+            updateProgress('Uploading Documents', 'success');
+            setStatus('Creating bundle...');
 
             const res = await fetch('/api/twilio/workflow', {
                 method: 'POST',
@@ -135,8 +169,24 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
             const data = await res.json();
 
             if (!res.ok) {
+                // Determine which step failed based on error message
+                if (data.error?.includes('address')) {
+                    updateProgress('Creating Address', 'error', data.error);
+                } else if (data.error?.includes('End User')) {
+                    updateProgress('Creating End User', 'error', data.error);
+                } else if (data.error?.includes('bundle')) {
+                    updateProgress('Creating Bundle', 'error', data.error);
+                } else {
+                    updateProgress('Submitting for Review', 'error', data.error);
+                }
                 throw new Error(data.error || 'Failed to create bundle');
             }
+
+            // Mark all steps as success
+            updateProgress('Creating Address', 'success');
+            updateProgress('Creating End User', 'success');
+            updateProgress('Creating Bundle', 'success');
+            updateProgress('Submitting for Review', 'success');
 
             setStatus('Success!');
             setSuccessData({ bundleSid: data.bundleSid, status: data.status });
@@ -223,6 +273,44 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                             Use the SID from Twilio or GoHighLevel settings
                         </p>
                     </div>
+
+                    {/* Progress Tracker - Shows during loading */}
+                    {progressSteps.length > 0 && (
+                        <div className="bg-gray-950 rounded-xl p-6 border border-gray-800 space-y-3">
+                            <h4 className="text-sm font-bold text-gray-300 mb-4 flex items-center gap-2">
+                                <Loader2 className={`w-4 h-4 ${loading ? 'animate-spin text-blue-400' : 'text-gray-500'}`} />
+                                Bundle Creation Progress
+                            </h4>
+                            {progressSteps.map((step, index) => (
+                                <div key={index} className="flex items-center gap-3">
+                                    {step.status === 'pending' && (
+                                        <div className="w-5 h-5 rounded-full border-2 border-gray-700 flex-shrink-0" />
+                                    )}
+                                    {step.status === 'loading' && (
+                                        <Loader2 className="w-5 h-5 text-blue-400 animate-spin flex-shrink-0" />
+                                    )}
+                                    {step.status === 'success' && (
+                                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                                    )}
+                                    {step.status === 'error' && (
+                                        <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                                    )}
+                                    <div className="flex-1">
+                                        <div className={`text-sm font-medium ${step.status === 'success' ? 'text-green-400' :
+                                                step.status === 'error' ? 'text-red-400' :
+                                                    step.status === 'loading' ? 'text-blue-400' :
+                                                        'text-gray-500'
+                                            }`}>
+                                            {step.name}
+                                        </div>
+                                        {step.message && (
+                                            <div className="text-xs text-gray-500 mt-1">{step.message}</div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Error Message - Right after SID input */}
                     {error && (
