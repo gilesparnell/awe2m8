@@ -3,7 +3,17 @@ import { getNotificationNumbers, saveNotificationNumbers } from '@/lib/twilio-he
 
 export async function GET() {
     const notificationNumbers = getNotificationNumbers();
-    return NextResponse.json({ notificationNumbers });
+
+    // Check for existence of Env Vars (do NOT return values)
+    const envStatus = {
+        TWILIO_ACCOUNT_SID: !!process.env.TWILIO_ACCOUNT_SID,
+        TWILIO_AUTH_TOKEN: !!process.env.TWILIO_AUTH_TOKEN,
+        TWILIO_SMS_ACCOUNT_SID: !!process.env.TWILIO_SMS_ACCOUNT_SID,
+        TWILIO_SMS_AUTH_TOKEN: !!process.env.TWILIO_SMS_AUTH_TOKEN,
+        OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
+    };
+
+    return NextResponse.json({ notificationNumbers, envStatus });
 }
 
 export async function POST(request: Request) {

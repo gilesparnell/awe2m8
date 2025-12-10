@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Save, Lock, Bell } from 'lucide-react';
+import { Save, Lock, Bell, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface ConfigurationFormProps {
     onSave: (creds: { accountSid: string; authToken: string }) => void;
@@ -9,10 +9,37 @@ interface ConfigurationFormProps {
 export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) => {
     const [sid, setSid] = useState('');
     const [token, setToken] = useState('');
-    const [notifyNumbers, setNotifyNumbers] = useState('+61401027141, +61404283605');
+    const [notifyNumbers, setNotifyNumbers] = useState(''); // Default empty, load from server
     const [saved, setSaved] = useState(false);
+    const [envStatus, setEnvStatus] = useState<Record<string, boolean>>({});
+    const [loadingEnv, setLoadingEnv] = useState(true);
+
+    const fetchConfig = async () => {
+        try {
+            setLoadingEnv(true);
+            const res = await fetch('/api/twilio/config');
+            const data = await res.json();
+
+            if (data.envStatus) {
+                setEnvStatus(data.envStatus);
+            }
+            if (data.notificationNumbers && Array.isArray(data.notificationNumbers)) {
+                // Only set if not already overridden by local storage in the other effect
+                // Actually, let's merge or prefer Server if Local is empty?
+                // The existing logic preferred LocalStorage. Let's keep that but populate if empty.
+                const serverNumbers = data.notificationNumbers.join(', ');
+                setNotifyNumbers(prev => prev || serverNumbers);
+            }
+        } catch (e) {
+            console.error("Failed to fetch server config", e);
+        } finally {
+            setLoadingEnv(false);
+        }
+    };
 
     useEffect(() => {
+        fetchConfig();
+
         // Check for local storage overrides
         const savedSid = localStorage.getItem('twilio_account_sid');
         const savedToken = localStorage.getItem('twilio_auth_token');
@@ -50,43 +77,85 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
         setTimeout(() => setSaved(false), 3000);
     };
 
+    const EnvStatusItem = ({ name, isSet }: { name: string, isSet: boolean }) => (
+        <div className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+            <code className="text-xs text-gray-400 font-mono bg-gray-900 px-2 py-1 rounded">{name}</code>
+            {isSet ? (
+                <div className="flex items-center gap-1.5 text-green-400 text-xs font-bold">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Set</span>
+                </div>
+            ) : (
+                <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
+                    <XCircle className="w-4 h-4" />
+                    <span>Missing</span>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 mb-8">
             <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600 mb-6">
                 Twilio Configuration
             </h2>
 
-            <div className="bg-blue-900/10 border border-blue-800/30 rounded-lg p-4 mb-6 flex gap-3 text-blue-300 text-sm">
-                <Lock className="w-5 h-5 flex-shrink-0" />
-                <div>
-                    <p className="mb-2">
-                        Server Side credentials found!<code>TWILIO_ACCOUNT_SID</code> and <code>TWILIO_AUTH_TOKEN</code>. If you wish to override these, enter local credentials here.
-                    </p>
-                    <p className="text-blue-400/70">
-                        You can override them here for this browser session only. Leave blank to use server defaults.
+            {/* Server Environment Variables Status */}
+            <div className="bg-gray-950 border border-gray-800 rounded-xl p-5 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-900/20 rounded-lg">
+                            <Lock className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-200">Server Environment Variables</h3>
+                            <p className="text-xs text-gray-500">Variables detected on the running server</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={fetchConfig}
+                        className="text-gray-500 hover:text-white transition-colors p-2 hover:bg-gray-900 rounded-lg"
+                        title="Refresh Status"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loadingEnv ? 'animate-spin' : ''}`} />
+                    </button>
+                </div>
+
+                <div className="bg-gray-900/50 rounded-lg border border-gray-800 px-4">
+                    <EnvStatusItem name="TWILIO_ACCOUNT_SID" isSet={envStatus.TWILIO_ACCOUNT_SID} />
+                    <EnvStatusItem name="TWILIO_AUTH_TOKEN" isSet={envStatus.TWILIO_AUTH_TOKEN} />
+                    <EnvStatusItem name="TWILIO_SMS_ACCOUNT_SID" isSet={envStatus.TWILIO_SMS_ACCOUNT_SID} />
+                    <EnvStatusItem name="TWILIO_SMS_AUTH_TOKEN" isSet={envStatus.TWILIO_SMS_AUTH_TOKEN} />
+                    <EnvStatusItem name="OPENAI_API_KEY" isSet={envStatus.OPENAI_API_KEY} />
+                </div>
+
+                <div className="mt-4 flex gap-3 text-xs text-blue-300/80 bg-blue-900/10 p-3 rounded-lg border border-blue-900/20">
+                    <p>
+                        <strong>Note:</strong> Server-side credentials are used automatically by default.
+                        You can override the <strong>Account SID</strong> and <strong>Auth Token</strong> below for this browser session only (useful for testing different accounts).
                     </p>
                 </div>
             </div>
 
             <div className="space-y-6 max-w-xl">
                 <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2">Account SID <span className="text-red-500">*</span></label>
+                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Account SID (Optional)</label>
                     <input
                         type="text"
                         value={sid}
                         onChange={(e) => setSid(e.target.value)}
                         placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all placeholder:text-gray-800"
                     />
                 </div>
                 <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2">Auth Token <span className="text-red-500">*</span></label>
+                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Auth Token (Optional)</label>
                     <input
                         type="password"
                         value={token}
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="Your Twilio Auth Token"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all placeholder:text-gray-800"
                     />
                 </div>
 
