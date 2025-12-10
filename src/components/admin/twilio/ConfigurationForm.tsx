@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Save, Lock } from 'lucide-react';
+import { Save, Lock, Bell } from 'lucide-react';
 
 interface ConfigurationFormProps {
     onSave: (creds: { accountSid: string; authToken: string }) => void;
@@ -9,33 +9,43 @@ interface ConfigurationFormProps {
 export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) => {
     const [sid, setSid] = useState('');
     const [token, setToken] = useState('');
+    const [notifyNumbers, setNotifyNumbers] = useState('+61401027141, +61404283605');
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
         // Check for local storage overrides
         const savedSid = localStorage.getItem('twilio_account_sid');
         const savedToken = localStorage.getItem('twilio_auth_token');
+        const savedNotifyNumbers = localStorage.getItem('twilio_notify_numbers');
+
         if (savedSid) setSid(savedSid);
         if (savedToken) setToken(savedToken);
+        if (savedNotifyNumbers) setNotifyNumbers(savedNotifyNumbers);
 
-        // If nothing saved, check if we can skip configuration (Env Vars)
-        // We can't see Env Vars in client, but we can assume if the user didn't Enter fields, we might use server defaults?
-        // Actually, for the "Saved!" state, we should pass empty strings to parent if we want to use server defaults?
-        // Or better: Add a checkbox "Use Server Environment Variables"?
-        // Simpler: Just allow saving empty fields if the user intends to use Env Vars.
         if (savedSid && savedToken) {
             onSave({ accountSid: savedSid, authToken: savedToken });
-        } else {
-            // Signal to parent we might be ready if server env vars exist?
-            // Since we can't know, we just let the USER decide to save empty or not.
         }
     }, [onSave]);
 
-    const handleSave = () => {
-        // ALLOW saving empty/partial to clear local storage and rely on server
+    const handleSave = async () => {
+        // Save credentials to localStorage
         localStorage.setItem('twilio_account_sid', sid);
         localStorage.setItem('twilio_auth_token', token);
-        onSave({ accountSid: sid, authToken: token }); // If empty, backend will try Env Vars
+        localStorage.setItem('twilio_notify_numbers', notifyNumbers);
+
+        // Save notification numbers to server
+        try {
+            const numbers = notifyNumbers.split(',').map(n => n.trim()).filter(n => n.length > 0);
+            await fetch('/api/twilio/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notificationNumbers: numbers })
+            });
+        } catch (e) {
+            console.error('Failed to save notification numbers:', e);
+        }
+
+        onSave({ accountSid: sid, authToken: token });
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
     };
@@ -77,6 +87,25 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="Your Twilio Auth Token"
                         className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                    />
+                </div>
+
+                <div className="pt-4 border-t border-gray-800">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Bell className="w-4 h-4 text-green-400" />
+                        <label className="block text-gray-400 text-sm font-bold">
+                            SMS Notification Numbers
+                        </label>
+                    </div>
+                    <p className="text-gray-500 text-xs mb-3">
+                        Phone numbers to receive SMS notifications when bundles are approved. Separate multiple numbers with commas.
+                    </p>
+                    <input
+                        type="text"
+                        value={notifyNumbers}
+                        onChange={(e) => setNotifyNumbers(e.target.value)}
+                        placeholder="+61401027141, +61404283605"
+                        className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all font-mono text-sm"
                     />
                 </div>
 

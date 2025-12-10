@@ -47,8 +47,11 @@ export async function POST(request: Request) {
                     // Fetch account details to get friendly name
                     const account = await client.api.accounts(bundle.accountSid).fetch();
 
-                    const notifyNumbers = ['+61401027141', '+61404283605'];
-                    await Promise.all(notifyNumbers.map(number =>
+                    // Get notification numbers from configuration
+                    const { getNotificationNumbers } = require('@/lib/twilio-helpers');
+                    const notifyNumbers = getNotificationNumbers();
+
+                    await Promise.all(notifyNumbers.map((number: string) =>
                         smsClient.messages.create({
                             body: `🎉 Great News! Regulatory Bundle Approved.\n\nClient: ${account.friendlyName}\nBundle: ${bundle.friendlyName}\n\nYour Twilio phone numbers are now ready to use!`,
                             from: '+61485009296',
