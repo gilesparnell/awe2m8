@@ -153,128 +153,9 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                         </p>
                     </div>
 
-                    {/* Editable Business Info (Pre-filled) */}
-                    <div className="bg-gray-950 rounded-xl p-6 border border-gray-800 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Details (Editable)</h4>
-                            <span className="text-xs text-blue-400">Must match documents exactly</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-gray-400 text-xs font-bold mb-1">Business Name</label>
-                                <input name="businessName" value={businessInfo.businessName} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 text-xs font-bold mb-1">EIN / ABN</label>
-                                <input name="ein" value={businessInfo.ein} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-gray-400 text-xs font-bold mb-1">Street Address</label>
-                            <input name="street" value={businessInfo.street} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-gray-400 text-xs font-bold mb-1">City</label>
-                                <input name="city" value={businessInfo.city} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 text-xs font-bold mb-1">State</label>
-                                <input name="state" value={businessInfo.state} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 text-xs font-bold mb-1">Postal Code</label>
-                                <input name="postalCode" value={businessInfo.postalCode} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
-                            </div>
-                            <div className="col-span-3 mt-2">
-                                <label className="block text-gray-400 text-xs font-bold mb-1">Country</label>
-                                <select name="country" value={businessInfo.country} onChange={(e: any) => handleInputChange(e)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none appearance-none">
-                                    <option value="AU">Australia (AU)</option>
-                                    <option value="US">United States (US)</option>
-                                    <option value="ZA">South Africa (ZA)</option>
-                                    <option value="GT">Guatemala (GT)</option>
-                                    <option disabled>──────────</option>
-                                    <option value="AF">Afghanistan (AF)</option>
-                                    <option value="AL">Albania (AL)</option>
-                                    <option value="DZ">Algeria (DZ)</option>
-                                    <option value="AR">Argentina (AR)</option>
-                                    <option value="AM">Armenia (AM)</option>
-                                    <option value="AT">Austria (AT)</option>
-                                    <option value="BE">Belgium (BE)</option>
-                                    <option value="BR">Brazil (BR)</option>
-                                    <option value="BG">Bulgaria (BG)</option>
-                                    <option value="CA">Canada (CA)</option>
-                                    <option value="CN">China (CN)</option>
-                                    <option value="HR">Croatia (HR)</option>
-                                    <option value="CZ">Czech Republic (CZ)</option>
-                                    <option value="DK">Denmark (DK)</option>
-                                    <option value="EG">Egypt (EG)</option>
-                                    <option value="EE">Estonia (EE)</option>
-                                    <option value="FI">Finland (FI)</option>
-                                    <option value="FR">France (FR)</option>
-                                    <option value="DE">Germany (DE)</option>
-                                    <option value="GB">United Kingdom (GB)</option>
-                                    <option value="GR">Greece (GR)</option>
-                                    <option value="HK">Hong Kong (HK)</option>
-                                    <option value="HU">Hungary (HU)</option>
-                                    <option value="IS">Iceland (IS)</option>
-                                    <option value="IN">India (IN)</option>
-                                    <option value="ID">Indonesia (ID)</option>
-                                    <option value="IE">Ireland (IE)</option>
-                                    <option value="IL">Israel (IL)</option>
-                                    <option value="IT">Italy (IT)</option>
-                                    <option value="JP">Japan (JP)</option>
-                                    <option value="LV">Latvia (LV)</option>
-                                    <option value="LT">Lithuania (LT)</option>
-                                    <option value="LU">Luxembourg (LU)</option>
-                                    <option value="MY">Malaysia (MY)</option>
-                                    <option value="MX">Mexico (MX)</option>
-                                    <option value="NL">Netherlands (NL)</option>
-                                    <option value="NZ">New Zealand (NZ)</option>
-                                    <option value="NO">Norway (NO)</option>
-                                    <option value="PH">Philippines (PH)</option>
-                                    <option value="PL">Poland (PL)</option>
-                                    <option value="PT">Portugal (PT)</option>
-                                    <option value="PR">Puerto Rico (PR)</option>
-                                    <option value="QA">Qatar (QA)</option>
-                                    <option value="RO">Romania (RO)</option>
-                                    <option value="SA">Saudi Arabia (SA)</option>
-                                    <option value="SG">Singapore (SG)</option>
-                                    <option value="SK">Slovakia (SK)</option>
-                                    <option value="SI">Slovenia (SI)</option>
-                                    <option value="KR">South Korea (KR)</option>
-                                    <option value="ES">Spain (ES)</option>
-                                    <option value="SE">Sweden (SE)</option>
-                                    <option value="CH">Switzerland (CH)</option>
-                                    <option value="TW">Taiwan (TW)</option>
-                                    <option value="TH">Thailand (TH)</option>
-                                    <option value="TR">Turkey (TR)</option>
-                                    <option value="UA">Ukraine (UA)</option>
-                                    <option value="AE">United Arab Emirates (AE)</option>
-                                    <option value="VN">Vietnam (VN)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div className="bg-gray-950 rounded-xl p-4 border border-gray-800 space-y-3">
-                        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Included Documents</h4>
-                        <div className="flex items-center gap-3 text-sm text-gray-300">
-                            <FileText className="w-4 h-4 text-green-500" />
-                            <span><strong>Docs:</strong> AWE2M8 Company Registration.pdf</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-gray-300">
-                            <FileText className="w-4 h-4 text-green-500" />
-                            <span><strong>Docs:</strong> AWE2M8 Business Address.pdf</span>
-                        </div>
-                    </div>
-
+                    {/* Error Message - Right after SID input */}
                     {error && (
-                        <div className="bg-red-900/20 border border-red-800 text-red-200 p-4 rounded-xl flex items-center gap-3 mb-4">
+                        <div className="bg-red-900/20 border border-red-800 text-red-200 p-4 rounded-xl flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 flex-shrink-0" />
                             <div className="flex-1">
                                 <div className="font-bold mb-1">Error</div>
@@ -283,6 +164,7 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                         </div>
                     )}
 
+                    {/* Submit Button - Right after SID input */}
                     <button
                         type="submit"
                         disabled={loading}
@@ -291,6 +173,148 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                         {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Play className="w-6 h-6 fill-white group-hover:scale-110 transition-transform" />}
                         {loading ? (status || 'Processing...') : 'Generate Standard Bundle'}
                     </button>
+
+                    {/* Collapsible Business Details */}
+                    <details className="group">
+                        <summary className="cursor-pointer list-none">
+                            <div className="bg-gray-950 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <Building className="w-5 h-5 text-gray-500" />
+                                        <div>
+                                            <h4 className="text-sm font-bold text-gray-300">Business Details (Optional)</h4>
+                                            <p className="text-xs text-gray-500">Click to review or edit default values</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-gray-500 group-open:rotate-180 transition-transform">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </summary>
+
+                        {/* Editable Business Info (Pre-filled) */}
+                        <div className="bg-gray-950 rounded-xl p-6 border border-gray-800 border-t-0 rounded-t-none space-y-4 mt-[-1px]">
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-xs text-blue-400">Must match documents exactly</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">Business Name</label>
+                                    <input name="businessName" value={businessInfo.businessName} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">EIN / ABN</label>
+                                    <input name="ein" value={businessInfo.ein} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-400 text-xs font-bold mb-1">Street Address</label>
+                                <input name="street" value={businessInfo.street} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">City</label>
+                                    <input name="city" value={businessInfo.city} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">State</label>
+                                    <input name="state" value={businessInfo.state} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">Postal Code</label>
+                                    <input name="postalCode" value={businessInfo.postalCode} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                                <div className="col-span-3 mt-2">
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">Country</label>
+                                    <select name="country" value={businessInfo.country} onChange={(e: any) => handleInputChange(e)} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none appearance-none">
+                                        <option value="AU">Australia (AU)</option>
+                                        <option value="US">United States (US)</option>
+                                        <option value="ZA">South Africa (ZA)</option>
+                                        <option value="GT">Guatemala (GT)</option>
+                                        <option disabled>──────────</option>
+                                        <option value="AF">Afghanistan (AF)</option>
+                                        <option value="AL">Albania (AL)</option>
+                                        <option value="DZ">Algeria (DZ)</option>
+                                        <option value="AR">Argentina (AR)</option>
+                                        <option value="AM">Armenia (AM)</option>
+                                        <option value="AT">Austria (AT)</option>
+                                        <option value="BE">Belgium (BE)</option>
+                                        <option value="BR">Brazil (BR)</option>
+                                        <option value="BG">Bulgaria (BG)</option>
+                                        <option value="CA">Canada (CA)</option>
+                                        <option value="CN">China (CN)</option>
+                                        <option value="HR">Croatia (HR)</option>
+                                        <option value="CZ">Czech Republic (CZ)</option>
+                                        <option value="DK">Denmark (DK)</option>
+                                        <option value="EG">Egypt (EG)</option>
+                                        <option value="EE">Estonia (EE)</option>
+                                        <option value="FI">Finland (FI)</option>
+                                        <option value="FR">France (FR)</option>
+                                        <option value="DE">Germany (DE)</option>
+                                        <option value="GB">United Kingdom (GB)</option>
+                                        <option value="GR">Greece (GR)</option>
+                                        <option value="HK">Hong Kong (HK)</option>
+                                        <option value="HU">Hungary (HU)</option>
+                                        <option value="IS">Iceland (IS)</option>
+                                        <option value="IN">India (IN)</option>
+                                        <option value="ID">Indonesia (ID)</option>
+                                        <option value="IE">Ireland (IE)</option>
+                                        <option value="IL">Israel (IL)</option>
+                                        <option value="IT">Italy (IT)</option>
+                                        <option value="JP">Japan (JP)</option>
+                                        <option value="LV">Latvia (LV)</option>
+                                        <option value="LT">Lithuania (LT)</option>
+                                        <option value="LU">Luxembourg (LU)</option>
+                                        <option value="MY">Malaysia (MY)</option>
+                                        <option value="MX">Mexico (MX)</option>
+                                        <option value="NL">Netherlands (NL)</option>
+                                        <option value="NZ">New Zealand (NZ)</option>
+                                        <option value="NO">Norway (NO)</option>
+                                        <option value="PH">Philippines (PH)</option>
+                                        <option value="PL">Poland (PL)</option>
+                                        <option value="PT">Portugal (PT)</option>
+                                        <option value="PR">Puerto Rico (PR)</option>
+                                        <option value="QA">Qatar (QA)</option>
+                                        <option value="RO">Romania (RO)</option>
+                                        <option value="SA">Saudi Arabia (SA)</option>
+                                        <option value="SG">Singapore (SG)</option>
+                                        <option value="SK">Slovakia (SK)</option>
+                                        <option value="SI">Slovenia (SI)</option>
+                                        <option value="KR">South Korea (KR)</option>
+                                        <option value="ES">Spain (ES)</option>
+                                        <option value="SE">Sweden (SE)</option>
+                                        <option value="CH">Switzerland (CH)</option>
+                                        <option value="TW">Taiwan (TW)</option>
+                                        <option value="TH">Thailand (TH)</option>
+                                        <option value="TR">Turkey (TR)</option>
+                                        <option value="UA">Ukraine (UA)</option>
+                                        <option value="AE">United Arab Emirates (AE)</option>
+                                        <option value="VN">Vietnam (VN)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-800">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Included Documents</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                                        <FileText className="w-4 h-4 text-green-500" />
+                                        <span>AWE2M8 Company Registration.pdf</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-sm text-gray-300">
+                                        <FileText className="w-4 h-4 text-green-500" />
+                                        <span>AWE2M8 Business Address.pdf</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
                 </form>
             </div>
         </div>
