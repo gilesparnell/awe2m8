@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
                 const docRes = await fetch('https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Basic ${Buffer.from(`${targetAccountSid}:${authToken}`).toString('base64')}`,
+                        // Use PARENT credentials for authentication, even when creating resources for subaccount
+                        'Authorization': `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
                     },
                     body: uploadFormData
                 });
