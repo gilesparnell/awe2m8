@@ -42,8 +42,10 @@ export async function GET(req: NextRequest) {
 
         const friendlyName = url.searchParams.get("friendlyName");
         const limit = parseInt(url.searchParams.get("limit") || "50", 10);
+        const pageSize = parseInt(url.searchParams.get("pageSize") || "10", 10);
+        const page = parseInt(url.searchParams.get("page") || "0", 10);
 
-        console.log(`Fetching bundles for ${subAccountSid || 'Master Account'}...`);
+        console.log(`Fetching bundles for ${subAccountSid || 'Master Account'}... Page: ${page}, Size: ${pageSize}`);
 
         // If subAccountSid is provided, we act on behalf of that account
         // using the Master Credentials
@@ -51,15 +53,32 @@ export async function GET(req: NextRequest) {
             ? twilio(accountSid, authToken, { accountSid: subAccountSid })
             : twilio(accountSid, authToken);
 
-        const listParams: any = {
-            limit: Math.min(limit, 100), // Cap at 100
-        };
+        // Note: The Twilio Node helper library 'list' method often automates paging to get 'limit' items.
+        // To get a specific 'page', we might need to use 'page' method instead of 'list',
+        // OR rely on the fact that 'list' fetches the first N items.
+        // If we want "Page 2" (items 11-20), 'list' isn't the best tool if we want efficient server-side paging without fetching everything.
+        // However, for simplicity in this V2 implementation:
+        // Twilio's `list` fetches up to `limit`. If we want page 2, we can't easily jump there without `page` method or URL from previous page.
+        // BUT, `regulatoryCompliance.bundles.page({ pageNumber: X, pageSize: Y })` IS available.
 
-        if (friendlyName) {
-            listParams.friendlyName = friendlyName;
+        let bundles;
+        if (url.searchParams.has("page")) {
+            // Use explicit paging
+            const pageResponse = await client.numbers.v2.regulatoryCompliance.bundles.page({
+                pageSize: pageSize,
+                pageNumber: page
+            });
+            bundles = pageResponse.instances;
+        } else {
+            // Default "list" behavior (fetch top N)
+            const listParams: any = {
+                limit: Math.min(limit, 100), // Cap at 100
+            };
+            if (friendlyName) {
+                listParams.friendlyName = friendlyName;
+            }
+            bundles = await client.numbers.v2.regulatoryCompliance.bundles.list(listParams);
         }
-
-        const bundles = await client.numbers.v2.regulatoryCompliance.bundles.list(listParams);
 
         console.log(`Found ${bundles.length} bundles.`);
 

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Package, Clock, CheckCircle, XCircle, Search, Database, History, Activity } from 'lucide-react';
+import { RefreshCw, Package, Clock, CheckCircle, XCircle, Database, History, Activity, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BundleListProps {
     credentials: { accountSid: string; authToken: string };
@@ -21,16 +21,18 @@ interface Bundle {
 export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     // State for separate data sets
     const [recentBundles, setRecentBundles] = useState<Bundle[]>([]);
-    const [searchResults, setSearchResults] = useState<Bundle[]>([]);
+    const [historyBundles, setHistoryBundles] = useState<Bundle[]>([]);
 
     const [loadingRecent, setLoadingRecent] = useState(false);
-    const [loadingSearch, setLoadingSearch] = useState(false);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
+    // History Panel State
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [historyPage, setHistoryPage] = useState(0);
+    const HISTORY_PAGE_SIZE = 10;
 
     const [error, setError] = useState<string | null>(null);
     const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const [hasSearched, setHasSearched] = useState(false);
 
     // Initial load: Fetch Recent Activity
     const fetchRecentActivity = async () => {
@@ -70,22 +72,24 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         }
     };
 
-    // Explicit Search
-    const handleSearch = async () => {
-        if (!searchTerm && !targetSubAccountSid) {
-            // If clearing search, maybe reset?
-            setSearchResults([]);
-            setHasSearched(false);
-            return;
-        }
-
-        setLoadingSearch(true);
-        setError(null);
+    // Fetch History Data (Paginated)
+    const fetchHistory = async (page: number) => {
+        setLoadingHistory(true);
+        setError(null); // Clear previous errors but don't reset global UI
         try {
             const params = new URLSearchParams();
             if (targetSubAccountSid) params.append("subAccountSid", targetSubAccountSid);
-            if (searchTerm) params.append("friendlyName", searchTerm);
-            params.append("limit", "50");
+
+            // We want Twilio Approved only for history? THe user said "Previously Approved Bundles"
+            // But we can filter client side or let them see all history. Let's fetch all and filter approved for the specific view if strictly requested.
+            // Actually, "Previously Approved" implies status=twilio-approved.
+            // But the Twilio API doesn't support filtering by status in the LIST endpoint easily without statusCallback filters (sometimes).
+            // Let's just fetch history sorted by date (default) and we display them.
+
+            params.append("pageSize", HISTORY_PAGE_SIZE.toString());
+            params.append("page", page.toString());
+            // We don't use 'limit' here because we are paging carefully
+            params.append("limit", HISTORY_PAGE_SIZE.toString());
 
             const res = await fetch(`/api/twilio/bundles?${params.toString()}`, {
                 headers: {
@@ -95,24 +99,51 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to search bundles');
+            if (!res.ok) throw new Error(data.error || 'Failed to fetch history');
 
-            setSearchResults(data.results || []);
-            setHasSearched(true);
+            setHistoryBundles(data.results || []);
 
         } catch (err: any) {
-            setError(err.message); // Show error but don't break whole page
+            setError(err.message);
         } finally {
-            setLoadingSearch(false);
+            setLoadingHistory(false);
         }
     };
+
+    const toggleHistory = () => {
+        if (!isHistoryOpen) {
+            setIsHistoryOpen(true);
+            // Fetch first page if empty
+            if (historyBundles.length === 0) {
+                fetchHistory(0);
+            }
+        } else {
+            setIsHistoryOpen(false);
+        }
+    };
+
+    const handleNextPage = () => {
+        const nextPage = historyPage + 1;
+        setHistoryPage(nextPage);
+        fetchHistory(nextPage);
+    };
+
+    const handlePrevPage = () => {
+        if (historyPage > 0) {
+            const prevPage = historyPage - 1;
+            setHistoryPage(prevPage);
+            fetchHistory(prevPage);
+        }
+    };
+
 
     // Reload when credentials or subaccount changes
     useEffect(() => {
         fetchRecentActivity();
-        // Reset search results when context changes
-        setSearchResults([]);
-        setHasSearched(false);
+        // Reset history when context changes
+        setHistoryBundles([]);
+        setHistoryPage(0);
+        setIsHistoryOpen(false);
     }, [credentials, targetSubAccountSid]); // Reload if subaccount changes (basic scope)
 
     const getStatusColor = (status: string) => {
@@ -288,51 +319,73 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             </div>
 
 
-            {/* SECTION 2: Search History */}
-            <div className="pt-8 border-t border-gray-800">
-                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-6">
-                    <History className="w-4 h-4" />
-                    Search Bundle History
-                </h4>
+            {/* SECTION 2: Previously Approved (Collapsible & Paginated) */}
+            <div className="pt-2 border-t border-gray-800/50">
+                <button
+                    onClick={toggleHistory}
+                    className="w-full bg-gray-900/30 hover:bg-gray-900/60 border border-gray-800 rounded-xl p-4 flex justify-between items-center group transition-all"
+                >
+                    <h4 className="text-sm font-bold text-gray-400 group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                        <History className="w-4 h-4" />
+                        Previously Approved Bundles
+                    </h4>
+                    {isHistoryOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+                </button>
 
-                <div className="flex gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search by Friendly Name..."
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-white placeholder:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                        />
-                        <Search className="w-5 h-5 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                    </div>
-                    <button
-                        onClick={handleSearch}
-                        disabled={loadingSearch}
-                        className="bg-blue-900/40 hover:bg-blue-900/60 border border-blue-800 text-blue-100 px-6 rounded-lg font-bold transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {loadingSearch ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                        Search
-                    </button>
-                </div>
+                {isHistoryOpen && (
+                    <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
 
-                {hasSearched && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                        <div className="flex justify-between items-center text-xs text-gray-500 px-1">
-                            <span>Found {searchResults.length} results</span>
-                            {searchResults.length >= 50 && <span className="text-yellow-600">Limited to 50 results</span>}
+                        {/* Pagination Controls */}
+                        <div className="flex justify-between items-center bg-gray-950/50 p-2 rounded-lg border border-gray-800/50 mb-4">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={historyPage === 0 || loadingHistory}
+                                className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 px-3 py-1"
+                            >
+                                <ChevronLeft className="w-4 h-4" /> Prev
+                            </button>
+                            <span className="text-xs font-mono text-gray-500">Page {historyPage + 1}</span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={historyBundles.length < HISTORY_PAGE_SIZE || loadingHistory} // Rough check for 'last page'
+                                className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 px-3 py-1"
+                            >
+                                Next <ChevronRight className="w-4 h-4" />
+                            </button>
                         </div>
 
-                        {searchResults.length === 0 && !loadingSearch && (
-                            <div className="bg-gray-900/30 border border-gray-800 border-dashed rounded-xl p-8 text-center text-gray-500 text-sm">
-                                No bundles found matching "{searchTerm}"
+                        {loadingHistory ? (
+                            <div className="text-center py-12 text-gray-500"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />Loading history...</div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {historyBundles.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500 text-sm">No bundles found on this page.</div>
+                                ) : (
+                                    historyBundles.filter(b => b.status !== 'pending-review').map(renderBundleCard)
+                                )}
                             </div>
                         )}
 
-                        <div className="grid gap-4">
-                            {searchResults.map(renderBundleCard)}
-                        </div>
+                        {/* Bottom Pagination (Convenience) */}
+                        {!loadingHistory && historyBundles.length > 3 && (
+                            <div className="flex justify-center items-center gap-4 mt-6 pt-4 border-t border-gray-900">
+                                <button
+                                    onClick={handlePrevPage}
+                                    disabled={historyPage === 0}
+                                    className="p-2 rounded-full hover:bg-gray-800 disabled:opacity-30"
+                                >
+                                    <ChevronLeft className="w-4 h-4 text-gray-400" />
+                                </button>
+                                <span className="text-xs font-mono text-gray-600">Page {historyPage + 1}</span>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={historyBundles.length < HISTORY_PAGE_SIZE}
+                                    className="p-2 rounded-full hover:bg-gray-800 disabled:opacity-30"
+                                >
+                                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
