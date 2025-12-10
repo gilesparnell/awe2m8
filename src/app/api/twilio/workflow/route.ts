@@ -268,31 +268,31 @@ export async function POST(req: NextRequest) {
             throw new Error(`Failed to create bundle: ${bundleError.message}`);
         }
 
-        // Assign End User
-        await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-            .itemAssignments.create({ objectSid: endUser.sid });
 
-        // Assign Address
-        await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-            .itemAssignments.create({ objectSid: address.sid });
+        // Assign End User to TrustHub Bundle
+        await targetClient.trusthub.v1.trustProducts(bundle.sid)
+            .trustProductsEntityAssignments.create({ objectSid: endUser.sid });
 
-        // Assign Documents
+        // Assign Address to TrustHub Bundle
+        await targetClient.trusthub.v1.trustProducts(bundle.sid)
+            .trustProductsEntityAssignments.create({ objectSid: address.sid });
+
+        // Assign Documents to TrustHub Bundle
         if (docIds['businessDoc']) {
-            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .itemAssignments.create({ objectSid: docIds['businessDoc'] });
+            await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                .trustProductsEntityAssignments.create({ objectSid: docIds['businessDoc'] });
         }
-        // ... assign other docs if they exist ...
         if (docIds['addressDoc']) {
-            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .itemAssignments.create({ objectSid: docIds['addressDoc'] });
+            await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                .trustProductsEntityAssignments.create({ objectSid: docIds['addressDoc'] });
         }
         if (docIds['repDoc']) {
-            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .itemAssignments.create({ objectSid: docIds['repDoc'] });
+            await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                .trustProductsEntityAssignments.create({ objectSid: docIds['repDoc'] });
         }
 
-        // 7. Submit Bundle
-        const submitted = await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+        // 7. Submit Bundle for Review
+        const submitted = await targetClient.trusthub.v1.trustProducts(bundle.sid)
             .update({ status: 'pending-review' });
 
         // 8. Send SMS Notification (Approvals are manual, so we notify on SUBMISSION for now,
