@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AWE2M8 Sales Demo Prep",
+  title: "AWE2M8 - Internal Tools",
   description: "Create personalized AI demo pages for prospects in minutes",
 };
 
