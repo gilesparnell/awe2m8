@@ -207,12 +207,12 @@ export async function POST(req: NextRequest) {
         console.log('Creating End User with address_sids...');
         let endUser;
         try {
-            // Attributes must be a JSON string, not an object
+            // Attributes for EndUser - DO NOT include address_sids here
+            // Addresses are linked to the bundle, not the EndUser directly
             const endUserAttributes = {
                 business_name: businessName,
                 business_type: formData.get("businessType") || 'llc',
-                business_registration_number: formData.get("ein") || '',
-                address_sids: [address.sid]
+                business_registration_number: formData.get("ein") || ''
             };
 
             console.log('EndUser attributes:', endUserAttributes);
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
             endUser = await targetClient.trusthub.v1.endUsers.create({
                 friendlyName: businessName,
                 type: 'business',
-                attributes: JSON.stringify(endUserAttributes)
+                attributes: endUserAttributes
             });
             console.log(`End User created successfully: ${endUser.sid}`);
         } catch (endUserError: any) {
@@ -258,6 +258,10 @@ export async function POST(req: NextRequest) {
         // Assign End User
         await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
             .itemAssignments.create({ objectSid: endUser.sid });
+
+        // Assign Address
+        await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+            .itemAssignments.create({ objectSid: address.sid });
 
         // Assign Documents
         if (docIds['businessDoc']) {
