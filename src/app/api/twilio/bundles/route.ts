@@ -2,13 +2,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import twilio from "twilio";
 
-// Helper to get Twilio Client from headers
+// Helper to get Twilio Client from headers OR env
 const getTwilioClient = (req: NextRequest) => {
-    const accountSid = req.headers.get("x-twilio-account-sid");
-    const authToken = req.headers.get("x-twilio-auth-token");
+    // 1. Try to get credentials from Headers (Client-side override)
+    let accountSid = req.headers.get("x-twilio-account-sid");
+    let authToken = req.headers.get("x-twilio-auth-token");
+
+    // 2. Fallback to Server Environment Variables
+    if (!accountSid || !authToken) {
+        accountSid = process.env.TWILIO_ACCOUNT_SID || null;
+        authToken = process.env.TWILIO_AUTH_TOKEN || null;
+    }
 
     if (!accountSid || !authToken) {
-        throw new Error("Missing Twilio credentials in headers");
+        throw new Error("Missing Twilio credentials. Set TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN env vars or provide headers.");
     }
 
     return twilio(accountSid, authToken);
@@ -16,15 +23,22 @@ const getTwilioClient = (req: NextRequest) => {
 
 export async function GET(req: NextRequest) {
     try {
-        const accountSid = req.headers.get("x-twilio-account-sid");
-        const authToken = req.headers.get("x-twilio-auth-token");
+        const url = new URL(req.url);
+        const subAccountSid = url.searchParams.get("subAccountSid");
+
+        // 1. Get Base Client (Master or Header-provided)
+        // We do this MANUALLY instead of helper to support subAccount switching logic
+        let accountSid = req.headers.get("x-twilio-account-sid");
+        let authToken = req.headers.get("x-twilio-auth-token");
+
+        if (!accountSid || !authToken) {
+            accountSid = process.env.TWILIO_ACCOUNT_SID || null;
+            authToken = process.env.TWILIO_AUTH_TOKEN || null;
+        }
 
         if (!accountSid || !authToken) {
             return NextResponse.json({ error: "Missing Twilio credentials" }, { status: 401 });
         }
-
-        const url = new URL(req.url);
-        const subAccountSid = url.searchParams.get("subAccountSid");
 
         console.log(`Fetching bundles for ${subAccountSid || 'Master Account'}...`);
 
