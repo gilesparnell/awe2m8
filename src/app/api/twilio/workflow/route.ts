@@ -204,25 +204,46 @@ export async function POST(req: NextRequest) {
         }
 
 
-        console.log('Creating End User with address_sids...');
+        console.log('Creating End User...');
         let endUser;
+        const country = formData.get("country") as string || 'AU';
+
         try {
-            // Attributes for EndUser - DO NOT include address_sids here
-            // Addresses are linked to the bundle, not the EndUser directly
-            const endUserAttributes = {
-                business_name: businessName,
-                business_type: formData.get("businessType") || 'llc',
-                business_registration_number: formData.get("ein") || ''
-            };
+            if (country === 'AU') {
+                // Australia uses Regulatory Compliance EndUser
+                console.log('Creating EndUser via Regulatory Compliance API...');
+                const endUserAttributes = {
+                    business_name: businessName,
+                    business_type: formData.get("businessType") || 'llc',
+                    business_registration_number: formData.get("ein") || ''
+                };
 
-            console.log('EndUser attributes:', endUserAttributes);
+                console.log('EndUser attributes:', endUserAttributes);
 
-            endUser = await targetClient.trusthub.v1.endUsers.create({
-                friendlyName: businessName,
-                type: 'business',
-                attributes: endUserAttributes
-            });
-            console.log(`End User created successfully: ${endUser.sid}`);
+                endUser = await targetClient.numbers.v2.regulatoryCompliance.endUsers.create({
+                    friendlyName: businessName,
+                    type: 'business',
+                    attributes: endUserAttributes
+                });
+                console.log(`End User created successfully: ${endUser.sid}`);
+            } else {
+                // Other countries use TrustHub EndUser
+                console.log('Creating EndUser via TrustHub API...');
+                const endUserAttributes = {
+                    business_name: businessName,
+                    business_type: formData.get("businessType") || 'llc',
+                    business_registration_number: formData.get("ein") || ''
+                };
+
+                console.log('EndUser attributes:', endUserAttributes);
+
+                endUser = await targetClient.trusthub.v1.endUsers.create({
+                    friendlyName: businessName,
+                    type: 'business',
+                    attributes: endUserAttributes
+                });
+                console.log(`End User created successfully: ${endUser.sid}`);
+            }
         } catch (endUserError: any) {
             console.error('End User creation failed:', {
                 message: endUserError.message,
@@ -237,7 +258,6 @@ export async function POST(req: NextRequest) {
         console.log('Creating Regulatory Bundle...');
         // 6. Create Bundle - Different API based on country
         let bundle;
-        const country = formData.get("country") as string || 'AU';
 
         try {
             if (country === 'AU') {
