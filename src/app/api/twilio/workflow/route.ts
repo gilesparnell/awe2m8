@@ -323,17 +323,10 @@ export async function POST(req: NextRequest) {
         // Assign items to bundle - Different API based on country
         if (country === 'AU') {
             // Australia uses Regulatory Compliance API
-            console.log('Assigning items using Regulatory Compliance API...');
+            // primary_customer_profile_bundle_australia only accepts Supporting Documents
+            console.log('Assigning documents using Regulatory Compliance API...');
 
-            // Assign End User
-            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .itemAssignments.create({ objectSid: endUser.sid });
-
-            // Assign Address
-            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .itemAssignments.create({ objectSid: address.sid });
-
-            // Assign Documents
+            // Assign Documents only (EndUser and Address are not supported for this regulation type)
             if (docIds['businessDoc']) {
                 await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
                     .itemAssignments.create({ objectSid: docIds['businessDoc'] });
