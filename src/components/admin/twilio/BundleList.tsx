@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { RefreshCw, Package, Clock, CheckCircle, XCircle, Search, Database } from 'lucide-react';
 
 interface BundleListProps {
     credentials: { accountSid: string; authToken: string };
@@ -19,6 +19,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     const [bundles, setBundles] = useState<Bundle[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
 
     const fetchBundles = async () => {
         if (!credentials.accountSid || !credentials.authToken) return;
@@ -26,7 +27,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch('/api/twilio/bundles', {
+            const query = targetSubAccountSid ? `?subAccountSid=${targetSubAccountSid}` : '';
+            const res = await fetch(`/api/twilio/bundles${query}`, {
                 headers: {
                     'x-twilio-account-sid': credentials.accountSid,
                     'x-twilio-auth-token': credentials.authToken
@@ -122,6 +124,36 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     Refresh
                 </button>
+            </div>
+
+            {/* SubAccount Filter */}
+            <div className="bg-gray-900/30 border border-gray-800 rounded-2xl p-6">
+                <label className="block text-gray-400 text-sm font-bold mb-2">
+                    Start by Entering Subaccount SID
+                </label>
+                <div className="flex gap-4">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            value={targetSubAccountSid}
+                            onChange={(e) => setTargetSubAccountSid(e.target.value)}
+                            placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (Optional)"
+                            className="w-full bg-gray-950 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-white font-mono placeholder:text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        />
+                        <Database className="w-5 h-5 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                    </div>
+                    <button
+                        onClick={fetchBundles}
+                        disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 rounded-lg font-bold transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                        <Search className="w-4 h-4" />
+                        View Bundles
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                    Leave empty to view bundles on the Master Account. Enter a Subaccount SID to view that client's bundles.
+                </p>
             </div>
 
             {error && (
