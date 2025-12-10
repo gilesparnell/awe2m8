@@ -59,8 +59,33 @@ export async function POST(req: NextRequest) {
         // 4. Upload Documents
         // We handle 'businessDoc', 'addressDoc', 'repDoc'
         const docIds: Record<string, string> = {};
+
+        // NOTE: We need to create the Address FIRST so we can reference it in the address document
+        console.log('Creating Address Resource...');
+        let address;
+        try {
+            address = await client.addresses.create({
+                customerName: businessName,
+                street: formData.get("street") as string,
+                city: formData.get("city") as string,
+                region: formData.get("state") as string,
+                postalCode: formData.get("postalCode") as string,
+                isoCountry: formData.get("country") as string,
+                friendlyName: `${businessName} - HQ`
+            });
+            console.log(`Address created successfully: ${address.sid}`);
+        } catch (addressError: any) {
+            console.error('Address creation failed:', {
+                message: addressError.message,
+                code: addressError.code,
+                moreInfo: addressError.moreInfo,
+                details: addressError.details
+            });
+            throw new Error(`Failed to create address: ${addressError.message}`);
+        }
+
         const docFields = [
-            { key: 'businessDoc', type: 'business_registration', friendlySuffix: 'Business Registration' },
+            { key: 'businessDoc', type: 'commercial_registrar_excerpt', friendlySuffix: 'Business Registration' },
             { key: 'addressDoc', type: 'utility_bill', friendlySuffix: 'Proof of Address' },
             { key: 'repDoc', type: 'government_issued_document', friendlySuffix: 'Representative ID' }
         ];
@@ -75,49 +100,25 @@ export async function POST(req: NextRequest) {
                 const blob = new Blob([buffer], { type: file.type });
                 uploadFormData.append('FriendlyName', `${businessName} - ${field.friendlySuffix}`);
                 uploadFormData.append('Type', field.type);
-                // Attributes are required for some types?
-                // Business Registration needs 'business_name' usually?
-                // Check docs: attributes are optional for upload, but used in EndUser.
-                // Wait, Supporting Document upload *does* take Attributes sometimes.
-                // User's HTML passed `Attributes: JSON.stringify({ business_name: ... })` for businessDoc.
+
+                // Add required attributes based on document type
                 if (field.key === 'businessDoc') {
-                    uploadFormData.append('Attributes', JSON.stringify({ business_name: businessName }));
+                    // Business registration document needs business_name AND document_number (ABN)
+                    uploadFormData.append('Attributes', JSON.stringify({
+                        business_name: businessName,
+                        document_number: formData.get("ein") || ''
+                    }));
+                } else if (field.key === 'addressDoc') {
+                    // Address proof document needs address_sids
+                    uploadFormData.append('Attributes', JSON.stringify({
+                        address_sids: [address.sid]
+                    }));
                 }
 
-                // We MUST append the file. The parameter name is 'File' usually? Or the documents API?
-                // Twilio API: POST /v2/RegulatoryCompliance/SupportingDocuments
-                // It consumes request with boundary.
-                // It might depend on how we construct the body.
-                // Appending 'File' is standard.
                 uploadFormData.append('File', blob, file.name || 'document.pdf');
 
                 // CRITICAL: Specify which account should own this document
-                // When using parent credentials to create resources for a subaccount,
-                // we must explicitly set the AccountSid parameter
                 uploadFormData.append('AccountSid', targetAccountSid);
-
-                // We need authorization header manually since we are using fetch
-                const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
-
-                // Note: We need to hit the API for the TARGET account?
-                // If targetAccountSid != accountSid, we might need a mechanism.
-                // Actually, Regulatory Compliance API is global? No, it's per account.
-                // If we want to create document *on the subaccount*, we should probably use the subaccount SID in the URL?
-                // "https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments" defaults to the authenticated account.
-                // To act on subaccount, usually basic auth with Parent credentials works if we specify the account?
-                // But the URL doesn't have AccountSid.
-                // Twilio often relies on the AccountSid in the Basic Auth username.
-                // IF we are using Parent credentials, we are authenticated as Parent.
-                // To impersonate Subaccount, we usually do `client = twilio(..., { accountSid: sub })` which creates headers?
-                // No, it handles it internally.
-                // For raw fetch, it's harder.
-                // We might stick to creating the document on the PARENT account?
-                // The EndUser and Bundle will link to it?
-                // Cross-account linking is allowed? documents can be shared?
-                // Let's assume we create everything on the Target Account.
-                // If we created a subaccount, we can try to use its SID in the Basic Auth username?
-                // `Buffer.from(`${targetAccountSid}:${authToken}`)`? This often works with Parent Auth Token 
-                // if Parent owns the Subaccount. Let's try that.
 
                 console.log(`Uploading ${field.friendlySuffix} for account ${targetAccountSid}...`);
 
@@ -178,31 +179,6 @@ export async function POST(req: NextRequest) {
         // Let's try creating the Address as a supporting document? No.
         // Let's try creating a Twilio Address Resource first.
 
-        console.log('Creating Address Resource...');
-        // Create Address Resource using PARENT client
-        // Addresses are account-level resources and should be created on the parent account
-        let address;
-        try {
-            address = await client.addresses.create({
-                customerName: businessName,
-                street: formData.get("street") as string,
-                city: formData.get("city") as string,
-                region: formData.get("state") as string,
-                postalCode: formData.get("postalCode") as string,
-                isoCountry: formData.get("country") as string,
-                friendlyName: `${businessName} - HQ`
-            });
-            console.log(`Address created successfully: ${address.sid}`);
-        } catch (addressError: any) {
-            console.error('Address creation failed:', {
-                message: addressError.message,
-                code: addressError.code,
-                moreInfo: addressError.moreInfo,
-                details: addressError.details
-            });
-            throw new Error(`Failed to create address: ${addressError.message}`);
-        }
-
 
         console.log('Creating End User...');
         let endUser;
@@ -211,18 +187,16 @@ export async function POST(req: NextRequest) {
         try {
             if (country === 'AU') {
                 // Australia uses Regulatory Compliance EndUser
+                // NOTE: The Regulatory Compliance API only accepts specific attributes for 'business' type
                 console.log('Creating EndUser via Regulatory Compliance API...');
                 const endUserAttributes = {
                     business_name: businessName,
-                    business_type: formData.get("businessType") || 'llc',
+                    business_type: formData.get("businessType") || 'corporation',
                     business_registration_number: formData.get("ein") || '',
-                    // Required for Australia
                     business_website: formData.get("website") || 'https://awe2m8.ai',
-                    authorized_representative_first_name: formData.get("firstName") || 'Giles',
-                    authorized_representative_last_name: formData.get("lastName") || 'Parnell',
-                    authorized_representative_email: formData.get("email") as string,
-                    business_industry: 'Technology',
-                    business_regions_of_operation: 'AU'
+                    business_industry: formData.get("businessIndustry") || 'Technology'
+                    // NOTE: authorized_representative_* fields are NOT supported in EndUser attributes
+                    // These will be handled via separate supporting documents or bundle-level fields
                 };
 
                 console.log('EndUser attributes:', endUserAttributes);
@@ -330,10 +304,14 @@ export async function POST(req: NextRequest) {
         // Assign items to bundle - Different API based on country
         if (country === 'AU') {
             // Australia uses Regulatory Compliance API
-            // primary_customer_profile_bundle_australia only accepts Supporting Documents
-            console.log('Assigning documents using Regulatory Compliance API...');
+            // primary_customer_profile_bundle_australia requires EndUser AND Supporting Documents
+            console.log('Assigning EndUser and documents using Regulatory Compliance API...');
 
-            // Assign Documents only (EndUser and Address are not supported for this regulation type)
+            // Assign EndUser (REQUIRED for Australian bundles)
+            await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                .itemAssignments.create({ objectSid: endUser.sid });
+
+            // Assign Supporting Documents
             if (docIds['businessDoc']) {
                 await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
                     .itemAssignments.create({ objectSid: docIds['businessDoc'] });

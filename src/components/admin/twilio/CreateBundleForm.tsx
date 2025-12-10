@@ -26,7 +26,8 @@ const DEFAULT_BUSINESS_INFO = {
     firstName: "Jesse",
     lastName: "Allan",
     email: "giles@awe2m8.com",
-    phone: "+61412345678"
+    phone: "+61412345678",
+    businessIndustry: "Technology"
 };
 
 export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials, onSuccess }) => {
@@ -297,9 +298,9 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                                     )}
                                     <div className="flex-1">
                                         <div className={`text-sm font-medium ${step.status === 'success' ? 'text-green-400' :
-                                                step.status === 'error' ? 'text-red-400' :
-                                                    step.status === 'loading' ? 'text-blue-400' :
-                                                        'text-gray-500'
+                                            step.status === 'error' ? 'text-red-400' :
+                                                step.status === 'loading' ? 'text-blue-400' :
+                                                    'text-gray-500'
                                             }`}>
                                             {step.name}
                                         </div>
@@ -368,6 +369,34 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
                                 <div>
                                     <label className="block text-gray-400 text-xs font-bold mb-1">EIN / ABN</label>
                                     <input name="ein" value={businessInfo.ein} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-400 text-xs font-bold mb-1">Business Website <span className="text-red-400">*</span></label>
+                                <input name="website" value={businessInfo.website} onChange={handleInputChange} placeholder="https://example.com" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" required />
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-400 text-xs font-bold mb-1">Business Industry <span className="text-red-400">*</span></label>
+                                <input name="businessIndustry" value={businessInfo.businessIndustry} onChange={handleInputChange} placeholder="e.g., Technology, Healthcare, Retail" className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" required />
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-800">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Authorized Representative</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-gray-400 text-xs font-bold mb-1">First Name <span className="text-red-400">*</span></label>
+                                        <input name="firstName" value={businessInfo.firstName} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" required />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-400 text-xs font-bold mb-1">Last Name <span className="text-red-400">*</span></label>
+                                        <input name="lastName" value={businessInfo.lastName} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" required />
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block text-gray-400 text-xs font-bold mb-1">Email <span className="text-red-400">*</span></label>
+                                    <input name="email" type="email" value={businessInfo.email} onChange={handleInputChange} className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none" required />
                                 </div>
                             </div>
 
