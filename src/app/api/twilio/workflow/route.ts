@@ -203,34 +203,53 @@ export async function POST(req: NextRequest) {
             throw new Error(`Failed to create address: ${addressError.message}`);
         }
 
-        const endUser = await targetClient.numbers.v2.regulatoryCompliance.endUsers.create({
-            friendlyName: businessName,
-            type: 'business',
-            attributes: {
-                business_name: businessName,
-                business_type: formData.get("businessType"),
-                business_registration_number: formData.get("ein"),
-                // V2.0 Requirement: Link the Address Resource via address_sids
-                address_sids: [address.sid]
-            }
-        });
 
-        // 6. Create Bundle
-        const bundleOptions: any = {
-            friendlyName: `${businessName} - Regulatory Bundle`,
-            email: formData.get("email") as string,
-            // Use 'a2p_messaging_profile_bundle' for A2P 10DLC, but if user wants AU specific, we might use 'mobile_local' or similar.
-            // For now, if the user intends A2P 10DLC (US sending), the ISO Country must often be US.
-            // But if the user explicitly says "Bundle should have been for Australia", we set it to the selected country.
-            // WARNING: 'a2p_messaging_profile_bundle' might NOT exist for AU. 
-            // However, assuming the user implies "Business Profile for this region".
-            regulationType: 'a2p_messaging_profile_bundle',
-            isoCountry: formData.get("country") || 'US', // Uses selected country (e.g. AU)
-            endUserType: 'business',
-            numberType: 'mobile',
-        };
+        console.log('Creating End User with address_sids...');
+        let endUser;
+        try {
+            endUser = await targetClient.trusthub.v1.endUsers.create({
+                friendlyName: businessName,
+                type: 'business',
+                attributes: {
+                    business_name: businessName,
+                    business_type: formData.get("businessType"),
+                    business_registration_number: formData.get("ein"),
+                    // V2.0 Requirement: Link the Address Resource via address_sids
+                    address_sids: [address.sid]
+                }
+            });
+            console.log(`End User created successfully: ${endUser.sid}`);
+        } catch (endUserError: any) {
+            console.error('End User creation failed:', {
+                message: endUserError.message,
+                code: endUserError.code,
+                moreInfo: endUserError.moreInfo,
+                details: endUserError.details,
+                status: endUserError.status
+            });
+            throw new Error(`Failed to create End User: ${endUserError.message}`);
+        }
 
-        const bundle = await targetClient.numbers.v2.regulatoryCompliance.bundles.create(bundleOptions);
+        console.log('Creating Regulatory Bundle...');
+        // 6. Create Bundle using TrustHub API
+        let bundle;
+        try {
+            bundle = await targetClient.trusthub.v1.trustProducts.create({
+                friendlyName: `${businessName} - Regulatory Bundle`,
+                email: formData.get("email") as string,
+                policySid: 'RNb0d4771c2c98518d837b5c0b0ca5c4', // A2P 10DLC Messaging Profile Bundle
+                statusCallback: '' // Optional callback URL
+            });
+            console.log(`Bundle created successfully: ${bundle.sid}`);
+        } catch (bundleError: any) {
+            console.error('Bundle creation failed:', {
+                message: bundleError.message,
+                code: bundleError.code,
+                moreInfo: bundleError.moreInfo,
+                details: bundleError.details
+            });
+            throw new Error(`Failed to create bundle: ${bundleError.message}`);
+        }
 
         // Assign End User
         await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
