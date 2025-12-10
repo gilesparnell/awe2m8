@@ -207,16 +207,20 @@ export async function POST(req: NextRequest) {
         console.log('Creating End User with address_sids...');
         let endUser;
         try {
+            // Attributes must be a JSON string, not an object
+            const endUserAttributes = {
+                business_name: businessName,
+                business_type: formData.get("businessType") || 'llc',
+                business_registration_number: formData.get("ein") || '',
+                address_sids: [address.sid]
+            };
+
+            console.log('EndUser attributes:', endUserAttributes);
+
             endUser = await targetClient.trusthub.v1.endUsers.create({
                 friendlyName: businessName,
                 type: 'business',
-                attributes: {
-                    business_name: businessName,
-                    business_type: formData.get("businessType"),
-                    business_registration_number: formData.get("ein"),
-                    // V2.0 Requirement: Link the Address Resource via address_sids
-                    address_sids: [address.sid]
-                }
+                attributes: JSON.stringify(endUserAttributes)
             });
             console.log(`End User created successfully: ${endUser.sid}`);
         } catch (endUserError: any) {
