@@ -30,7 +30,9 @@ export async function GET(request: Request) {
         const accounts = await client.api.accounts.list({ status: 'active' });
         console.log(`Cron: Found ${accounts.length} active accounts.`);
 
-        const notifyNumbers = ['+61401027141', '+61404283605'];
+        // Get notification numbers from configuration
+        const { getNotificationNumbers } = require('@/lib/twilio-helpers');
+        const notifyNumbers = getNotificationNumbers();
         const results = [];
 
         // 2. Iterate each account to check its bundles
@@ -72,7 +74,7 @@ export async function GET(request: Request) {
                     const smsAuthToken = process.env.TWILIO_SMS_AUTH_TOKEN || authToken;
                     const smsClient = twilio(smsAccountSid, smsAuthToken);
 
-                    await Promise.all(notifyNumbers.map(number =>
+                    await Promise.all(notifyNumbers.map((number: string) =>
                         smsClient.messages.create({
                             body: `🎉 Great News! Regulatory Bundle Approved.\n\nClient: ${account.friendlyName}\nBundle: ${bundle.friendlyName}\n\nYour Twilio phone numbers are now ready to use!`,
                             from: '+61485009296',

@@ -26,8 +26,11 @@ export async function POST(request: Request) {
 
         console.log(`Using Twilio number: ${fromNumber} for test SMS from account: ${smsAccountSid}`);
 
-        const notifyNumbers = ['+61401027141', '+61404283605'];
-        const results = await Promise.all(notifyNumbers.map(number =>
+        // Get notification numbers from configuration
+        const { getNotificationNumbers } = require('@/lib/twilio-helpers');
+        const notifyNumbers = getNotificationNumbers();
+
+        const results = await Promise.all(notifyNumbers.map((number: string) =>
             client.messages.create({
                 body: '🔔 Test SMS from AWE2M8 Twilio Admin. Your configuration is working correctly!',
                 from: fromNumber,
