@@ -368,12 +368,38 @@ export async function POST(req: NextRequest) {
 
         // 7. Submit Bundle for Review - Different API based on country
         let submitted;
-        if (country === 'AU') {
-            submitted = await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
-                .update({ status: 'pending-review' });
-        } else {
-            submitted = await targetClient.trusthub.v1.trustProducts(bundle.sid)
-                .update({ status: 'pending-review' });
+        try {
+            if (country === 'AU') {
+                submitted = await targetClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid)
+                    .update({ status: 'pending-review' });
+            } else {
+                submitted = await targetClient.trusthub.v1.trustProducts(bundle.sid)
+                    .update({ status: 'pending-review' });
+            }
+        } catch (submissionError: any) {
+            // If submission fails, fetch the evaluation to see what's missing
+            console.error('Bundle submission failed:', submissionError.message);
+
+            if (country === 'AU') {
+                try {
+                    const evaluations = await targetClient.numbers.v2.regulatoryCompliance
+                        .bundles(bundle.sid)
+                        .evaluations.list({ limit: 1 });
+
+                    if (evaluations.length > 0) {
+                        const evaluation = evaluations[0];
+                        console.error('Bundle Evaluation Results:', {
+                            status: evaluation.status,
+                            results: evaluation.results
+                        });
+                        throw new Error(`Bundle validation failed: ${JSON.stringify(evaluation.results)}`);
+                    }
+                } catch (evalError) {
+                    console.error('Could not fetch evaluation:', evalError);
+                }
+            }
+
+            throw submissionError;
         }
 
         // 8. Send SMS Notification (Approvals are manual, so we notify on SUBMISSION for now,
