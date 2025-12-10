@@ -215,7 +215,14 @@ export async function POST(req: NextRequest) {
                 const endUserAttributes = {
                     business_name: businessName,
                     business_type: formData.get("businessType") || 'llc',
-                    business_registration_number: formData.get("ein") || ''
+                    business_registration_number: formData.get("ein") || '',
+                    // Required for Australia
+                    business_website: formData.get("website") || 'https://awe2m8.ai',
+                    authorized_representative_first_name: formData.get("firstName") || 'Giles',
+                    authorized_representative_last_name: formData.get("lastName") || 'Parnell',
+                    authorized_representative_email: formData.get("email") as string,
+                    business_industry: 'Technology',
+                    business_regions_of_operation: 'AU'
                 };
 
                 console.log('EndUser attributes:', endUserAttributes);
