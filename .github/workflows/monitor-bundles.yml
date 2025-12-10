@@ -18,6 +18,6 @@ jobs:
             echo "Warning: CRON_SECRET not set in repository secrets"
             exit 0
           fi
-          curl -X GET https://demos.awe2m8.ai/api/cron/check-bundles \
+          curl -X GET https://internal.awe2m8.ai/api/cron/check-bundles \
           -H "Authorization: Bearer $CRON_SECRET" \
           --fail || echo "Ping failed but continuing to avoid workflow error"

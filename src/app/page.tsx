@@ -1,30 +1,85 @@
+'use client';
+
+import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, LayoutTemplate } from 'lucide-react';
+import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings, Sparkles, Shield } from 'lucide-react';
 
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
-      <div className="max-w-2xl w-full text-center space-y-12">
+export default function AdminDashboard() {
+    return (
+        <div className="min-h-screen bg-gray-950 text-white font-sans p-8">
+            <div className="max-w-5xl mx-auto">
+                {/* Header */}
+                <header className="mb-12 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-4">
+                        Internal Tools
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+                            AWE2M8
+                        </span>{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
+                            Command Center
+                        </span>
+                    </h1>
+                    <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                        Select a tool to manage sales demos, compliance, or system configurations.
+                    </p>
+                </header>
 
-        <div className="space-y-4">
-          <h1 className="text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
-            AWE2M8
-          </h1>
-          <p className="text-xl text-gray-400">Internal Sales & Demo Platform</p>
-        </div>
+                {/* Tools Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        <div className="flex justify-center">
-          <Link href="/admin" className="group bg-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-green-500/50 transition-all hover:bg-gray-900/80 text-left max-w-md w-full">
-            <div className="w-12 h-12 bg-green-900/20 rounded-lg flex items-center justify-center text-green-400 mb-4 group-hover:scale-110 transition-transform">
-              <LayoutTemplate className="w-6 h-6" />
+                    {/* Tool 1: Sales Demo Builder */}
+                    <Link
+                        href="/demos"
+                        className="group block bg-gray-900/50 border border-gray-800 hover:border-blue-500/50 rounded-xl p-6 transition-all hover:shadow-lg hover:shadow-blue-900/20"
+                    >
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center border border-purple-800/50 group-hover:border-purple-500/50 transition-colors">
+                                <Sparkles className="w-6 h-6 text-purple-400" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white">Demo Builder</h3>
+                        </div>
+                        <p className="text-gray-400 text-sm">Create stunning AI-powered demo pages for your clients</p>
+                    </Link>
+
+                    {/* Tool 2: Twilio Compliance */}
+                    <Link
+                        href="/twilio"
+                        className="group block bg-gray-900/50 border border-gray-800 hover:border-cyan-500/50 rounded-xl p-6 transition-all hover:shadow-lg hover:shadow-cyan-900/20"
+                    >
+                        <div className="flex items-center gap-4 mb-3">
+                            <div className="w-12 h-12 bg-cyan-900/30 rounded-lg flex items-center justify-center border border-cyan-800/50 group-hover:border-cyan-500/50 transition-colors">
+                                <Shield className="w-6 h-6 text-cyan-400" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white">Twilio Bundle Manager</h3>
+                        </div>
+                        <p className="text-gray-400 text-sm">Manage A2P 10DLC regulatory compliance bundles</p>
+                    </Link>
+
+                    {/* Tool 3: Placeholder / System Config */}
+                    <div className="group relative overflow-hidden bg-gray-900/50 border border-gray-800 rounded-2xl p-6 opacity-60">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mb-4">
+                                <Settings className="w-6 h-6 text-gray-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-400 mb-2">System Settings</h3>
+                            <p className="text-gray-500 text-sm mb-4">
+                                Global API configurations and system monitoring tools.
+                            </p>
+                            <div className="flex items-center text-gray-600 text-sm font-bold cursor-not-allowed">
+                                Coming Soon
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Footer / Stats */}
+                <div className="mt-16 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                    <p>Internal Tools v2.0 • Secure Access Only</p>
+                </div>
             </div>
-            <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-              AWE2M8 Sales Demo Prep <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
-            </h2>
-            <p className="text-gray-400">Generate new client demos using AI.</p>
-          </Link>
         </div>
-      </div>
-    </main>
-  );
+    );
 }
