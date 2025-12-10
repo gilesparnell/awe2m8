@@ -3,13 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, FilePlus, List, ArrowLeft } from 'lucide-react';
+import { Settings, FilePlus, List, ArrowLeft, ArrowRightLeft } from 'lucide-react';
 import { ConfigurationForm } from '@/components/admin/twilio/ConfigurationForm';
 import { CreateBundleForm } from '@/components/admin/twilio/CreateBundleForm';
 import { BundleList } from '@/components/admin/twilio/BundleList';
+import { NumberPortForm } from '@/components/admin/twilio/NumberPortForm';
 
 export default function TwilioAdminPage() {
-    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list'>('config');
+    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port'>('config');
     const [credentials, setCredentials] = useState({ accountSid: '', authToken: '' });
 
     useEffect(() => {
@@ -70,6 +71,12 @@ export default function TwilioAdminPage() {
                         icon={<List className="w-5 h-5" />}
                         label="View Bundles"
                     />
+                    <TabButton
+                        active={activeTab === 'port'}
+                        onClick={() => setActiveTab('port')}
+                        icon={<ArrowRightLeft className="w-5 h-5" />}
+                        label="Port Number"
+                    />
                 </div>
 
                 {/* Content */}
@@ -87,6 +94,10 @@ export default function TwilioAdminPage() {
 
                     {activeTab === 'list' && (
                         <BundleList credentials={credentials} />
+                    )}
+
+                    {activeTab === 'port' && (
+                        <NumberPortForm credentials={credentials} />
                     )}
                 </div>
             </div>
