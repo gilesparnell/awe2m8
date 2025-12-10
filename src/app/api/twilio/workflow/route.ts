@@ -91,6 +91,11 @@ export async function POST(req: NextRequest) {
                 // Appending 'File' is standard.
                 uploadFormData.append('File', blob, file.name || 'document.pdf');
 
+                // CRITICAL: Specify which account should own this document
+                // When using parent credentials to create resources for a subaccount,
+                // we must explicitly set the AccountSid parameter
+                uploadFormData.append('AccountSid', targetAccountSid);
+
                 // We need authorization header manually since we are using fetch
                 const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
 
@@ -113,6 +118,8 @@ export async function POST(req: NextRequest) {
                 // If we created a subaccount, we can try to use its SID in the Basic Auth username?
                 // `Buffer.from(`${targetAccountSid}:${authToken}`)`? This often works with Parent Auth Token 
                 // if Parent owns the Subaccount. Let's try that.
+
+                console.log(`Uploading ${field.friendlySuffix} for account ${targetAccountSid}...`);
 
                 const docRes = await fetch('https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments', {
                     method: 'POST',
@@ -171,6 +178,7 @@ export async function POST(req: NextRequest) {
         // Let's try creating the Address as a supporting document? No.
         // Let's try creating a Twilio Address Resource first.
 
+        console.log('Creating Address Resource...');
         // Create Address Resource
         const address = await targetClient.addresses.create({
             customerName: businessName,
