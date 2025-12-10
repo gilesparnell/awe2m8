@@ -8,7 +8,7 @@ export const AdminHeader: React.FC = () => {
                 Internal Tool
             </div>
             <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600 tracking-tight">
-                AWE2M8 Sales Demo Prep
+                AWE2M8 - Internal Tools
             </h1>
             <p className="text-gray-400 mt-4 text-lg max-w-2xl mx-auto">
                 Create personalized AI demo pages for prospects in minutes. Our AI analyzes their website and generates custom sales content.
