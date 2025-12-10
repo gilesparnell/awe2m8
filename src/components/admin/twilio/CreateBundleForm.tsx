@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Play, CheckCircle, AlertCircle, Loader2, Building, FileText, Database } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 interface Credentials {
     accountSid: string;
@@ -33,9 +34,39 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
     const [error, setError] = useState<string | null>(null);
     const [status, setStatus] = useState<string>('');
     const [subAccountSid, setSubAccountSid] = useState('');
+    const [successData, setSuccessData] = useState<{ bundleSid: string; status: string } | null>(null);
 
     // Editable State
     const [businessInfo, setBusinessInfo] = useState(DEFAULT_BUSINESS_INFO);
+
+    const triggerConfetti = () => {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+        const interval = window.setInterval(() => {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+            });
+            confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+            });
+        }, 250);
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -108,9 +139,10 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
             }
 
             setStatus('Success!');
-            onSuccess();
-            alert(`Bundle Created Successfully!\nSID: ${data.bundleSid}`);
+            setSuccessData({ bundleSid: data.bundleSid, status: data.status });
+            triggerConfetti();
             setSubAccountSid(''); // Reset
+            onSuccess();
 
         } catch (err: any) {
             setError(err.message);
@@ -122,6 +154,45 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
 
     return (
         <div className="animate-in fade-in duration-500 max-w-2xl mx-auto">
+            {/* Success Modal */}
+            {successData && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-gradient-to-br from-gray-900 to-gray-950 border-2 border-green-500/50 rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-green-900/20 animate-in zoom-in duration-300">
+                        <div className="text-center">
+                            <div className="w-20 h-20 bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-green-500 animate-pulse">
+                                <CheckCircle className="w-12 h-12 text-green-400" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-white mb-2">Bundle Created!</h2>
+                            <p className="text-gray-400 mb-6">Your regulatory bundle has been successfully submitted to Twilio.</p>
+
+                            <div className="bg-gray-950 rounded-xl p-4 mb-6 text-left">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 text-sm">Bundle SID:</span>
+                                        <code className="text-green-400 text-sm font-mono">{successData.bundleSid}</code>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 text-sm">Status:</span>
+                                        <span className="text-yellow-400 text-sm font-semibold capitalize">{successData.status}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-gray-500 mb-6">
+                                You'll receive an SMS notification when the bundle is approved by Twilio (typically 24-48 hours).
+                            </p>
+
+                            <button
+                                onClick={() => setSuccessData(null)}
+                                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 shadow-xl">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-800/50">
