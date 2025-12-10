@@ -22,8 +22,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
 
     const fetchBundles = async () => {
-        if (!credentials.accountSid || !credentials.authToken) return;
-
+        // Did NOT return early to allow server-side auth
         setLoading(true);
         setError(null);
         try {
@@ -101,13 +100,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         }
     };
 
-    if (!credentials.accountSid) {
-        return (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center text-gray-500">
-                <p>Please configure your Twilio credentials first.</p>
-            </div>
-        );
-    }
+    // We no longer block on missing credentials, as the server might have them in Env Vars.
+    const isUsingServerCreds = !credentials.accountSid;
 
     return (
         <div className="space-y-6 animate-in fade-in">
@@ -115,6 +109,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <Package className="w-5 h-5 text-green-500" />
                     Submitted Bundles
+                    {isUsingServerCreds && <span className="ml-2 text-xs text-blue-400 bg-blue-900/30 px-2 py-1 rounded-full border border-blue-800/30">Server Auth</span>}
                 </h3>
                 <button
                     onClick={fetchBundles}
