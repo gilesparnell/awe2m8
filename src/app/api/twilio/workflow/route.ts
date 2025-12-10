@@ -238,18 +238,40 @@ export async function POST(req: NextRequest) {
         // 6. Create Bundle using TrustHub API
         let bundle;
         try {
-            // First, get the list of available policies to find the right one
+            const country = formData.get("country") as string || 'AU';
+
+            // First, get the list of available policies
             const policies = await targetClient.trusthub.v1.policies.list({ limit: 20 });
             console.log('Available policies:', policies.map(p => ({ sid: p.sid, name: p.friendlyName })));
 
-            // Use the first available policy (usually the primary business profile)
-            const policySid = policies[0]?.sid;
+            // Select the appropriate policy based on country and business type
+            let selectedPolicy;
+
+            if (country === 'AU') {
+                // For Australia, use "Australia: Toll-Free - Business"
+                selectedPolicy = policies.find(p => p.friendlyName === 'Australia: Toll-Free - Business');
+            } else if (country === 'US') {
+                // For US, look for A2P 10DLC or Primary Business Profile
+                selectedPolicy = policies.find(p =>
+                    p.friendlyName?.includes('A2P') ||
+                    p.friendlyName?.includes('Primary Business')
+                );
+            } else if (country === 'IE') {
+                // For Ireland
+                selectedPolicy = policies.find(p => p.friendlyName === 'Ireland: Mobile - Business');
+            } else if (country === 'BR') {
+                // For Brazil
+                selectedPolicy = policies.find(p => p.friendlyName === 'Brazil: Mobile - Business');
+            }
+
+            // Fallback to first policy if no match found
+            const policySid = selectedPolicy?.sid || policies[0]?.sid;
 
             if (!policySid) {
                 throw new Error('No TrustHub policies available for this account');
             }
 
-            console.log(`Using policySid: ${policySid}`);
+            console.log(`Using policySid: ${policySid} (${selectedPolicy?.friendlyName || policies[0]?.friendlyName})`);
 
             bundle = await targetClient.trusthub.v1.trustProducts.create({
                 friendlyName: `${businessName} - Regulatory Bundle`,
