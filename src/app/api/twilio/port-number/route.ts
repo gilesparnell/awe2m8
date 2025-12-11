@@ -223,26 +223,14 @@ export async function POST(request: Request) {
                                 console.log(`[Port] Detected AU Mobile regulation for bundle ${validBundleSid}. Specific AU Mobile logic might be needed.`);
                             }
 
-                            console.log(`[Port] Inspecting Bundle Items...`);
-                            const items = await subAccountClient.numbers.v2.regulatoryCompliance
-                                .bundles(validBundleSid)
-                                .itemAssignments
-                                .list({ limit: 10 });
+                            // The Bundle contains Regulatory Documents (RD...) which encapsulate the address.
+                            // The Legacy Address (AD...) found on the account is likely not directly linked in a way the API accepts as a pair.
+                            // Sending both causes "Bundle not found" (Context Mismatch).
+                            // We must rely SOLELY on the BundleSid.
 
-                            // Log items to debug structure
-                            console.log(`[Port] Items JSON:`, JSON.stringify(items.map((i: any) => ({ type: i.resourceType, sid: i.objectSid }))));
-
-                            const addressItem = items.find((i: any) => i.resourceType === 'address' || i.resource_type === 'address');
-
-                            if (addressItem) {
-                                console.log(`[Port] Found linked Address ${addressItem.objectSid} in Bundle. Using this match.`);
-                                updateParams.addressSid = addressItem.objectSid;
-                            } else {
-                                console.warn('[Port] No Address found inside Bundle items. Using the Address found in previous step (cross-fingers).');
-                                // Previously we deleted updateParams.addressSid here. 
-                                // But if Twilio threw 21631 (Address Required), sending NO address might fail again.
-                                // Let's keep the fallback address. Worst case: "Bundle not found" (Mismatch).
-                                // Best case: Twilio accepts the standalone address + bundle.
+                            if (updateParams.addressSid) {
+                                console.warn('[Port] Removing Legacy AddressSid (AD...) to rely solely on Regulatory Bundle (BU...). sending both causes verification conflict.');
+                                delete updateParams.addressSid;
                             }
 
                             updateParams.bundleSid = validBundleSid;
