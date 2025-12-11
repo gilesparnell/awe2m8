@@ -151,6 +151,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             case 'twilio-approved': return 'bg-green-900/40 text-green-400 border-green-800';
             case 'twilio-rejected': return 'bg-red-900/40 text-red-400 border-red-800';
             case 'pending-review': return 'bg-yellow-900/40 text-yellow-400 border-yellow-800';
+            case 'in-review': return 'bg-purple-900/40 text-purple-400 border-purple-800';
             default: return 'bg-gray-800 text-gray-400 border-gray-700';
         }
     };
@@ -159,6 +160,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         switch (status) {
             case 'twilio-approved': return <CheckCircle className="w-4 h-4" />;
             case 'twilio-rejected': return <XCircle className="w-4 h-4" />;
+            case 'pending-review': return <Clock className="w-4 h-4" />;
+            case 'in-review': return <Activity className="w-4 h-4 animate-pulse" />;
             default: return <Clock className="w-4 h-4" />;
         }
     };
@@ -167,7 +170,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     const isUsingServerCreds = !credentials.accountSid;
 
     // Filter Recent List for display
-    const pendingReviewBundles = recentBundles.filter(b => b.status === 'pending-review');
+    const pendingReviewBundles = recentBundles.filter(b => b.status === 'pending-review' || b.status === 'in-review');
 
     // Valid "Latest Approved" logic: Take approved items, slice top 5
     const latestApproved = recentBundles
@@ -218,7 +221,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             </div>
 
             {/* Actions Block (Check Status) */}
-            {bundle.status === 'pending-review' && (
+            {(bundle.status === 'pending-review' || bundle.status === 'in-review') && (
                 <div className="flex shrink-0">
                     <button
                         onClick={async () => {
