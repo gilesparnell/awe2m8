@@ -174,75 +174,80 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         .filter(b => b.status === 'twilio-approved')
         .slice(0, 5);
 
-    // If no specific recent activity found, we might fallback or show empty
-    const showRecentSection = pendingReviewBundles.length > 0 || latestApproved.length > 0;
+    // Check if we have pending items for the pending section
+    const showPendingSection = pendingReviewBundles.length > 0;
+    // Check if we have approved items for the recent approved section
+    const showApprovedSection = latestApproved.length > 0;
 
+    const renderBundleRow = (bundle: Bundle) => (
+        <div key={bundle.sid} className="bg-gray-950 border border-gray-800 hover:border-green-500/30 rounded-lg p-4 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Info Block */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
-    const renderBundleCard = (bundle: Bundle) => (
-        <div key={bundle.sid} className="bg-gray-950 border border-gray-800 hover:border-green-500/50 rounded-xl p-6 transition-all group">
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h4 className="text-lg font-bold text-white group-hover:text-green-400 transition-colors">
+                {/* 1. Reg Name (col-span-4) */}
+                <div className="md:col-span-4">
+                    <h4 className="text-sm font-bold text-white group-hover:text-green-400 transition-colors truncate" title={bundle.friendlyName || bundle.friendly_name}>
                         {bundle.friendlyName || bundle.friendly_name}
                     </h4>
-                    <div className="text-xs text-gray-500 font-mono mt-1">{bundle.sid}</div>
+                    <div className="text-[10px] text-gray-600 font-mono">{bundle.sid}</div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 uppercase tracking-wide ${getStatusColor(bundle.status)}`}>
-                    {getStatusIcon(bundle.status)}
-                    {bundle.status}
-                    {bundle.status === 'pending-review' && <span className="animate-pulse text-[10px] lowercase opacity-70 ml-1">(checking...)</span>}
+
+                {/* 2. Date Created (AEST) (col-span-3) */}
+                <div className="md:col-span-3 text-xs text-gray-400">
+                    <span className="block md:hidden text-[10px] text-gray-600 mb-0.5">Created (AEST)</span>
+                    {new Date(bundle.dateCreated || bundle.date_created || '').toLocaleString('en-AU', {
+                        timeZone: 'Australia/Sydney',
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    })}
+                </div>
+
+                {/* 3. Email (col-span-3) */}
+                <div className="md:col-span-3 text-xs text-gray-400 truncate" title={bundle.email}>
+                    <span className="block md:hidden text-[10px] text-gray-600 mb-0.5">Email</span>
+                    {bundle.email}
+                </div>
+
+                {/* 4. Status (col-span-2) */}
+                <div className="md:col-span-2 flex justify-end md:justify-start">
+                    <div className={`px-2 py-1 rounded-md text-[10px] font-bold border flex items-center gap-1.5 uppercase tracking-wide w-fit ${getStatusColor(bundle.status)}`}>
+                        {getStatusIcon(bundle.status)}
+                        {bundle.status?.replace('twilio-', '')}
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4 pt-4 border-t border-gray-900">
-                <div>
-                    <span className="block text-gray-600 text-xs mb-1">Created Date</span>
-                    <span className="text-gray-300">
-                        {new Date(bundle.dateCreated || bundle.date_created || '').toLocaleDateString()}
-                    </span>
+            {/* Actions Block (Check Status) */}
+            {bundle.status === 'pending-review' && (
+                <div className="flex shrink-0">
+                    <button
+                        onClick={async () => {
+                            if (!confirm('Check status from Twilio and notify if approved?')) return;
+                            try {
+                                const res = await fetch('/api/twilio/check-status', {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        accountSid: credentials.accountSid,
+                                        authToken: credentials.authToken,
+                                        bundleSid: bundle.sid
+                                    }),
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+                                const d = await res.json();
+                                if (d.success) {
+                                    alert(`Status: ${d.status}\nSMS Sent: ${d.smsSent ? 'YES' : 'NO'}`);
+                                    fetchRecentActivity(); // Refresh list
+                                } else {
+                                    alert('Error: ' + d.error);
+                                }
+                            } catch (e) { alert('Failed to check status'); }
+                        }}
+                        className="text-xs bg-blue-900/20 hover:bg-blue-900/40 text-blue-300 px-3 py-1.5 rounded border border-blue-800/30 transition-colors whitespace-nowrap"
+                    >
+                        Check Status
+                    </button>
                 </div>
-                <div>
-                    <span className="block text-gray-600 text-xs mb-1">Email</span>
-                    <span className="text-gray-300">{bundle.email}</span>
-                </div>
-                <div>
-                    <span className="block text-gray-600 text-xs mb-1">Type</span>
-                    <span className="text-gray-300 bg-gray-900 px-2 py-0.5 rounded text-xs">
-                        {bundle.regulationType || bundle.regulation_type}
-                    </span>
-                </div>
-                {/* Check Status Button for Pending Bundles */}
-                {bundle.status === 'pending-review' && (
-                    <div className="flex items-end justify-end">
-                        <button
-                            onClick={async () => {
-                                if (!confirm('Check status from Twilio and notify if approved?')) return;
-                                try {
-                                    const res = await fetch('/api/twilio/check-status', {
-                                        method: 'POST',
-                                        body: JSON.stringify({
-                                            accountSid: credentials.accountSid,
-                                            authToken: credentials.authToken,
-                                            bundleSid: bundle.sid
-                                        }),
-                                        headers: { 'Content-Type': 'application/json' }
-                                    });
-                                    const d = await res.json();
-                                    if (d.success) {
-                                        alert(`Status: ${d.status}\nSMS Sent: ${d.smsSent ? 'YES' : 'NO'}`);
-                                        fetchRecentActivity(); // Refresh list
-                                    } else {
-                                        alert('Error: ' + d.error);
-                                    }
-                                } catch (e) { alert('Failed to check status'); }
-                            }}
-                            className="text-xs bg-blue-900/30 hover:bg-blue-900/50 text-blue-300 px-3 py-1.5 rounded-lg border border-blue-800/50 transition-colors"
-                        >
-                            Check & Notify
-                        </button>
-                    </div>
-                )}
-            </div>
+            )}
         </div>
     );
 
@@ -293,29 +298,44 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                 </div>
             )}
 
-            {/* SECTION 1: Pending & Recent Activity (Always Visible) */}
+            {/* SECTION 1: Pending Reviews */}
             <div className="space-y-4">
-                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-sm font-bold text-yellow-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
                     <Activity className="w-4 h-4" />
-                    Pending & Recent Approvals
+                    Pending Reviews
                 </h4>
 
-                {!showRecentSection && !loadingRecent && (
-                    <div className="bg-gray-900/30 border border-gray-800 border-dashed rounded-xl p-8 text-center text-gray-500 text-sm">
-                        No recent activity found.
+                {loadingRecent && !recentBundles.length ? (
+                    <div className="flex justify-center p-4"><RefreshCw className="w-5 h-5 animate-spin text-gray-600" /></div>
+                ) : !showPendingSection ? (
+                    <div className="bg-gray-900/20 border border-gray-800/50 border-dashed rounded-xl p-4 text-center text-gray-500 text-xs">
+                        No bundles currently pending review.
+                    </div>
+                ) : (
+                    <div className="grid gap-2">
+                        {pendingReviewBundles.map(renderBundleRow)}
                     </div>
                 )}
+            </div>
 
-                {loadingRecent && (
-                    <div className="text-center py-8 text-gray-500"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />Loading activity...</div>
+            {/* SECTION 2: Recently Approved */}
+            <div className="space-y-4">
+                <h4 className="text-sm font-bold text-green-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
+                    <CheckCircle className="w-4 h-4" />
+                    Recently Approved
+                </h4>
+
+                {loadingRecent && !recentBundles.length ? (
+                    <div className="flex justify-center p-4"><RefreshCw className="w-5 h-5 animate-spin text-gray-600" /></div>
+                ) : !showApprovedSection ? (
+                    <div className="bg-gray-900/20 border border-gray-800/50 border-dashed rounded-xl p-4 text-center text-gray-500 text-xs">
+                        No recently approved bundles found.
+                    </div>
+                ) : (
+                    <div className="grid gap-2">
+                        {latestApproved.map(renderBundleRow)}
+                    </div>
                 )}
-
-                <div className="grid gap-4">
-                    {/* Prioritize Pending */}
-                    {pendingReviewBundles.map(renderBundleCard)}
-                    {/* Then Latest Approved */}
-                    {latestApproved.map(renderBundleCard)}
-                </div>
             </div>
 
 
@@ -357,11 +377,11 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                         {loadingHistory ? (
                             <div className="text-center py-12 text-gray-500"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />Loading history...</div>
                         ) : (
-                            <div className="grid gap-4">
+                            <div className="grid gap-2">
                                 {historyBundles.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500 text-sm">No bundles found on this page.</div>
                                 ) : (
-                                    historyBundles.filter(b => b.status !== 'pending-review').map(renderBundleCard)
+                                    historyBundles.filter(b => b.status !== 'pending-review').map(renderBundleRow)
                                 )}
                             </div>
                         )}
