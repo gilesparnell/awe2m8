@@ -231,34 +231,35 @@ export default function CleanupPage() {
                 {/* Navigation Tabs */}
                 <div className="flex gap-4 mb-8 justify-center flex-wrap">
                     <button
-                        onClick={() => window.location.href = '/twilio'}
+                        onClick={() => window.location.href = '/admin/twilio?tab=config'}
                         className="flex items-center gap-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-xl transition-all"
                     >
                         <span>⚙️</span>
                         <span>Configuration</span>
                     </button>
                     <button
-                        onClick={() => window.location.href = '/twilio#create'}
+                        onClick={() => window.location.href = '/admin/twilio?tab=create'}
                         className="flex items-center gap-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-xl transition-all"
                     >
                         <span>📄</span>
                         <span>Create Bundle</span>
                     </button>
                     <button
-                        onClick={() => window.location.href = '/twilio#view'}
+                        onClick={() => window.location.href = '/admin/twilio?tab=list'}
                         className="flex items-center gap-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-xl transition-all"
                     >
                         <span>📋</span>
                         <span>View Bundles</span>
                     </button>
                     <button
-                        onClick={() => window.location.href = '/twilio#port'}
+                        onClick={() => window.location.href = '/admin/twilio?tab=port'}
                         className="flex items-center gap-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-xl transition-all"
                     >
                         <span>🔄</span>
                         <span>Port Number</span>
                     </button>
                     <button
+                        onClick={() => window.location.href = '/twilio/cleanup'}
                         className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-500 rounded-xl font-medium shadow-lg shadow-blue-500/20"
                     >
                         <span>🧹</span>
@@ -269,8 +270,8 @@ export default function CleanupPage() {
                 {/* Alert Messages */}
                 {message && (
                     <div className={`mb-6 p-4 rounded-xl border ${messageType === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-400' :
-                            messageType === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                                'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                        messageType === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                            'bg-blue-500/10 border-blue-500/30 text-blue-400'
                         }`}>
                         {message}
                     </div>
@@ -433,8 +434,8 @@ export default function CleanupPage() {
                                     <div
                                         key={address.sid}
                                         className={`rounded-xl p-4 flex items-center gap-4 transition-all ${isDuplicate
-                                                ? 'bg-yellow-500/5 border border-yellow-500/30 hover:bg-yellow-500/10'
-                                                : 'bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60 hover:border-gray-600/50'
+                                            ? 'bg-yellow-500/5 border border-yellow-500/30 hover:bg-yellow-500/10'
+                                            : 'bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60 hover:border-gray-600/50'
                                             }`}
                                     >
                                         <input
