@@ -88,6 +88,15 @@ function TwilioAdminContent() {
                         icon={<ArrowRightLeft className="w-5 h-5" />}
                         label="Port Number"
                     />
+
+                    {/* Check Status / Cleanup Link */}
+                    <Link
+                        href="/twilio/cleanup"
+                        className="flex-1 py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-3 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border border-blue-500/30"
+                    >
+                        <span className="text-xl">🧹</span>
+                        Cleanup
+                    </Link>
                 </div>
 
                 {/* Content */}
