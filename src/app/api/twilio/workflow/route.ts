@@ -196,6 +196,41 @@ export async function POST(request: Request) {
             });
         }
 
+        // =====================================================================
+        // ACTION: CHECK STATUS
+        // =====================================================================
+        // ... (This logic actually lives in a different route file /api/twilio/check-status, 
+        //      but we can keep generic logic here if we merge)
+        // For now, let's just implement the 'submit-bundle' block requested by Frontend
+
+        // =====================================================================
+        // ACTION: SUBMIT BUNDLE (Draft -> Pending)
+        // =====================================================================
+        if (action === 'submit-bundle') {
+            const { bundleSid, subAccountSid } = body;
+            if (!bundleSid || !subAccountSid) {
+                return NextResponse.json({ success: false, error: 'Missing bundleSid or subAccountSid' }, { status: 400 });
+            }
+
+            console.log(`[Submit Bundle] Submitting ${bundleSid} for account ${subAccountSid}...`);
+
+            // Re-auth as subaccount
+            const subAccount = await client.api.v2010.accounts(subAccountSid).fetch();
+            const subClient = twilio(subAccountSid, subAccount.authToken);
+
+            try {
+                const updated = await subClient.numbers.v2.regulatoryCompliance.bundles(bundleSid).update({
+                    status: 'pending-review'
+                });
+
+                console.log(`[Submit Bundle] Success! New Status: ${updated.status}`);
+                return NextResponse.json({ success: true, status: updated.status });
+            } catch (e: any) {
+                console.error(`[Submit Bundle] Failed: ${e.message}`);
+                return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+            }
+        }
+
         // ACTION: LIST NUMBERS
 
         // ACTION: PORT NUMBER (Default)
