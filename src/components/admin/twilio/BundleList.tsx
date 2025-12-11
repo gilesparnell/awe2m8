@@ -253,39 +253,63 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             {bundle.status === 'draft' && (
                 <div className="flex flex-col items-end shrink-0">
                     <span className="text-[10px] text-yellow-500/80 mb-1 font-mono">Draft State</span>
-                    <button
-                        onClick={async () => {
-                            // Clear previous error
-                            setActionErrors(prev => { const n = { ...prev }; delete n[bundle.sid]; return n; });
+                    <div className="flex gap-2">
+                        <button
+                            onClick={async () => {
+                                if (!confirm('Are you sure you want to PERMANENTLY delete this draft bundle?')) return;
+                                try {
+                                    const res = await fetch('/api/twilio/workflow', {
+                                        method: 'POST',
+                                        body: JSON.stringify({
+                                            action: 'delete-bundle',
+                                            bundleSid: bundle.sid,
+                                            subAccountSid: targetSubAccountSid || credentials.accountSid
+                                        }),
+                                        headers: { 'Content-Type': 'application/json' }
+                                    });
+                                    const d = await res.json();
+                                    if (d.success) fetchRecentActivity();
+                                    else alert('Error: ' + d.error);
+                                } catch (e) { alert('Failed to delete'); }
+                            }}
+                            className="text-xs bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1 rounded border border-red-900/50 transition-colors"
+                        >
+                            Delete
+                        </button>
+                        <button
+                            onClick={async () => {
+                                // Clear previous error
+                                setActionErrors(prev => { const n = { ...prev }; delete n[bundle.sid]; return n; });
 
-                            if (!confirm('This bundle is in Draft. Submit for review now?')) return;
-                            try {
-                                const res = await fetch('/api/twilio/workflow', {
-                                    method: 'POST',
-                                    body: JSON.stringify({
-                                        action: 'submit-bundle',
-                                        bundleSid: bundle.sid,
-                                        accountSid: credentials.accountSid,
-                                        authToken: credentials.authToken,
-                                        subAccountSid: targetSubAccountSid || credentials.accountSid
-                                    }),
-                                    headers: { 'Content-Type': 'application/json' }
-                                });
-                                const d = await res.json();
-                                if (d.success) {
-                                    fetchRecentActivity();
+                                if (!confirm('This bundle is in Draft. Submit for review now?')) return;
+                                try {
+                                    const res = await fetch('/api/twilio/workflow', {
+                                        method: 'POST',
+                                        body: JSON.stringify({
+                                            action: 'submit-bundle',
+                                            bundleSid: bundle.sid,
+                                            accountSid: credentials.accountSid,
+                                            authToken: credentials.authToken,
+                                            subAccountSid: targetSubAccountSid || credentials.accountSid
+                                        }),
+                                        headers: { 'Content-Type': 'application/json' }
+                                    });
+                                    const d = await res.json();
+                                    if (d.success) {
+                                        fetchRecentActivity();
+                                    }
+                                    else {
+                                        setActionErrors(prev => ({ ...prev, [bundle.sid]: d.error }));
+                                    }
+                                } catch (e: any) {
+                                    setActionErrors(prev => ({ ...prev, [bundle.sid]: e.message || 'Failed to submit' }));
                                 }
-                                else {
-                                    setActionErrors(prev => ({ ...prev, [bundle.sid]: d.error }));
-                                }
-                            } catch (e: any) {
-                                setActionErrors(prev => ({ ...prev, [bundle.sid]: e.message || 'Failed to submit' }));
-                            }
-                        }}
-                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition-colors"
-                    >
-                        Submit Now
-                    </button>
+                            }}
+                            className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition-colors"
+                        >
+                            Submit Now
+                        </button>
+                    </div>
                     {!actionErrors[bundle.sid] && (
                         <span className="text-[9px] text-gray-600 mt-1 max-w-[120px] text-right">
                             Action required correctly submit
