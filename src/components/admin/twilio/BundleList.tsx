@@ -33,6 +33,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
 
     const [error, setError] = useState<string | null>(null);
     const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
+    const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const lastSub = localStorage.getItem('twilio_last_subaccount_sid');
@@ -254,6 +255,9 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     <span className="text-[10px] text-yellow-500/80 mb-1 font-mono">Draft State</span>
                     <button
                         onClick={async () => {
+                            // Clear previous error
+                            setActionErrors(prev => { const n = { ...prev }; delete n[bundle.sid]; return n; });
+
                             if (!confirm('This bundle is in Draft. Submit for review now?')) return;
                             try {
                                 const res = await fetch('/api/twilio/workflow', {
@@ -268,17 +272,49 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                     headers: { 'Content-Type': 'application/json' }
                                 });
                                 const d = await res.json();
-                                if (d.success) fetchRecentActivity();
-                                else alert('Error: ' + d.error);
-                            } catch (e) { alert('Failed to submit'); }
+                                if (d.success) {
+                                    fetchRecentActivity();
+                                }
+                                else {
+                                    setActionErrors(prev => ({ ...prev, [bundle.sid]: d.error }));
+                                }
+                            } catch (e: any) {
+                                setActionErrors(prev => ({ ...prev, [bundle.sid]: e.message || 'Failed to submit' }));
+                            }
                         }}
                         className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition-colors"
                     >
                         Submit Now
                     </button>
-                    <span className="text-[9px] text-gray-600 mt-1 max-w-[120px] text-right">
-                        Action required correctly submit
-                    </span>
+                    {!actionErrors[bundle.sid] && (
+                        <span className="text-[9px] text-gray-600 mt-1 max-w-[120px] text-right">
+                            Action required correctly submit
+                        </span>
+                    )}
+
+                    {/* Detailed Error Display */}
+                    {actionErrors[bundle.sid] && (
+                        <div className="mt-2 text-[10px] text-red-300 max-w-[220px] text-right break-words bg-red-950/30 p-2 rounded border border-red-900/50 shadow-lg animate-in slide-in-from-top-1 fade-in">
+                            <div className="font-bold flex items-center justify-end gap-1 mb-1">
+                                <XCircle className="w-3 h-3" /> Submission Failed
+                            </div>
+                            {actionErrors[bundle.sid].includes('regulatory compliant') ? (
+                                <>
+                                    <div className="mb-2 opacity-80">This bundle is missing required info.</div>
+                                    <a
+                                        href={`https://console.twilio.com/us1/develop/phone-numbers/regulatory-compliance/bundles/${bundle.sid}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block bg-red-900 hover:bg-red-800 text-white px-2 py-1 rounded text-[9px] font-bold transition-colors"
+                                    >
+                                        Fix in Console &rarr;
+                                    </a>
+                                </>
+                            ) : (
+                                <div className="opacity-80 leading-snug">{actionErrors[bundle.sid]}</div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div >
