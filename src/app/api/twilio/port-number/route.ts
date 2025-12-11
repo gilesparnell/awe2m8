@@ -159,6 +159,54 @@ export async function POST(request: Request) {
         }
 
         // =======================================================================
+        // PRE-FETCH BUNDLE AND ADDRESS
+        // Explicitly find approved bundle and address in target account
+        // =======================================================================
+
+        let approvedBundleSid: string | undefined;
+        let validatedAddressSid: string | undefined;
+
+        try {
+            const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+
+            // Find approved bundle
+            console.log(`[Port] Pre-fetching approved bundle for ${targetCountryCode} ${numberType}...`);
+            const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                status: 'twilio-approved',
+                isoCountry: targetCountryCode,
+                limit: 5
+            });
+
+            if (bundles.length > 0) {
+                approvedBundleSid = bundles[0].sid;
+                console.log(`[Port] ✅ Found approved bundle: ${approvedBundleSid}`);
+            } else {
+                console.warn(`[Port] ⚠️  No approved bundle found for ${targetCountryCode}`);
+            }
+
+            // Find validated address
+            console.log(`[Port] Pre-fetching validated address for ${targetCountryCode}...`);
+            const addresses = await targetClient.addresses.list({
+                isoCountry: targetCountryCode,
+                limit: 20
+            });
+
+            const validatedAddresses = addresses.filter((addr: any) =>
+                addr.validated === true || addr.validated === 'true'
+            );
+
+            if (validatedAddresses.length > 0) {
+                validatedAddressSid = validatedAddresses[0].sid;
+                console.log(`[Port] ✅ Found validated address: ${validatedAddressSid}`);
+            } else {
+                console.warn(`[Port] ⚠️  No validated address found for ${targetCountryCode}`);
+            }
+
+        } catch (prefetchErr) {
+            console.warn(`[Port] Warning during pre-fetch:`, prefetchErr);
+        }
+
+        // =======================================================================
         // CRITICAL FIX: Bundles and Addresses are SCOPED to specific accounts.
         // When transferring numbers between subaccounts, we have TWO approaches:
         //
@@ -172,9 +220,16 @@ export async function POST(request: Request) {
         // =======================================================================
 
         let updatedNumber;
-        let updateParams: any = { accountSid: targetAccountSid };
+        let updateParams: any = {
+            accountSid: targetAccountSid,
+            // Include bundle and address if we found them
+            ...(approvedBundleSid && { bundleSid: approvedBundleSid }),
+            ...(validatedAddressSid && { addressSid: validatedAddressSid })
+        };
         let attempts = 0;
-        const maxAttempts = 3; // Reduced attempts since we're not doing incremental resolution
+        const maxAttempts = 3;
+
+        console.log(`[Port] Starting transfer with pre-fetched resources:`, JSON.stringify(updateParams));
 
         while (attempts < maxAttempts) {
             attempts++;

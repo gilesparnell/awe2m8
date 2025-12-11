@@ -172,6 +172,11 @@ export const NumberPortForm: React.FC<NumberPortFormProps> = ({ credentials }) =
                                     name="sourceAccountSid"
                                     value={formData.sourceAccountSid}
                                     onChange={handleInputChange}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            fetchNumbers();
+                                        }
+                                    }}
                                     placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                                     className="w-full bg-gray-950 border border-gray-800 rounded-lg pl-10 pr-4 py-4 text-white font-mono placeholder:text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                                     required
