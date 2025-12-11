@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Play, Loader2, ArrowRightLeft, CheckCircle, AlertCircle, Phone, Database, Search, RefreshCw } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 interface Credentials {
     accountSid: string;
@@ -126,6 +127,14 @@ export const NumberPortForm: React.FC<NumberPortFormProps> = ({ credentials }) =
             // Remove the ported number from the list
             setAvailableNumbers(prev => prev.filter(n => n.sid !== selectedNumberSid));
             setSelectedNumberSid('');
+
+            // CELEBRATE!
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#3b82f6', '#06b6d4', '#ffffff'] // Blue, Cyan, White
+            });
 
         } catch (err: any) {
             setError(err.message);
