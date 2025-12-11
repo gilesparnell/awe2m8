@@ -40,8 +40,9 @@ export async function POST(request: Request) {
                 );
             }
 
-            console.log(`Listing numbers for account ${sourceAccountSid}`);
+            console.log(`Listing numbers for account ${sourceAccountSid} using credentials for ${accountSid}`);
             try {
+                // Verify if we can access the account first (lightweight check) or just list numbers.
                 const numbers = await client.api.v2010
                     .accounts(sourceAccountSid)
                     .incomingPhoneNumbers
@@ -53,15 +54,23 @@ export async function POST(request: Request) {
                     friendlyName: n.friendlyName
                 }));
 
+                console.log(`Found ${formattedNumbers.length} numbers.`);
+
                 return NextResponse.json({
                     success: true,
                     numbers: formattedNumbers
                 });
             } catch (error: any) {
                 console.error("Error listing numbers:", error);
+
+                let errorMessage = `Failed to list numbers: ${error.message}`;
+                if (error.status === 404) {
+                    errorMessage += ". (Hint: Ensure the Source Account SID is a valid subaccount of your configured Master Account SID.)";
+                }
+
                 return NextResponse.json(
-                    { success: false, error: `Failed to list numbers: ${error.message}` },
-                    { status: 500 }
+                    { success: false, error: errorMessage },
+                    { status: error.status || 500 }
                 );
             }
         }
