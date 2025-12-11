@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Package, Clock, CheckCircle, XCircle, Database, History, Activity, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RefreshCw, Package, Clock, CheckCircle, XCircle, Database, History, Activity, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, FilePlus } from 'lucide-react';
 
 interface BundleListProps {
     credentials: { accountSid: string; authToken: string };
@@ -33,6 +33,11 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
 
     const [error, setError] = useState<string | null>(null);
     const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
+
+    useEffect(() => {
+        const lastSub = localStorage.getItem('twilio_last_subaccount_sid');
+        if (lastSub) setTargetSubAccountSid(lastSub);
+    }, []);
 
     // Initial load: Fetch Recent Activity
     const fetchRecentActivity = async () => {
@@ -152,6 +157,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             case 'twilio-rejected': return 'bg-red-900/40 text-red-400 border-red-800';
             case 'pending-review': return 'bg-yellow-900/40 text-yellow-400 border-yellow-800';
             case 'in-review': return 'bg-purple-900/40 text-purple-400 border-purple-800';
+            case 'draft': return 'bg-gray-700/40 text-gray-300 border-gray-600';
             default: return 'bg-gray-800 text-gray-400 border-gray-700';
         }
     };
@@ -162,6 +168,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             case 'twilio-rejected': return <XCircle className="w-4 h-4" />;
             case 'pending-review': return <Clock className="w-4 h-4" />;
             case 'in-review': return <Activity className="w-4 h-4 animate-pulse" />;
+            case 'draft': return <FilePlus className="w-4 h-4" />;
             default: return <Clock className="w-4 h-4" />;
         }
     };
@@ -170,7 +177,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     const isUsingServerCreds = !credentials.accountSid;
 
     // Filter Recent List for display
-    const pendingReviewBundles = recentBundles.filter(b => b.status === 'pending-review' || b.status === 'in-review');
+    const pendingReviewBundles = recentBundles.filter(b => b.status === 'pending-review' || b.status === 'in-review' || b.status === 'draft');
 
     // Valid "Latest Approved" logic: Take approved items, slice top 5
     const latestApproved = recentBundles
@@ -251,6 +258,40 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     </button>
                 </div>
             )}
+
+            {/* Actions Block (Submit Draft) */}
+            {bundle.status === 'draft' && (
+                <div className="flex shrink-0">
+                    <button
+                        onClick={async () => {
+                            if (!confirm('This will submit the bundle to Twilio for official review. Are you sure?')) return;
+                            try {
+                                const res = await fetch('/api/twilio/workflow', {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        action: 'submit-bundle', // New action we ensure exists on backend
+                                        bundleSid: bundle.sid,
+                                        accountSid: credentials.accountSid,
+                                        authToken: credentials.authToken,
+                                        subAccountSid: targetSubAccountSid // Important: Use target if set
+                                    }),
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+                                const d = await res.json();
+                                if (d.success) {
+                                    alert(`Bundle Submitted Successfully!`);
+                                    fetchRecentActivity(); // Refresh list to see new status
+                                } else {
+                                    alert('Error Submitting: ' + d.error);
+                                }
+                            } catch (e) { alert('Failed to submit bundle'); }
+                        }}
+                        className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded font-bold shadow-lg shadow-green-900/20 transition-all whitespace-nowrap"
+                    >
+                        Submit for Review
+                    </button>
+                </div>
+            )}
         </div>
     );
 
@@ -277,7 +318,10 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                             <input
                                 type="text"
                                 value={targetSubAccountSid}
-                                onChange={(e) => setTargetSubAccountSid(e.target.value)}
+                                onChange={(e) => {
+                                    setTargetSubAccountSid(e.target.value);
+                                    localStorage.setItem('twilio_last_subaccount_sid', e.target.value);
+                                }}
                                 placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                                 className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white font-mono placeholder:text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
                             />
