@@ -1,16 +1,16 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft } from 'lucide-react';
+import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft, Loader2 } from 'lucide-react';
 import { ConfigurationForm } from '@/components/admin/twilio/ConfigurationForm';
 import { CreateBundleForm } from '@/components/admin/twilio/CreateBundleForm';
 import { BundleList } from '@/components/admin/twilio/BundleList';
 import { NumberPortForm } from '@/components/admin/twilio/NumberPortForm';
 
-export default function TwilioAdminPage() {
+function TwilioAdminContent() {
     const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port'>('config');
     const [credentials, setCredentials] = useState({ accountSid: '', authToken: '' });
@@ -128,3 +128,15 @@ const TabButton = ({ active, onClick, icon, label }: any) => (
         {label}
     </button>
 );
+
+export default function TwilioAdminPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-950 text-white p-8 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+        }>
+            <TwilioAdminContent />
+        </Suspense>
+    );
+}
