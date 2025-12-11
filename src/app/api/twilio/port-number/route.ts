@@ -215,7 +215,10 @@ export async function POST(request: Request) {
                             const items = await subAccountClient.numbers.v2.regulatoryCompliance
                                 .bundles(validBundleSid)
                                 .itemAssignments
-                                .list({ limit: 5 });
+                                .list({ limit: 10 }); // Increase limit slightly
+
+                            // Log items to debug structure
+                            console.log(`[Port] Bundle Items found:`, JSON.stringify(items.map((i: any) => ({ type: i.resourceType, sid: i.objectSid }))));
 
                             const addressItem = items.find((i: any) => i.resourceType === 'address' || i.resource_type === 'address');
 
@@ -223,9 +226,10 @@ export async function POST(request: Request) {
                                 console.log(`[Port] Found linked Address ${addressItem.objectSid} in Bundle. Using this pair.`);
                                 updateParams.addressSid = addressItem.objectSid;
                             } else {
-                                console.warn('[Port] No Address found inside Bundle. Keeping default/found address (risk of mismatch).');
-                                // If we don't have an address yet, this will fail with 21631. 
-                                // But the loop logic handles 21631 separately.
+                                console.warn('[Port] No Address found inside Bundle items. REMOVING conflicting legacy AddressSid to rely solely on Bundle.');
+                                // Critical: If we send a BundleSid, we must NOT send a mismatched AddressSid.
+                                // It is better to send NO AddressSid and let Twilio resolve the Bundle.
+                                delete updateParams.addressSid;
                             }
 
                             updateParams.bundleSid = validBundleSid;
