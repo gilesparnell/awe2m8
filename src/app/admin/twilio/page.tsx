@@ -345,19 +345,21 @@ export default function CleanupPage() {
                                     key={bundle.sid}
                                     className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4 flex items-center gap-4 hover:bg-gray-800/60 hover:border-gray-600/50 transition-all"
                                 >
-                                    {/* Allow selecting ALL bundles, including approved ones */}
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedBundles.includes(bundle.sid)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setSelectedBundles([...selectedBundles, bundle.sid]);
-                                            } else {
-                                                setSelectedBundles(selectedBundles.filter(s => s !== bundle.sid));
-                                            }
-                                        }}
-                                        className="w-4 h-4"
-                                    />
+                                    {/* Only allow selecting non-approved bundles (safety check) */}
+                                    {bundle.status !== 'twilio-approved' && (
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBundles.includes(bundle.sid)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedBundles([...selectedBundles, bundle.sid]);
+                                                } else {
+                                                    setSelectedBundles(selectedBundles.filter(s => s !== bundle.sid));
+                                                }
+                                            }}
+                                            className="w-4 h-4"
+                                        />
+                                    )}
 
                                     <div className="flex-1 grid grid-cols-4 gap-4">
                                         <div>
@@ -380,13 +382,16 @@ export default function CleanupPage() {
                                         </div>
                                     </div>
 
-                                    <button
-                                        onClick={() => deleteBundles([bundle.sid])}
-                                        disabled={loading}
-                                        className="px-3 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded text-sm"
-                                    >
-                                        Delete
-                                    </button>
+                                    {/* Only show delete button for non-approved bundles (safety check) */}
+                                    {bundle.status !== 'twilio-approved' && (
+                                        <button
+                                            onClick={() => deleteBundles([bundle.sid])}
+                                            disabled={loading}
+                                            className="px-3 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded text-sm"
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -479,7 +484,7 @@ export default function CleanupPage() {
                                         </div>
 
                                         <button
-                                            onClick={() => deleteSelectedAddresses()}
+                                            onClick={() => setSelectedAddresses([...selectedAddresses, address.sid])}
                                             disabled={loading}
                                             className="px-3 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded text-sm"
                                         >
