@@ -179,11 +179,28 @@ export async function POST(request: Request) {
                             const validBundleSid = bundles[0].sid;
                             console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
 
-                            // Critical: Remove AddressSid if we are providing a BundleSid to avoid conflicts.
-                            if (updateParams.addressSid) {
-                                console.log('[Port] Removing colliding AddressSid in favor of BundleSid.');
-                                delete updateParams.addressSid;
+                            // Critical: Ensure Address matches Bundle
+                            // Porting often requires BOTH params, and they must pair correctly.
+                            // If we pick a random address and a random bundle, they mismatch.
+                            // We must find the Address INSIDE the Bundle.
+                            console.log(`[Port] Inspecting Bundle ${validBundleSid} items for Address...`);
+
+                            const items = await subAccountClient.numbers.v2.regulatoryCompliance
+                                .bundles(validBundleSid)
+                                .itemAssignments
+                                .list({ limit: 5 });
+
+                            const addressItem = items.find((i: any) => i.resourceType === 'address' || i.resource_type === 'address');
+
+                            if (addressItem) {
+                                console.log(`[Port] Found linked Address ${addressItem.objectSid} in Bundle. Using this pair.`);
+                                updateParams.addressSid = addressItem.objectSid;
+                            } else {
+                                console.warn('[Port] No Address found inside Bundle. Keeping default/found address (risk of mismatch).');
+                                // If we don't have an address yet, this will fail with 21631. 
+                                // But the loop logic handles 21631 separately.
                             }
+
                             updateParams.bundleSid = validBundleSid;
 
                             continue; // Retry loop
