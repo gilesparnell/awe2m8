@@ -274,8 +274,8 @@ export default function CleanupPage() {
                 {/* Alert Messages */}
                 {message && (
                     <div className={`mb-6 p-4 rounded-xl border ${messageType === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-400' :
-                            messageType === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                                'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                        messageType === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                            'bg-blue-500/10 border-blue-500/30 text-blue-400'
                         }`}>
                         {message}
                     </div>
@@ -435,8 +435,8 @@ export default function CleanupPage() {
                                     <div
                                         key={address.sid}
                                         className={`rounded-xl p-4 flex items-center gap-4 transition-all ${isDuplicate
-                                                ? 'bg-yellow-500/5 border border-yellow-500/30 hover:bg-yellow-500/10'
-                                                : 'bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60 hover:border-gray-600/50'
+                                            ? 'bg-yellow-500/5 border border-yellow-500/30 hover:bg-yellow-500/10'
+                                            : 'bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60 hover:border-gray-600/50'
                                             }`}
                                     >
                                         <input
