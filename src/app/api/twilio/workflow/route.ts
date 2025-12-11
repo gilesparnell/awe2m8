@@ -207,19 +207,38 @@ export async function POST(request: Request) {
         // ACTION: SUBMIT BUNDLE (Draft -> Pending)
         // =====================================================================
         if (action === 'submit-bundle') {
-            const { bundleSid, subAccountSid } = body;
+            let { bundleSid, subAccountSid } = body;
+
+            // Fallback: If subAccountSid is not provided (e.g. Server Auth mode on frontend),
+            // assume we want to submit for the currently authenticated account (Master).
+            if (!subAccountSid) {
+                console.log("[Submit Bundle] No subAccountSid provided. Defaulting to authenticated Account SID.");
+                subAccountSid = accountSid;
+            }
+
             if (!bundleSid || !subAccountSid) {
                 return NextResponse.json({ success: false, error: 'Missing bundleSid or subAccountSid' }, { status: 400 });
             }
 
             console.log(`[Submit Bundle] Submitting ${bundleSid} for account ${subAccountSid}...`);
 
-            // Re-auth as subaccount
-            const subAccount = await client.api.v2010.accounts(subAccountSid).fetch();
-            const subClient = twilio(subAccountSid, subAccount.authToken);
+            // Re-auth as target account to ensure we have correct permissions/context works
+            // If subAccountSid === accountSid, this effectively re-fetches self, which is fine but slightly redundant.
+            // Converting to straight update if SIDs match to save an API call.
+
+            let targetClient = client;
+            if (subAccountSid !== accountSid) {
+                try {
+                    const subAccount = await client.api.v2010.accounts(subAccountSid).fetch();
+                    targetClient = twilio(subAccountSid, subAccount.authToken);
+                } catch (err: any) {
+                    console.error(`[Submit Bundle] Failed to fetch subaccount credentials: ${err.message}`);
+                    return NextResponse.json({ success: false, error: `Invalid subAccountSid: ${err.message}` }, { status: 400 });
+                }
+            }
 
             try {
-                const updated = await subClient.numbers.v2.regulatoryCompliance.bundles(bundleSid).update({
+                const updated = await targetClient.numbers.v2.regulatoryCompliance.bundles(bundleSid).update({
                     status: 'pending-review'
                 });
 
