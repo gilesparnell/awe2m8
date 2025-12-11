@@ -229,71 +229,59 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
 
             {/* Actions Block (Check Status) */}
             {(bundle.status === 'pending-review' || bundle.status === 'in-review') && (
-                <div className="flex shrink-0">
-                    <button
-                        onClick={async () => {
-                            if (!confirm('Check status from Twilio and notify if approved?')) return;
-                            try {
-                                const res = await fetch('/api/twilio/check-status', {
-                                    method: 'POST',
-                                    body: JSON.stringify({
-                                        accountSid: credentials.accountSid,
-                                        authToken: credentials.authToken,
-                                        bundleSid: bundle.sid
-                                    }),
-                                    headers: { 'Content-Type': 'application/json' }
-                                });
-                                const d = await res.json();
-                                if (d.success) {
-                                    alert(`Status: ${d.status}\nSMS Sent: ${d.smsSent ? 'YES' : 'NO'}`);
-                                    fetchRecentActivity(); // Refresh list
-                                } else {
-                                    alert('Error: ' + d.error);
-                                }
-                            } catch (e) { alert('Failed to check status'); }
-                        }}
-                        className="text-xs bg-blue-900/20 hover:bg-blue-900/40 text-blue-300 px-3 py-1.5 rounded border border-blue-800/30 transition-colors whitespace-nowrap"
-                    >
-                        Check Status
-                    </button>
+                <div className="flex shrink-0 flex-col items-end">
+                    <span className="text-[10px] text-gray-500 font-mono mb-1">
+                        Creating...
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wide">
+                            Live Polling
+                        </span>
+                    </div>
+                    <div className="text-[10px] text-gray-600 mt-1">
+                        Last check: {new Date().toLocaleTimeString()}
+                    </div>
                 </div>
             )}
 
-            {/* Actions Block (Submit Draft) */}
+            {/* Action Block (Draft Indication) */}
             {bundle.status === 'draft' && (
-                <div className="flex shrink-0">
+                <div className="flex flex-col items-end shrink-0">
+                    <span className="text-[10px] text-yellow-500/80 mb-1 font-mono">Draft State</span>
                     <button
                         onClick={async () => {
-                            if (!confirm('This will submit the bundle to Twilio for official review. Are you sure?')) return;
+                            if (!confirm('This bundle is in Draft. Submit for review now?')) return;
                             try {
                                 const res = await fetch('/api/twilio/workflow', {
                                     method: 'POST',
                                     body: JSON.stringify({
-                                        action: 'submit-bundle', // New action we ensure exists on backend
+                                        action: 'submit-bundle',
                                         bundleSid: bundle.sid,
                                         accountSid: credentials.accountSid,
                                         authToken: credentials.authToken,
-                                        // If no subaccount filter is set, we assume we are acting on the Master Account (credentials.accountSid)
                                         subAccountSid: targetSubAccountSid || credentials.accountSid
                                     }),
                                     headers: { 'Content-Type': 'application/json' }
                                 });
                                 const d = await res.json();
-                                if (d.success) {
-                                    alert(`Bundle Submitted Successfully!`);
-                                    fetchRecentActivity(); // Refresh list to see new status
-                                } else {
-                                    alert('Error Submitting: ' + d.error);
-                                }
-                            } catch (e) { alert('Failed to submit bundle'); }
+                                if (d.success) fetchRecentActivity();
+                                else alert('Error: ' + d.error);
+                            } catch (e) { alert('Failed to submit'); }
                         }}
-                        className="text-xs bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded font-bold shadow-lg shadow-green-900/20 transition-all whitespace-nowrap"
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition-colors"
                     >
-                        Submit for Review
+                        Submit Now
                     </button>
+                    <span className="text-[9px] text-gray-600 mt-1 max-w-[120px] text-right">
+                        Action required correctly submit
+                    </span>
                 </div>
             )}
-        </div>
+        </div >
     );
 
     return (
