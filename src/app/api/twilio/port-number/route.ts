@@ -163,7 +163,13 @@ export async function POST(request: Request) {
                     if (bundles.length > 0) {
                         const validBundleSid = bundles[0].sid;
                         console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
+
+                        // Critical: Remove AddressSid if we are providing a BundleSid. 
+                        // Providing both might trigger conflicting validation paths (Legacy vs V2).
+                        // The Bundle itself contains the necessary address/compliance info.
+                        delete updateParams.addressSid;
                         updateParams.bundleSid = validBundleSid;
+
                         continue; // Retry loop
                     } else {
                         // Fallback: Check for just "draft" or "pending" to give a better error message? 
