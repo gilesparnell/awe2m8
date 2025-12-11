@@ -345,8 +345,8 @@ export default function CleanupPage() {
                                     key={bundle.sid}
                                     className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4 flex items-center gap-4 hover:bg-gray-800/60 hover:border-gray-600/50 transition-all"
                                 >
-                                    {/* Only allow selecting non-approved bundles (safety check) */}
-                                    {bundle.status !== 'twilio-approved' && (
+                                    {/* Only show checkbox for deletable bundles (draft or rejected) */}
+                                    {(bundle.status === 'draft' || bundle.status === 'twilio-rejected') && (
                                         <input
                                             type="checkbox"
                                             checked={selectedBundles.includes(bundle.sid)}
@@ -382,8 +382,8 @@ export default function CleanupPage() {
                                         </div>
                                     </div>
 
-                                    {/* Only show delete button for non-approved bundles (safety check) */}
-                                    {bundle.status !== 'twilio-approved' && (
+                                    {/* Only show delete button for deletable bundles per Twilio API rules */}
+                                    {(bundle.status === 'draft' || bundle.status === 'twilio-rejected') && (
                                         <button
                                             onClick={() => deleteBundles([bundle.sid])}
                                             disabled={loading}
