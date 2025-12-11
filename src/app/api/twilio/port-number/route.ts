@@ -187,16 +187,14 @@ export async function POST(request: Request) {
                 console.log(`[Port] No existing bundle found. Cloning bundle ${sourceBundleSid} from source to target account...`);
 
                 try {
-                    // Create client for the source account to access its bundles
-                    const sourceClient = twilio(accountSid, authToken, { accountSid: sourceAccountSid });
+                    // Use master account credentials to clone the bundle
+                    const masterClient = twilio(accountSid, authToken);
 
-                    // Clone the bundle to the target account
-                    const clonedBundle = await sourceClient.numbers.v2
-                        .bundleClone(sourceBundleSid)
-                        .create({
-                            targetAccountSid: targetAccountSid,
-                            friendlyName: `Cloned from ${sourceAccountSid} for number transfer`
-                        });
+                    // Clone the bundle to the target account using the master account
+                    const clonedBundle = await masterClient.numbers.v2.regulatoryCompliance.bundles(sourceBundleSid).bundleCopies.create({
+                        targetAccountSid: targetAccountSid,
+                        friendlyName: `Cloned from ${sourceAccountSid} for number transfer`
+                    });
 
                     targetBundleSid = clonedBundle.sid;
                     console.log(`[Port] ✅ Successfully cloned bundle to target account: ${targetBundleSid}`);
