@@ -273,7 +273,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                         bundleSid: bundle.sid,
                                         accountSid: credentials.accountSid,
                                         authToken: credentials.authToken,
-                                        subAccountSid: targetSubAccountSid // Important: Use target if set
+                                        // If no subaccount filter is set, we assume we are acting on the Master Account (credentials.accountSid)
+                                        subAccountSid: targetSubAccountSid || credentials.accountSid
                                     }),
                                     headers: { 'Content-Type': 'application/json' }
                                 });
