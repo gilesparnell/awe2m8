@@ -205,7 +205,11 @@ export async function POST(request: Request) {
                 byCountry[country].push(addr);
             });
 
-            const results = [];
+            const results: Array<{
+                country: string;
+                kept: { sid: string; customerName: string; validated: any };
+                deleted: Array<{ sid: string; customerName: string; success: boolean; error?: string }>;
+            }> = [];
             let totalDeleted = 0;
 
             for (const [country, countryAddresses] of Object.entries(byCountry)) {
