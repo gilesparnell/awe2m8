@@ -51,13 +51,13 @@ function TwilioAdminContent() {
                     </div>
 
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-900/30 border border-blue-800 rounded-full text-blue-400 text-xs font-bold uppercase tracking-wider mb-4 mt-8 md:mt-0">
-                        A2P 10DLC Compliance
+                        Regulatory Compliance
                     </div>
                     <h1 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600 tracking-tight mb-4">
                         Twilio Regulatory Bundle Manager
                     </h1>
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                        Streamline A2P 10DLC compliance for your agency clients. Manage approvals, documents, and sub-accounts in one place.
+                        Streamline phone number regulatory compliance for your agency clients. Manage approvals, documents, and sub-accounts in one place.
                     </p>
                 </header>
 
