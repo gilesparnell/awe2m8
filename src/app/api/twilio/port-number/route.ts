@@ -31,6 +31,24 @@ export async function POST(request: Request) {
 
         const client = twilio(accountSid, authToken);
 
+        // DIAGNOSTIC: Verify who we are authenticated as
+        let authenticatedAccount;
+        try {
+            // "get()" without params fetches the authenticated account (myself)
+            // Actually, in Twilio Node lib, usually .accounts(sid).fetch() is how you get specific.
+            // But to get "current", we can just look at the 'accountSid' variable we passed, 
+            // OR try to fetch it to ensure valid creds.
+            // A better check is to list accounts filtering by the Source Account SID to see if we own it.
+            authenticatedAccount = await client.api.v2010.accounts(accountSid).fetch();
+            console.log(`[Auth] Authenticated as: ${authenticatedAccount.friendlyName} (${authenticatedAccount.sid})`);
+
+            if (sourceAccountSid && authenticatedAccount.sid === sourceAccountSid) {
+                console.warn("[Auth] WARNING: You are authenticated as the SOURCE Subaccount. moving numbers between subaccounts requires MASTER credentials.");
+            }
+        } catch (authErr) {
+            console.error("[Auth] Failed to verify authenticated account:", authErr);
+        }
+
         // ACTION: LIST NUMBERS
         if (action === 'list') {
             if (!sourceAccountSid) {
