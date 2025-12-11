@@ -180,15 +180,38 @@ export async function POST(request: Request) {
             });
 
             if (existingBundles.length > 0) {
-                targetBundleSid = existingBundles[0].sid;
-                console.log(`[Port] ✅ Found existing approved bundle in target: ${targetBundleSid}`);
+                // Found existing bundle, but we need to verify it's the right one
+                // If the source has a bundle, we should clone it to ensure consistency
+                if (sourceBundleSid) {
+                    console.log(`[Port] Found existing bundle ${existingBundles[0].sid} in target, but source has bundle ${sourceBundleSid}.`);
+                    console.log(`[Port] Cloning source bundle to ensure regulatory consistency...`);
+
+                    try {
+                        const masterClient = twilio(accountSid, authToken);
+
+                        const clonedBundle = await masterClient.numbers.v2
+                            .bundleClone(sourceBundleSid)
+                            .create({
+                                targetAccountSid: targetAccountSid,
+                                friendlyName: `Cloned from ${sourceAccountSid} for number ${phoneNumber || phoneNumberSid}`
+                            });
+
+                        targetBundleSid = clonedBundle.bundleSid;
+                        console.log(`[Port] ✅ Successfully cloned bundle to target account: ${targetBundleSid}`);
+                    } catch (cloneErr: any) {
+                        console.warn(`[Port] Failed to clone bundle, will use existing bundle ${existingBundles[0].sid}:`, cloneErr.message);
+                        targetBundleSid = existingBundles[0].sid;
+                    }
+                } else {
+                    // No source bundle, use the existing target bundle
+                    targetBundleSid = existingBundles[0].sid;
+                    console.log(`[Port] ✅ Using existing approved bundle in target: ${targetBundleSid}`);
+                }
             } else if (sourceBundleSid) {
-                // No existing bundle - clone from source
+                // No existing bundle - must clone from source
                 console.log(`[Port] No existing bundle found. Cloning bundle ${sourceBundleSid} from source to target account...`);
 
                 try {
-                    // FIXED: Use bundleClone (singular) instead of bundleCopies (plural)
-                    // The correct path is client.numbers.v2.bundleClone(bundleSid).create()
                     const masterClient = twilio(accountSid, authToken);
 
                     const clonedBundle = await masterClient.numbers.v2
@@ -200,8 +223,6 @@ export async function POST(request: Request) {
 
                     targetBundleSid = clonedBundle.bundleSid;
                     console.log(`[Port] ✅ Successfully cloned bundle to target account: ${targetBundleSid}`);
-
-                    // The cloned bundle is automatically approved, so we can use it immediately
                 } catch (cloneErr: any) {
                     console.error(`[Port] Failed to clone bundle:`, cloneErr);
                     throw new Error(
@@ -240,10 +261,8 @@ export async function POST(request: Request) {
         // PERFORM THE NUMBER TRANSFER
         // =======================================================================
         let updatedNumber;
-        // IMPORTANT: Only pass accountSid in the initial transfer
-        // The target account's bundle and address will be auto-detected
-        // Passing bundleSid/addressSid explicitly causes "Bundle not found" errors
-        // because the source account can't see the target account's resources
+        // Start with minimal params - only accountSid
+        // Add address/bundle only when explicitly required by Twilio
         let updateParams: any = {
             accountSid: targetAccountSid
         };
