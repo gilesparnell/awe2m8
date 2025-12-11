@@ -53,9 +53,12 @@ export async function POST(request: Request) {
 
         const numberDetails = await mainClient.api.v2010.accounts(sourceAccountSid).incomingPhoneNumbers(sidToPort).fetch();
 
-        // FIXED: Use Lookup API for country code (Twilio SDK v4+ compliant)
-        const lookup = await mainClient.lookups.v2.phoneNumbers(numberDetails.phoneNumber).fetch({ fields: 'country_code' });
-        const countryCode = lookup.countryCode; // e.g., 'AU'
+        // FIXED: Parse country from E.164 phoneNumber (no extra libs)
+        let countryCode = 'US'; // Default
+        const phone = numberDetails.phoneNumber || '';
+        if (phone.startsWith('+61')) countryCode = 'AU';
+        else if (phone.startsWith('+1')) countryCode = 'US'; // Add more as needed
+        console.log(`[Port] Parsed country: ${countryCode}`);
 
         let updatedNumber: any;
         let needsBundle = false;
@@ -69,6 +72,7 @@ export async function POST(request: Request) {
                 .update({ accountSid: targetAccountSid });
             console.log("[Port] Success – no regulatory requirements");
         } catch (err: any) {
+            console.log(`[Port] Attempt 1 failed: ${err.code} - ${err.message}`);
             if (err.code === 21649) needsBundle = true;
             else if (err.code === 21631) needsAddress = true;
             else throw err;
@@ -82,7 +86,7 @@ export async function POST(request: Request) {
             if (needsAddress) {
                 const addresses = await targetClient.addresses.list({ isoCountry: countryCode, limit: 20 });
                 const validAddr = addresses.find(a => a.validated === true);
-                if (!validAddr) return NextResponse.json({ success: false, error: `No validated address in target account for ${countryCode}` }, { status: 400 });
+                if (!validAddr) return NextResponse.json({ success: false, error: `No validated address in target for ${countryCode}` }, { status: 400 });
                 params.addressSid = validAddr.sid;
             }
 
@@ -98,7 +102,7 @@ export async function POST(request: Request) {
                         friendlyName: `Clone for ${numberDetails.phoneNumber}`
                     });
 
-                params.bundleSid = cloned.bundleSid; // correct property name
+                params.bundleSid = cloned.bundleSid;
                 console.log(`[Port] Cloned bundle ${cloned.bundleSid}`);
             }
 
