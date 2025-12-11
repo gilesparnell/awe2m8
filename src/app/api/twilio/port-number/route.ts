@@ -106,78 +106,81 @@ export async function POST(request: Request) {
 
         // Update the Phone Number resource
         let updatedNumber;
-        try {
-            console.log(`[Port] Attempting initial update for SID: ${sidToPort} to Account: ${targetAccountSid}`);
-            updatedNumber = await client.api.v2010
-                .accounts(sourceAccountSid)
-                .incomingPhoneNumbers(sidToPort)
-                .update({ accountSid: targetAccountSid });
-        } catch (portError: any) {
-            console.error(`[Port] Initial update failed. Code: ${portError.code}, Message: ${portError.message}`);
+        let updateParams: any = { accountSid: targetAccountSid };
+        let attempts = 0;
+        const maxAttempts = 5; // Allow for a few distinct regulation hurdles
 
-            // CASE 1: Address Requirement (Error 21631)
-            if (portError.code === 21631 || portError.message?.includes('AddressSid')) {
-                console.warn('[Port] Missing Address (21631). searching target account for address...');
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                console.log(`[Port] Attempt ${attempts}: Updating SID ${sidToPort} with params:`, JSON.stringify(updateParams));
 
-                const addresses = await client.api.v2010
-                    .accounts(targetAccountSid)
-                    .addresses
-                    .list({ limit: 1 });
+                updatedNumber = await client.api.v2010
+                    .accounts(sourceAccountSid)
+                    .incomingPhoneNumbers(sidToPort)
+                    .update(updateParams);
 
-                if (addresses.length > 0) {
-                    const validAddressSid = addresses[0].sid;
-                    console.log(`[Port] Found address ${validAddressSid}. Retrying...`);
+                // If we get here, success!
+                break;
 
-                    updatedNumber = await client.api.v2010
-                        .accounts(sourceAccountSid)
-                        .incomingPhoneNumbers(sidToPort)
-                        .update({
-                            accountSid: targetAccountSid,
-                            addressSid: validAddressSid
-                        });
-                } else {
-                    throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid}. Please create a validation address first.`);
+            } catch (portError: any) {
+                console.error(`[Port] Update failed on attempt ${attempts}. Code: ${portError.code}, Message: ${portError.message}`);
+
+                // If last attempt, throw the error
+                if (attempts >= maxAttempts) throw portError;
+
+                // CASE 1: Address Requirement (Error 21631)
+                if ((portError.code === 21631 || portError.message?.includes('AddressSid')) && !updateParams.addressSid) {
+                    console.warn('[Port] Missing Address (21631). Searching target account for address...');
+
+                    const addresses = await client.api.v2010
+                        .accounts(targetAccountSid)
+                        .addresses
+                        .list({ limit: 1 });
+
+                    if (addresses.length > 0) {
+                        const validAddressSid = addresses[0].sid;
+                        console.log(`[Port] Found address ${validAddressSid}. Adding to retry params.`);
+                        updateParams.addressSid = validAddressSid;
+                        continue; // Retry loop
+                    } else {
+                        throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid}. Please create a validation address first.`);
+                    }
+                }
+                // CASE 2: Bundle Requirement (Error 21649)
+                else if ((portError.code === 21649 || portError.message?.includes('Bundle required')) && !updateParams.bundleSid) {
+                    console.warn('[Port] Missing Regulatory Bundle (21649). Searching target account for approved bundles...');
+
+                    // Instantiate client scoped to target subaccount to find its bundles
+                    const subAccountClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+
+                    // Fetch "twilio-approved" bundles
+                    const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list({
+                        status: 'twilio-approved',
+                        limit: 1
+                    });
+
+                    if (bundles.length > 0) {
+                        const validBundleSid = bundles[0].sid;
+                        console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
+                        updateParams.bundleSid = validBundleSid;
+                        continue; // Retry loop
+                    } else {
+                        // Fallback: Check for just "draft" or "pending" to give a better error message? 
+                        // Or try to list ALL properly and see if any exist.
+                        throw new Error(`Port Failed (Bundle Required): No 'twilio-approved' regulatory bundles found on target account ${targetAccountSid}. Please ensure you have a bundle with status 'Twilio Approved'.`);
+                    }
+                }
+                else {
+                    // Unknown error or we already tried fixing this param and it failed again
+                    // Rethrow to exit
+                    throw portError;
                 }
             }
-            // CASE 2: Bundle Requirement (Error 21649 or textual match)
-            else if (portError.code === 21649 || portError.message?.includes('Bundle required')) {
-                console.warn('[Port] Missing Regulatory Bundle. Searching target account for approved bundles...');
+        }
 
-                // We need to act as the Master Account but query the Subaccount's bundles
-                // Note: 'client' is initialized with Master Credentials. 
-                // To list bundles FOR the subaccount, we can pass { accountSid: targetAccountSid } to the twilio constructor
-                // OR use the existing client if we can scope it. 
-                // The 'numbers.v2' API is global but we need to see bundles owned by the subaccount.
-                // The safest way is to instantiate a client for that subaccount.
-
-                // We use the Master Auth Token, but act on the Subaccount
-                const subAccountClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
-
-                const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list({
-                    status: 'twilio-approved',
-                    limit: 1,
-                    // validUntilDate: check for not expired? Usually status='twilio-approved' is enough.
-                });
-
-                if (bundles.length > 0) {
-                    const validBundleSid = bundles[0].sid;
-                    console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Retrying...`);
-
-                    updatedNumber = await client.api.v2010
-                        .accounts(sourceAccountSid)
-                        .incomingPhoneNumbers(sidToPort)
-                        .update({
-                            accountSid: targetAccountSid,
-                            bundleSid: validBundleSid
-                        });
-                } else {
-                    throw new Error(`Port Failed (Bundle Required): No approved regulatory bundles found on target account ${targetAccountSid}. Please create and approve a bundle first.`);
-                }
-            }
-            else {
-                // Unknown error, rethrow
-                throw portError;
-            }
+        if (!updatedNumber) {
+            throw new Error("Port failed: Unable to complete number update after multiple attempts.");
         }
 
         console.log(`Successfully ported number ${updatedNumber.phoneNumber} to ${targetAccountSid}`);
