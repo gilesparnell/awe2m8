@@ -131,11 +131,38 @@ export async function POST(request: Request) {
 
         console.log(`Porting Number SID: ${sidToPort} to ${targetAccountSid}`);
 
+        // Pre-fetch number details for intelligent filtering (e.g. Country Code)
+        let targetCountryCode: string | undefined;
+        try {
+            const numberDetails = await client.api.v2010
+                .accounts(sourceAccountSid)
+                .incomingPhoneNumbers(sidToPort)
+                .fetch();
+
+            // Fix: 'countryCode' might not be in the strict type definition, but is often in the response.
+            // We cast to any or use fallback parsing.
+            const nd = numberDetails as any;
+            if (nd.countryCode) {
+                targetCountryCode = nd.countryCode;
+            } else if (numberDetails.phoneNumber) {
+                // Fallback: Infer from prefix
+                if (numberDetails.phoneNumber.startsWith('+61')) targetCountryCode = 'AU';
+                else if (numberDetails.phoneNumber.startsWith('+1')) targetCountryCode = 'US';
+                else if (numberDetails.phoneNumber.startsWith('+44')) targetCountryCode = 'GB';
+            }
+
+            if (targetCountryCode) {
+                console.log(`[Port] Target Number Country Code determined: ${targetCountryCode}`);
+            }
+        } catch (detailsErr) {
+            console.warn(`[Port] Failed to fetch details for number ${sidToPort}, defaulting to broader search.`, detailsErr);
+        }
+
         // Update the Phone Number resource
         let updatedNumber;
         let updateParams: any = { accountSid: targetAccountSid };
         let attempts = 0;
-        const maxAttempts = 5; // Allow for a few distinct regulation hurdles
+        const maxAttempts = 6; // Increased attempts to allow for full resolution flow
 
         while (attempts < maxAttempts) {
             attempts++;
@@ -159,78 +186,73 @@ export async function POST(request: Request) {
                 // CASE 1: Address Requirement (Error 21631)
                 if ((portError.code === 21631 || portError.message?.includes('AddressSid'))) {
                     if (updateParams.bundleSid) {
-                        // If we have a bundle but still get "Address Required", the bundle is likely invalid or insufficient.
-                        // We shouldn't blindly add address back.
-                        console.warn('[Port] Received Address error (21631) despite having BundleSid. The Bundle might be invalid for this number.');
-                        // For now, let's throw to avoid infinite loop of swapping params, or let the loop exhaust
+                        // If we have a bundle but still get "Address Required", it means we explicitly need an AddressSid too.
+                        console.warn('[Port] Received Address error (21631) despite having BundleSid. Attempting to add AddressSid to pair with Bundle.');
                     }
-                    else if (!updateParams.addressSid) {
-                        console.warn('[Port] Missing Address (21631). Searching target account for address...');
+
+                    if (!updateParams.addressSid) {
+                        console.warn(`[Port] Missing Address (21631). Searching target account for ${targetCountryCode || 'any'} address...`);
+
+                        const addressListParams: any = { limit: 1 };
+                        if (targetCountryCode) {
+                            addressListParams.isoCountry = targetCountryCode;
+                        }
 
                         const addresses = await client.api.v2010
                             .accounts(targetAccountSid)
                             .addresses
-                            .list({ limit: 1 });
+                            .list(addressListParams);
 
                         if (addresses.length > 0) {
                             const validAddressSid = addresses[0].sid;
-                            console.log(`[Port] Found address ${validAddressSid}. Adding to retry params.`);
+                            console.log(`[Port] Found address ${validAddressSid} (Country: ${addresses[0].isoCountry}). Adding to retry params.`);
                             updateParams.addressSid = validAddressSid;
                             continue; // Retry loop
                         } else {
-                            throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid}. Please create a validation address first.`);
+                            throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid} matching country ${targetCountryCode || 'any'}. Please create a validation address first.`);
                         }
                     }
                 }
                 // CASE 2: Bundle Requirement (Error 21649)
                 else if ((portError.code === 21649 || portError.message?.includes('Bundle required'))) {
                     // Start Case 2 logic
-                    if (updateParams.bundleSid) {
-                        // We already have a bundle but got error? 
-                        // Check if we are stuck
-                    }
-
                     if (!updateParams.bundleSid) {
-                        console.warn('[Port] Missing Regulatory Bundle (21649). Searching target account for approved bundles...');
+                        console.warn(`[Port] Missing Regulatory Bundle (21649). Searching target account for approved ${targetCountryCode || ''} bundles...`);
 
                         // Instantiate client scoped to target subaccount to find its bundles
                         const subAccountClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
 
-                        // Fetch "twilio-approved" bundles
-                        const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list({
+                        const bundleListParams: any = {
                             status: 'twilio-approved',
                             limit: 1
-                        });
+                        };
+                        if (targetCountryCode) {
+                            bundleListParams.isoCountry = targetCountryCode;
+                        }
+
+                        // Fetch "twilio-approved" bundles
+                        const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list(bundleListParams);
 
                         if (bundles.length > 0) {
                             const validBundleSid = bundles[0].sid;
                             console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
 
-                            // Critical: Ensure Address matches Bundle
-                            // Porting often requires BOTH params, and they must pair correctly.
-                            // If we pick a random address and a random bundle, they mismatch.
-                            // We must find the Address INSIDE the Bundle.
-                            // Deep Diagnostic of the Bundle
+                            // Diagnostic of the Bundle
                             console.log(`[Port] Inspecting Bundle Details for ${validBundleSid}...`);
-                            const bundleDetails = await subAccountClient.numbers.v2.regulatoryCompliance
-                                .bundles(validBundleSid)
-                                .fetch();
-
-                            console.log(`[Port] Bundle Details: Status=${bundleDetails.status}, FriendlyName="${bundleDetails.friendlyName}", RegulationSid=${bundleDetails.regulationSid}, DateUpdated=${bundleDetails.dateUpdated}`);
-
-                            // Add specific log for "AU Mobile" check logic (just logging for now)
-                            if (bundleDetails.regulationSid?.includes('AU_MOBILE')) {
-                                console.log(`[Port] Detected AU Mobile regulation for bundle ${validBundleSid}. Specific AU Mobile logic might be needed.`);
+                            try {
+                                const bundleDetails = await subAccountClient.numbers.v2.regulatoryCompliance
+                                    .bundles(validBundleSid)
+                                    .fetch();
+                                console.log(`[Port] Bundle Details: Status=${bundleDetails.status}, FriendlyName="${bundleDetails.friendlyName}", RegulationSid=${bundleDetails.regulationSid}`);
+                            } catch (e) {
+                                console.warn("[Port] Could not fetch deep bundle details, continuing anyway.");
                             }
 
-                            // The Bundle contains Regulatory Documents (RD...) which encapsulate the address.
-                            // The Legacy Address (AD...) found on the account is likely not directly linked in a way the API accepts as a pair.
-                            // Sending both causes "Bundle not found" (Context Mismatch).
-                            // We must rely SOLELY on the BundleSid.
-
+                            // NOTE: Previously we removed AddressSid here. We now KEEP it because some regulations (like AU Mobile)
+                            // require both parameters or the API throws 21631 again if AddressSid is missing.
+                            // If a specific conflict arises (like Bundle not found due to Address mismatch), it will appear as a different error.
                             if (updateParams.addressSid) {
-                                console.warn('[Port] Removing Legacy AddressSid (AD...) to rely solely on Regulatory Bundle (BU...). sending both causes verification conflict.');
-                                delete updateParams.addressSid;
+                                console.log('[Port] Retaining AddressSid alongside BundleSid to satisfy potential dual-requirement.');
                             }
 
                             updateParams.bundleSid = validBundleSid;
