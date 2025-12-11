@@ -22,12 +22,11 @@ const PHONE_NUMBER_SID = 'PNf5c2d825721cab8f4df2bd7f5d3d8c50'; // +61 468 170 31
 const SOURCE_SUBACCOUNT_SID = process.env.SOURCE_ACCOUNT_SID;
 const GAINING_SUBACCOUNT_SID = process.env.TARGET_ACCOUNT_SID;
 
-// Bundle existing in Target Account (Provided by User)
-const BUNDLE_SID = 'BUd6e3fd542333bf2f64e400763b597603';
+// Bundle existing in Target Account (You will update this after approval)
+const BUNDLE_SID = process.argv[2] || 'BU_INSERT_YOUR_NEW_BUNDLE_SID_HERE';
 
-// Address existing in Target Account (Created previously)
-// Required for AU numbers to be configured
-const ADDRESS_SID = 'AD4a1b21f477301181fa81b0d1dcbd92b5';
+// Address existing in Target Account (The one created by the Setup/Bundle App)
+const ADDRESS_SID = process.argv[3] || 'AD_INSERT_YOUR_NEW_ADDRESS_SID_HERE';
 
 async function run() {
     console.log('--- Simple Port Execution ---');
