@@ -237,22 +237,43 @@ export async function POST(request: Request) {
                             const validBundleSid = bundles[0].sid;
                             console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
 
-                            // Diagnostic of the Bundle
-                            console.log(`[Port] Inspecting Bundle Details for ${validBundleSid}...`);
+                            // Critical: Ensure Address matches Bundle
+                            // Porting often requires BOTH params, and they must pair correctly.
+                            // If we pick a random address and a random bundle, they mismatch, causing "Bundle not found" error.
+                            // We must find the Address INSIDE the Bundle.
+                            console.log(`[Port] Inspecting Bundle Item Assignments for ${validBundleSid} to find linked Address...`);
+
+                            let bundleAddressSid: string | undefined;
                             try {
-                                const bundleDetails = await subAccountClient.numbers.v2.regulatoryCompliance
+                                const itemAssignments = await subAccountClient.numbers.v2.regulatoryCompliance
                                     .bundles(validBundleSid)
-                                    .fetch();
-                                console.log(`[Port] Bundle Details: Status=${bundleDetails.status}, FriendlyName="${bundleDetails.friendlyName}", RegulationSid=${bundleDetails.regulationSid}`);
-                            } catch (e) {
-                                console.warn("[Port] Could not fetch deep bundle details, continuing anyway.");
+                                    .itemAssignments
+                                    .list({ limit: 20 });
+
+                                const addressAssignment = itemAssignments.find((item: any) => item.objectSid && item.objectSid.startsWith('AD'));
+                                if (addressAssignment) {
+                                    bundleAddressSid = addressAssignment.objectSid;
+                                    console.log(`[Port] Found Address ${bundleAddressSid} inside Bundle ${validBundleSid}.`);
+                                } else {
+                                    console.log(`[Port] No Address (AD...) found directly assigned to Bundle ${validBundleSid}.`);
+                                }
+                            } catch (itemErr) {
+                                console.warn("[Port] Failed to fetch item assignments for bundle:", itemErr);
                             }
 
-                            // NOTE: Previously we removed AddressSid here. We now KEEP it because some regulations (like AU Mobile)
-                            // require both parameters or the API throws 21631 again if AddressSid is missing.
-                            // If a specific conflict arises (like Bundle not found due to Address mismatch), it will appear as a different error.
-                            if (updateParams.addressSid) {
-                                console.log('[Port] Retaining AddressSid alongside BundleSid to satisfy potential dual-requirement.');
+                            // Conflict Resolution Strategy
+                            if (bundleAddressSid) {
+                                // Best Case: Use the Address actually valid for this Bundle
+                                console.log(`[Port] Using Bundle-linked AddressSid: ${bundleAddressSid}`);
+                                updateParams.addressSid = bundleAddressSid;
+                            }
+                            else if (updateParams.addressSid) {
+                                // Logic: If we didn't find an address IN the bundle, but we have one from the account...
+                                // Should we keep it? 
+                                // If the API requires an address, and the bundle doesn't have one explicitly as an item (rare for AU Mobile, usually it does), 
+                                // we might be in a tough spot. 
+                                // But if previous attempts failed with "Address Required", we MUST send one.
+                                console.warn('[Port] Using generic Account AddressSid (might mismatch Bundle).');
                             }
 
                             updateParams.bundleSid = validBundleSid;
