@@ -43,48 +43,160 @@ export async function POST(request: Request) {
             console.error("[Auth] Failed to verify authenticated account:", authErr);
         }
 
-        // ACTION: LIST NUMBERS
-        if (action === 'list') {
-            if (!sourceAccountSid) {
-                return NextResponse.json(
-                    { success: false, error: 'Missing sourceAccountSid' },
-                    { status: 400 }
-                );
-            }
+        // =====================================================================
+        // ACTION: CREATE BUNDLE
+        // =====================================================================
+        if (action === 'create-bundle') {
+            console.log(`[Create Bundle] Request for SubAccount: ${body.subAccountSid}`);
 
-            console.log(`Listing numbers for account ${sourceAccountSid} using credentials for ${accountSid}`);
-            try {
-                const numbers = await client.api.v2010
-                    .accounts(sourceAccountSid)
-                    .incomingPhoneNumbers
-                    .list({ limit: 100 });
+            const subSid = body.subAccountSid;
+            const businessInfo = body.businessInfo || {};
 
-                const formattedNumbers = numbers.map(n => ({
-                    sid: n.sid,
-                    phoneNumber: n.phoneNumber,
-                    friendlyName: n.friendlyName
-                }));
+            if (!subSid) throw new Error("Missing subAccountSid");
 
-                console.log(`Found ${formattedNumbers.length} numbers.`);
+            // 1. Authenticate AS SubAccount
+            // We need the SubAccount's AuthToken
+            console.log(`[Create Bundle] Fetching AuthToken for ${subSid}...`);
+            const subAccount = await client.api.v2010.accounts(subSid).fetch();
+            const subClient = twilio(subSid, subAccount.authToken);
+            const subAuth = Buffer.from(`${subSid}:${subAccount.authToken}`).toString('base64');
 
-                return NextResponse.json({
-                    success: true,
-                    numbers: formattedNumbers
-                });
-            } catch (error: any) {
-                console.error("Error listing numbers:", error);
+            const fs = require('fs');
+            const path = require('path');
+            const https = require('https');
 
-                let errorMessage = `Failed to list numbers: ${error.message}`;
-                if (error.status === 404) {
-                    errorMessage += ". (Hint: Ensure the Source Account SID is a valid subaccount of your configured Master Account SID.)";
+            // 2. Create Address
+            console.log(`[Create Bundle] Creating Address...`);
+            const address = await subClient.addresses.create({
+                customerName: businessInfo.businessName || 'AWE2M8 Pty Ltd',
+                street: businessInfo.street || '50a Habitat Way',
+                city: businessInfo.city || 'Lennox Head',
+                region: businessInfo.state || 'NSW',
+                postalCode: businessInfo.postalCode || '2478',
+                isoCountry: businessInfo.country || 'AU',
+                emergencyEnabled: false,
+                friendlyName: 'Regulatory Address (Created via API)'
+            });
+            console.log(`[Create Bundle] Address Created: ${address.sid}`);
+
+            // 3. Upload Documents (Helper)
+            const uploadDocument = (docType: string, filename: string, attributes: any) => new Promise<string>((resolve, reject) => {
+                console.log(`[Create Bundle] Uploading ${filename} as ${docType}...`);
+                const filePath = path.join(process.cwd(), 'public', 'admin', 'documents', filename);
+
+                if (!fs.existsSync(filePath)) {
+                    reject(new Error(`File not found on server: ${filePath}`));
+                    return;
                 }
 
-                return NextResponse.json(
-                    { success: false, error: errorMessage },
-                    { status: error.status || 500 }
-                );
-            }
+                const boundary = 'TwilioBoundary' + Math.random().toString(16);
+                const content = fs.readFileSync(filePath);
+
+                const parts = [
+                    `--${boundary}`, `Content-Disposition: form-data; name="FriendlyName"`, '', `${filename} (API Upload)`,
+                    `--${boundary}`, `Content-Disposition: form-data; name="Type"`, '', docType,
+                    `--${boundary}`, `Content-Disposition: form-data; name="Attributes"`, '', JSON.stringify(attributes),
+                    `--${boundary}`, `Content-Disposition: form-data; name="File"; filename="${filename}"`, `Content-Type: application/pdf`, '', ''
+                ];
+
+                const payload = Buffer.concat([
+                    Buffer.from(parts.join('\r\n')),
+                    content,
+                    Buffer.from(`\r\n--${boundary}--`)
+                ]);
+
+                const req = https.request({
+                    hostname: 'numbers.twilio.com',
+                    path: '/v2/RegulatoryCompliance/SupportingDocuments',
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Basic ${subAuth}`,
+                        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                        'Content-Length': payload.length
+                    }
+                }, (res: any) => {
+                    let data = '';
+                    res.on('data', (c: any) => data += c);
+                    res.on('end', () => {
+                        if (res.statusCode < 300) {
+                            const json = JSON.parse(data);
+                            resolve(json.sid);
+                        } else {
+                            reject(new Error(`Twilio Upload Error: ${data}`));
+                        }
+                    });
+                });
+
+                req.on('error', (e: any) => reject(e));
+                req.write(payload);
+                req.end();
+            });
+
+            // 4. Upload Specific Documents
+            // Map AU specific attributes
+            const regAttrs = {
+                business_name: businessInfo.businessName,
+                document_number: businessInfo.ein // Maps 'ein' form field to 'document_number' (ABN)
+            };
+            const addrAttrs = {
+                address_sids: [address.sid]
+            };
+
+            const regDocSid = await uploadDocument('commercial_registrar_excerpt', 'AWE2M8 Company Registration.pdf', regAttrs);
+            const addrDocSid = await uploadDocument('utility_bill', 'AWE2M8 Business Address.pdf', addrAttrs);
+
+            console.log(`[Create Bundle] Docs Uploaded: ${regDocSid}, ${addrDocSid}`);
+
+            // 5. Create End User
+            // AU Business Attributes
+            const endUserAttrs = {
+                business_name: businessInfo.businessName,
+                business_type: businessInfo.businessType || 'corporation', // corporation/partnership etc
+                business_registration_identifier: businessInfo.ein,
+                business_identity: 'direct_customer', // usually direct
+                business_industry: businessInfo.businessIndustry || 'TECHNOLOGY',
+            };
+
+            console.log(`[Create Bundle] Creating EndUser...`);
+            const endUser = await subClient.numbers.v2.regulatoryCompliance.endUsers.create({
+                friendlyName: businessInfo.businessName,
+                type: 'business',
+                attributes: JSON.stringify(endUserAttrs)
+            });
+            console.log(`[Create Bundle] EndUser Created: ${endUser.sid}`);
+
+            // 6. Create Bundle
+            console.log(`[Create Bundle] Creating Bundle container...`);
+            const bundle = await subClient.numbers.v2.regulatoryCompliance.bundles.create({
+                friendlyName: `${businessInfo.businessName} - Porting Bundle`,
+                email: businessInfo.email,
+                // status: 'draft', // Type error, defaults to draft
+                endUserType: 'business',
+                isoCountry: 'AU',
+                numberType: 'mobile'
+            });
+
+            // 7. Assign Items
+            await subClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid).itemAssignments.create({ objectSid: endUser.sid });
+            await subClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid).itemAssignments.create({ objectSid: regDocSid });
+            await subClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid).itemAssignments.create({ objectSid: addrDocSid });
+
+            // 8. Submit
+            console.log(`[Create Bundle] Submitting Bundle ${bundle.sid}...`);
+            const submitted = await subClient.numbers.v2.regulatoryCompliance.bundles(bundle.sid).update({
+                status: 'pending-review'
+            });
+
+            return NextResponse.json({
+                success: true,
+                bundleSid: bundle.sid,
+                status: submitted.status,
+                addressSid: address.sid,
+                friendlyName: submitted.friendlyName
+            });
         }
+
+        // ACTION: LIST NUMBERS
 
         // ACTION: PORT NUMBER (Default)
         console.log("Parameters:", { sourceAccountSid, targetAccountSid, phoneNumber, phoneNumberSid });
