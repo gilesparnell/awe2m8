@@ -3,13 +3,16 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, FilePlus, List, ChevronLeft } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft } from 'lucide-react';
 import { ConfigurationForm } from '@/components/admin/twilio/ConfigurationForm';
 import { CreateBundleForm } from '@/components/admin/twilio/CreateBundleForm';
 import { BundleList } from '@/components/admin/twilio/BundleList';
+import { NumberPortForm } from '@/components/admin/twilio/NumberPortForm';
 
 export default function TwilioAdminPage() {
-    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list'>('config');
+    const searchParams = useSearchParams();
+    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port'>('config');
     const [credentials, setCredentials] = useState({ accountSid: '', authToken: '' });
 
     useEffect(() => {
@@ -18,14 +21,20 @@ export default function TwilioAdminPage() {
         const token = localStorage.getItem('twilio_auth_token');
         if (sid && token) {
             setCredentials({ accountSid: sid, authToken: token });
-            // Default to 'create' if configured
+        }
+
+        // Check URL params for tab
+        const tabParam = searchParams.get('tab');
+        if (tabParam && ['config', 'create', 'list', 'port'].includes(tabParam)) {
+            setActiveTab(tabParam as any);
+        } else if (sid && token) {
+            // Default to 'create' if configured and no specific tab requested
             setActiveTab('create');
         }
-    }, []);
+    }, [searchParams]);
 
     const handleConfigSave = (creds: { accountSid: string; authToken: string }) => {
         setCredentials(creds);
-        // A test comment- Giles was here
         // Automatically switch to create if saving for first time
         if (activeTab === 'config') setActiveTab('create');
     };
@@ -73,6 +82,12 @@ export default function TwilioAdminPage() {
                         icon={<List className="w-5 h-5" />}
                         label="View Bundles"
                     />
+                    <TabButton
+                        active={activeTab === 'port'}
+                        onClick={() => setActiveTab('port')}
+                        icon={<ArrowRightLeft className="w-5 h-5" />}
+                        label="Port Number"
+                    />
                 </div>
 
                 {/* Content */}
@@ -90,6 +105,10 @@ export default function TwilioAdminPage() {
 
                     {activeTab === 'list' && (
                         <BundleList credentials={credentials} />
+                    )}
+
+                    {activeTab === 'port' && (
+                        <NumberPortForm credentials={credentials} />
                     )}
                 </div>
             </div>
