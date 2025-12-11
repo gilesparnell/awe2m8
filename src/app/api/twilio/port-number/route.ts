@@ -169,19 +169,43 @@ export async function POST(request: Request) {
         try {
             const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
 
-            // Find approved bundle
+            // Find approved bundle - FILTER BY BOTH COUNTRY AND NUMBER TYPE
             console.log(`[Port] Pre-fetching approved bundle for ${targetCountryCode} ${numberType}...`);
-            const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+            const bundleListParams: any = {
                 status: 'twilio-approved',
-                isoCountry: targetCountryCode,
-                limit: 5
-            });
+                limit: 10
+            };
+
+            if (targetCountryCode) {
+                bundleListParams.isoCountry = targetCountryCode;
+            }
+            if (numberType) {
+                bundleListParams.numberType = numberType;
+            }
+
+            const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list(bundleListParams);
 
             if (bundles.length > 0) {
                 approvedBundleSid = bundles[0].sid;
-                console.log(`[Port] ✅ Found approved bundle: ${approvedBundleSid}`);
+                console.log(`[Port] ✅ Found approved bundle: ${approvedBundleSid} (numberType: ${numberType})`);
             } else {
-                console.warn(`[Port] ⚠️  No approved bundle found for ${targetCountryCode}`);
+                console.warn(`[Port] ⚠️  No approved bundle found for ${targetCountryCode} ${numberType}`);
+
+                // Try without numberType filter as fallback
+                console.log(`[Port] Trying broader bundle search without numberType filter...`);
+                const broaderBundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                    status: 'twilio-approved',
+                    isoCountry: targetCountryCode,
+                    limit: 10
+                });
+
+                if (broaderBundles.length > 0) {
+                    // Log what we found for debugging
+                    console.log(`[Port] Found ${broaderBundles.length} bundles without numberType filter:`);
+                    broaderBundles.forEach((b: any) => {
+                        console.log(`[Port]   - ${b.sid}: ${b.friendlyName || 'unnamed'} (numberType: ${b.numberType || 'unknown'})`);
+                    });
+                }
             }
 
             // Find validated address
@@ -209,7 +233,8 @@ export async function POST(request: Request) {
         let updatedNumber;
         let updateParams: any = {
             accountSid: targetAccountSid,
-            ...(validatedAddressSid && { addressSid: validatedAddressSid })
+            ...(validatedAddressSid && { addressSid: validatedAddressSid }),
+            ...(approvedBundleSid && { bundleSid: approvedBundleSid })  // <-- KEY FIX: Include bundleSid
         };
         let attempts = 0;
         const maxAttempts = 3;
@@ -240,8 +265,14 @@ export async function POST(request: Request) {
                         );
                     } else if (portError.code === 21649) {
                         throw new Error(
-                            `Transfer failed: Target account ${targetAccountSid} needs a Regulatory Bundle for ${targetCountryCode || 'this country'} ${numberType || 'mobile'} numbers. ` +
-                            `Create and approve a bundle first, or use the Bundle Manager tool.`
+                            `Target account ${targetAccountSid} needs a 'twilio-approved' regulatory bundle for ` +
+                            `${targetCountryCode || 'AU'} ${numberType || 'mobile'} numbers. ` +
+                            `\n\nSteps to fix:\n` +
+                            `1. Create a bundle in the TARGET account (${targetAccountSid})\n` +
+                            `2. Ensure bundle is for country: ${targetCountryCode}, number type: ${numberType}\n` +
+                            `3. Wait for bundle to be approved (status: 'twilio-approved')\n` +
+                            `4. Then retry the transfer\n\n` +
+                            `Use the Bundle Manager tool or Twilio Console to create the bundle.`
                         );
                     }
                     throw portError;
@@ -297,18 +328,36 @@ export async function POST(request: Request) {
                         `${targetCountryCode || 'this country'} ${numberType || 'mobile'} numbers.`
                     );
 
+                    // Try to find a matching bundle with more detailed logging
                     try {
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
-                        const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+
+                        // First, list ALL approved bundles for debugging
+                        const allBundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
                             status: 'twilio-approved',
-                            isoCountry: targetCountryCode,
-                            limit: 1
+                            limit: 20
                         });
 
-                        if (bundles.length > 0) {
-                            const bundleSid = bundles[0].sid;
-                            console.log(`[Port] Found approved bundle ${bundleSid} in target account, but cannot directly reference it.`);
-                            console.log(`[Port] Twilio should auto-match this bundle. The issue may be that the bundle doesn't match the number type.`);
+                        console.log(`[Port] All approved bundles in target account (${allBundles.length} total):`);
+                        allBundles.forEach((b: any) => {
+                            console.log(`[Port]   - ${b.sid}: country=${b.isoCountry}, numberType=${b.numberType}, name="${b.friendlyName || 'unnamed'}"`);
+                        });
+
+                        // Try to find exact match
+                        const exactMatchBundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                            status: 'twilio-approved',
+                            isoCountry: targetCountryCode,
+                            numberType: numberType,
+                            limit: 5
+                        });
+
+                        if (exactMatchBundles.length > 0) {
+                            const bundleSid = exactMatchBundles[0].sid;
+                            console.log(`[Port] Found exact match bundle ${bundleSid}, retrying with bundleSid...`);
+                            updateParams.bundleSid = bundleSid;
+                            continue;
+                        } else {
+                            console.warn(`[Port] No bundle found matching country=${targetCountryCode} AND numberType=${numberType}`);
                         }
                     } catch (bundleCheckErr) {
                         console.warn(`[Port] Could not check for bundles:`, bundleCheckErr);
