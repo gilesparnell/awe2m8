@@ -156,9 +156,9 @@ export async function POST(request: Request) {
                 console.log(`[Port] ✅ Found address: ${validAddress.sid}`);
             }
 
-            // Get bundle from target account if needed
+            // Get bundle from target account if needed - but clone from source to ensure compliance match
             if (retryWithBundle) {
-                console.log(`[Port] Looking for approved bundle in target account...`);
+                console.log(`[Port] Cloning source bundle to target account for compliance...`);
 
                 // Determine number type
                 const capabilities = numberDetails.capabilities;
@@ -167,23 +167,24 @@ export async function POST(request: Request) {
                     numberType = 'mobile';
                 }
 
-                const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
-                    isoCountry: country,
-                    numberType: numberType,
-                    status: 'twilio-approved',
-                    limit: 20
-                });
-
-                if (bundles.length === 0) {
+                // Clone the source bundle to target
+                const sourceBundleSid = numberDetails.bundleSid;
+                if (!sourceBundleSid) {
                     return NextResponse.json({
                         success: false,
-                        error: `No approved bundle found in target account for ${country} ${numberType} numbers. ` +
-                            `Please create and approve a bundle in account ${targetAccountSid} first.`
+                        error: `Source number has no bundle. Create/assign one in source first.`
                     }, { status: 400 });
                 }
 
-                updateParams.bundleSid = bundles[0].sid;
-                console.log(`[Port] ✅ Found bundle: ${bundles[0].sid}`);
+                const clonedBundle = await mainClient.numbers.v2
+                    .bundleClone(sourceBundleSid)
+                    .create({
+                        targetAccountSid: targetAccountSid,
+                        friendlyName: `Cloned for ${numberDetails.phoneNumber} transfer`
+                    });
+
+                updateParams.bundleSid = clonedBundle.bundleSid;
+                console.log(`[Port] ✅ Cloned bundle: ${clonedBundle.bundleSid}`);
             }
 
             // ATTEMPT 2: Transfer with bundle/address from target account
