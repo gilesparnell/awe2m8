@@ -212,33 +212,56 @@ export async function POST(request: Request) {
 
                 // CASE 1: Address Requirement (Error 21631)
                 if (portError.code === 21631 || portError.message?.includes('AddressSid')) {
-                    console.warn(`[Port] Missing Address (21631). Creating address in TARGET account...`);
+                    console.warn(`[Port] Missing Address (21631). Looking for existing addresses in TARGET account...`);
 
-                    // Create a generic address in the TARGET account
-                    // This is better than trying to reference an existing one
                     try {
-                        // Use target account credentials to create address
+                        // Use target account credentials to find existing addresses
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
 
-                        const newAddress = await targetClient.addresses.create({
-                            customerName: 'Transfer Address',
-                            street: '123 Transfer Street', // Placeholder
-                            city: 'Sydney',
-                            region: targetCountryCode === 'AU' ? 'NSW' : 'CA',
-                            postalCode: targetCountryCode === 'AU' ? '2000' : '94102',
-                            isoCountry: targetCountryCode || 'AU',
-                            emergencyEnabled: false
-                        });
+                        // First, try to find existing validated addresses for this country
+                        const addressListParams: any = { limit: 20 };
+                        if (targetCountryCode) {
+                            addressListParams.isoCountry = targetCountryCode;
+                        }
 
-                        console.log(`[Port] Created Address ${newAddress.sid} in target account. Retrying transfer with this address...`);
+                        const existingAddresses = await targetClient.addresses.list(addressListParams);
 
-                        // Now add the address to update params
-                        updateParams.addressSid = newAddress.sid;
-                        continue; // Retry the transfer
+                        // Filter for validated addresses
+                        const validatedAddresses = existingAddresses.filter((addr: any) =>
+                            addr.validated === true || addr.validated === 'true'
+                        );
+
+                        if (validatedAddresses.length > 0) {
+                            // Reuse existing validated address (prevents duplicates!)
+                            const addressToUse = validatedAddresses[0];
+                            console.log(`[Port] ✅ Found existing validated address ${addressToUse.sid} (${addressToUse.customerName})`);
+                            console.log(`[Port] Reusing address to prevent duplicates`);
+
+                            updateParams.addressSid = addressToUse.sid;
+                            continue; // Retry the transfer
+                        } else {
+                            // No validated addresses exist - create one
+                            console.log(`[Port] No validated addresses found. Creating new address...`);
+
+                            const newAddress = await targetClient.addresses.create({
+                                customerName: 'Business Address',
+                                street: targetCountryCode === 'AU' ? '50a Habitat Way' : '1 Market Street',
+                                city: targetCountryCode === 'AU' ? 'Lennox Head' : 'San Francisco',
+                                region: targetCountryCode === 'AU' ? 'NSW' : 'CA',
+                                postalCode: targetCountryCode === 'AU' ? '2478' : '94102',
+                                isoCountry: targetCountryCode || 'AU',
+                                emergencyEnabled: false
+                            });
+
+                            console.log(`[Port] Created new Address ${newAddress.sid} in target account`);
+
+                            updateParams.addressSid = newAddress.sid;
+                            continue; // Retry the transfer
+                        }
                     } catch (addrErr: any) {
-                        console.error(`[Port] Failed to create address:`, addrErr);
+                        console.error(`[Port] Failed to handle address:`, addrErr);
                         throw new Error(
-                            `Failed to create address in target account: ${addrErr.message}. ` +
+                            `Failed to find or create address in target account: ${addrErr.message}. ` +
                             `Please create an address manually in account ${targetAccountSid}.`
                         );
                     }
