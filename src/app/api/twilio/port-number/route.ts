@@ -130,51 +130,66 @@ export async function POST(request: Request) {
                 if (attempts >= maxAttempts) throw portError;
 
                 // CASE 1: Address Requirement (Error 21631)
-                if ((portError.code === 21631 || portError.message?.includes('AddressSid')) && !updateParams.addressSid) {
-                    console.warn('[Port] Missing Address (21631). Searching target account for address...');
+                if ((portError.code === 21631 || portError.message?.includes('AddressSid'))) {
+                    if (updateParams.bundleSid) {
+                        // If we have a bundle but still get "Address Required", the bundle is likely invalid or insufficient.
+                        // We shouldn't blindly add address back.
+                        console.warn('[Port] Received Address error (21631) despite having BundleSid. The Bundle might be invalid for this number.');
+                        // For now, let's throw to avoid infinite loop of swapping params, or let the loop exhaust
+                    }
+                    else if (!updateParams.addressSid) {
+                        console.warn('[Port] Missing Address (21631). Searching target account for address...');
 
-                    const addresses = await client.api.v2010
-                        .accounts(targetAccountSid)
-                        .addresses
-                        .list({ limit: 1 });
+                        const addresses = await client.api.v2010
+                            .accounts(targetAccountSid)
+                            .addresses
+                            .list({ limit: 1 });
 
-                    if (addresses.length > 0) {
-                        const validAddressSid = addresses[0].sid;
-                        console.log(`[Port] Found address ${validAddressSid}. Adding to retry params.`);
-                        updateParams.addressSid = validAddressSid;
-                        continue; // Retry loop
-                    } else {
-                        throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid}. Please create a validation address first.`);
+                        if (addresses.length > 0) {
+                            const validAddressSid = addresses[0].sid;
+                            console.log(`[Port] Found address ${validAddressSid}. Adding to retry params.`);
+                            updateParams.addressSid = validAddressSid;
+                            continue; // Retry loop
+                        } else {
+                            throw new Error(`Port Failed (Address Required): No addresses found on target account ${targetAccountSid}. Please create a validation address first.`);
+                        }
                     }
                 }
                 // CASE 2: Bundle Requirement (Error 21649)
-                else if ((portError.code === 21649 || portError.message?.includes('Bundle required')) && !updateParams.bundleSid) {
-                    console.warn('[Port] Missing Regulatory Bundle (21649). Searching target account for approved bundles...');
+                else if ((portError.code === 21649 || portError.message?.includes('Bundle required'))) {
+                    // Start Case 2 logic
+                    if (updateParams.bundleSid) {
+                        // We already have a bundle but got error? 
+                        // Check if we are stuck
+                    }
 
-                    // Instantiate client scoped to target subaccount to find its bundles
-                    const subAccountClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+                    if (!updateParams.bundleSid) {
+                        console.warn('[Port] Missing Regulatory Bundle (21649). Searching target account for approved bundles...');
 
-                    // Fetch "twilio-approved" bundles
-                    const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list({
-                        status: 'twilio-approved',
-                        limit: 1
-                    });
+                        // Instantiate client scoped to target subaccount to find its bundles
+                        const subAccountClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
 
-                    if (bundles.length > 0) {
-                        const validBundleSid = bundles[0].sid;
-                        console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
+                        // Fetch "twilio-approved" bundles
+                        const bundles = await subAccountClient.numbers.v2.regulatoryCompliance.bundles.list({
+                            status: 'twilio-approved',
+                            limit: 1
+                        });
 
-                        // Critical: Remove AddressSid if we are providing a BundleSid. 
-                        // Providing both might trigger conflicting validation paths (Legacy vs V2).
-                        // The Bundle itself contains the necessary address/compliance info.
-                        delete updateParams.addressSid;
-                        updateParams.bundleSid = validBundleSid;
+                        if (bundles.length > 0) {
+                            const validBundleSid = bundles[0].sid;
+                            console.log(`[Port] Found approved bundle ${validBundleSid} (${bundles[0].friendlyName}). Adding to retry params.`);
 
-                        continue; // Retry loop
-                    } else {
-                        // Fallback: Check for just "draft" or "pending" to give a better error message? 
-                        // Or try to list ALL properly and see if any exist.
-                        throw new Error(`Port Failed (Bundle Required): No 'twilio-approved' regulatory bundles found on target account ${targetAccountSid}. Please ensure you have a bundle with status 'Twilio Approved'.`);
+                            // Critical: Remove AddressSid if we are providing a BundleSid to avoid conflicts.
+                            if (updateParams.addressSid) {
+                                console.log('[Port] Removing colliding AddressSid in favor of BundleSid.');
+                                delete updateParams.addressSid;
+                            }
+                            updateParams.bundleSid = validBundleSid;
+
+                            continue; // Retry loop
+                        } else {
+                            throw new Error(`Port Failed (Bundle Required): No 'twilio-approved' regulatory bundles found on target account ${targetAccountSid}. Please ensure you have a bundle with status 'Twilio Approved'.`);
+                        }
                     }
                 }
                 else {
