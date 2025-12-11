@@ -92,9 +92,8 @@ export const NumberPortForm: React.FC<NumberPortFormProps> = ({ credentials }) =
         setSuccessMessage(null);
 
         try {
-            if (!credentials.accountSid || !credentials.authToken) {
-                throw new Error("Missing Master Account credentials. Please configure them in the Configuration tab.");
-            }
+            // Credentials are optional client-side now (Server Fallback)
+            const shouldUseServerCreds = !credentials.accountSid;
 
             if (!selectedNumberSid) {
                 throw new Error("Please select a phone number to port.");
@@ -142,7 +141,10 @@ export const NumberPortForm: React.FC<NumberPortFormProps> = ({ credentials }) =
                     <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-800/50">
                         <ArrowRightLeft className="w-8 h-8 text-blue-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Twilio Number Port</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-3">
+                        Twilio Number Port
+                        {!credentials.accountSid && <span className="text-xs text-blue-400 bg-blue-900/30 px-2 py-1 rounded-full border border-blue-800/30">Server Auth</span>}
+                    </h2>
                     <p className="text-gray-400">
                         Move a Twilio phone number from one sub-account to another instantly.
                     </p>

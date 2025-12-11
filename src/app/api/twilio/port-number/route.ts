@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     console.log("Twilio Port/List request received");
     try {
         const body = await request.json();
-        const {
+        let {
             action, // 'list' or 'port'
             accountSid,
             authToken,
@@ -16,9 +16,15 @@ export async function POST(request: Request) {
             phoneNumberSid
         } = body;
 
+        // Allow Env Vars Fallback
+        if (!accountSid || !authToken) {
+            accountSid = process.env.TWILIO_ACCOUNT_SID;
+            authToken = process.env.TWILIO_AUTH_TOKEN;
+        }
+
         if (!accountSid || !authToken) {
             return NextResponse.json(
-                { success: false, error: 'Missing Twilio credentials' },
+                { success: false, error: 'Missing Twilio credentials. Set TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN env vars or provide them in request.' },
                 { status: 401 }
             );
         }
