@@ -191,9 +191,8 @@ export async function POST(request: Request) {
                     const sourceClient = twilio(accountSid, authToken, { accountSid: sourceAccountSid });
 
                     // Clone the bundle to the target account
-                    const clonedBundle = await sourceClient.numbers.v2.regulatoryCompliance
-                        .bundles(sourceBundleSid)
-                        .bundleClones
+                    const clonedBundle = await sourceClient.numbers.v2
+                        .bundleClone(sourceBundleSid)
                         .create({
                             targetAccountSid: targetAccountSid,
                             friendlyName: `Cloned from ${sourceAccountSid} for number transfer`
