@@ -61,40 +61,47 @@ function TwilioAdminContent() {
                     </p>
                 </header>
 
-                {/* Tabs */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
+                {/* Modern Navigation Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
                     <TabButton
                         active={activeTab === 'config'}
-                        onClick={() => setActiveTab('config')}
+                        onClick={() => { setActiveTab('config'); window.history.pushState({}, '', '?tab=config'); }}
                         icon={<Settings className="w-5 h-5" />}
-                        label="Configuration"
+                        label="Config"
+                        desc="Setup API"
                     />
                     <TabButton
                         active={activeTab === 'create'}
-                        onClick={() => setActiveTab('create')}
+                        onClick={() => { setActiveTab('create'); window.history.pushState({}, '', '?tab=create'); }}
                         icon={<FilePlus className="w-5 h-5" />}
-                        label="Create Bundle"
+                        label="Create"
+                        desc="New Bundle"
                     />
                     <TabButton
                         active={activeTab === 'list'}
-                        onClick={() => setActiveTab('list')}
+                        onClick={() => { setActiveTab('list'); window.history.pushState({}, '', '?tab=list'); }}
                         icon={<List className="w-5 h-5" />}
-                        label="View Bundles"
+                        label="Bundles"
+                        desc="View All"
                     />
                     <TabButton
                         active={activeTab === 'port'}
-                        onClick={() => setActiveTab('port')}
+                        onClick={() => { setActiveTab('port'); window.history.pushState({}, '', '?tab=port'); }}
                         icon={<ArrowRightLeft className="w-5 h-5" />}
-                        label="Port Number"
+                        label="Porting"
+                        desc="Move Number"
                     />
 
-                    {/* Check Status / Cleanup Link */}
+                    {/* Maintenance Tool */}
                     <Link
-                        href="/twilio/cleanup"
-                        className="flex-1 py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-3 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border border-blue-500/30"
+                        href="/admin/twilio/cleanup"
+                        className="group relative flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 bg-gray-900 border-gray-800 hover:border-gray-700 hover:bg-gray-800/50"
                     >
-                        <span className="text-xl">🧹</span>
-                        Bundle and Address Cleanup
+                        <div className="p-2 rounded-lg bg-gray-800 text-gray-400 group-hover:text-blue-400 group-hover:scale-110 transition-all mb-2">
+                            <span className="text-xl">🧹</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-300 group-hover:text-white">Maintenance</span>
+                        <span className="text-xs text-gray-500 mt-0.5">Cleanup Tools</span>
                     </Link>
                 </div>
 
@@ -124,16 +131,26 @@ function TwilioAdminContent() {
     );
 }
 
-const TabButton = ({ active, onClick, icon, label }: any) => (
+const TabButton = ({ active, onClick, icon, label, desc }: any) => (
     <button
         onClick={onClick}
-        className={`flex-1 py-4 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-3 ${active
-            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-            : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-gray-200 border border-gray-800'
+        className={`group relative flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 ${active
+            ? 'bg-blue-900/20 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]'
+            : 'bg-gray-900 border-gray-800 hover:border-gray-700 hover:bg-gray-800/50'
             }`}
     >
-        {icon}
-        {label}
+        <div className={`p-2 rounded-lg mb-2 transition-all duration-200 ${active
+            ? 'bg-blue-500 text-white shadow-lg'
+            : 'bg-gray-800 text-gray-400 group-hover:text-blue-400 group-hover:scale-110'
+            }`}>
+            {icon}
+        </div>
+        <span className={`text-sm font-bold ${active ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
+            {label}
+        </span>
+        <span className={`text-xs mt-0.5 ${active ? 'text-blue-200' : 'text-gray-500'}`}>
+            {desc}
+        </span>
     </button>
 );
 

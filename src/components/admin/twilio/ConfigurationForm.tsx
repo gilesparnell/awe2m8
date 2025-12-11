@@ -138,8 +138,12 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
             </div>
 
             <div className="space-y-6 max-w-xl">
+                <div className="bg-blue-900/10 border border-blue-900/20 rounded-lg p-3 text-xs text-blue-300">
+                    <strong>Note:</strong> These credentials must belong to the <strong>Parent Account</strong>.
+                    They are used to authenticate API calls and then "act as" subaccounts.
+                </div>
                 <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Account SID (Optional)</label>
+                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Parent Account SID (Optional)</label>
                     <input
                         type="text"
                         value={sid}
@@ -149,7 +153,7 @@ export const ConfigurationForm: React.FC<ConfigurationFormProps> = ({ onSave }) 
                     />
                 </div>
                 <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Auth Token (Optional)</label>
+                    <label className="block text-gray-400 text-sm font-bold mb-2">Override Parent Auth Token (Optional)</label>
                     <input
                         type="password"
                         value={token}
