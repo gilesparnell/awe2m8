@@ -210,26 +210,39 @@ export async function POST(request: Request) {
                             // Porting often requires BOTH params, and they must pair correctly.
                             // If we pick a random address and a random bundle, they mismatch.
                             // We must find the Address INSIDE the Bundle.
-                            console.log(`[Port] Inspecting Bundle ${validBundleSid} items for Address...`);
+                            // Deep Diagnostic of the Bundle
+                            console.log(`[Port] Inspecting Bundle Details for ${validBundleSid}...`);
+                            const bundleDetails = await subAccountClient.numbers.v2.regulatoryCompliance
+                                .bundles(validBundleSid)
+                                .fetch();
 
+                            console.log(`[Port] Bundle Details: Status=${bundleDetails.status}, FriendlyName="${bundleDetails.friendlyName}", RegulationSid=${bundleDetails.regulationSid}, DateUpdated=${bundleDetails.dateUpdated}`);
+
+                            // Add specific log for "AU Mobile" check logic (just logging for now)
+                            if (bundleDetails.regulationSid?.includes('AU_MOBILE')) {
+                                console.log(`[Port] Detected AU Mobile regulation for bundle ${validBundleSid}. Specific AU Mobile logic might be needed.`);
+                            }
+
+                            console.log(`[Port] Inspecting Bundle Items...`);
                             const items = await subAccountClient.numbers.v2.regulatoryCompliance
                                 .bundles(validBundleSid)
                                 .itemAssignments
-                                .list({ limit: 10 }); // Increase limit slightly
+                                .list({ limit: 10 });
 
                             // Log items to debug structure
-                            console.log(`[Port] Bundle Items found:`, JSON.stringify(items.map((i: any) => ({ type: i.resourceType, sid: i.objectSid }))));
+                            console.log(`[Port] Items JSON:`, JSON.stringify(items.map((i: any) => ({ type: i.resourceType, sid: i.objectSid }))));
 
                             const addressItem = items.find((i: any) => i.resourceType === 'address' || i.resource_type === 'address');
 
                             if (addressItem) {
-                                console.log(`[Port] Found linked Address ${addressItem.objectSid} in Bundle. Using this pair.`);
+                                console.log(`[Port] Found linked Address ${addressItem.objectSid} in Bundle. Using this match.`);
                                 updateParams.addressSid = addressItem.objectSid;
                             } else {
-                                console.warn('[Port] No Address found inside Bundle items. REMOVING conflicting legacy AddressSid to rely solely on Bundle.');
-                                // Critical: If we send a BundleSid, we must NOT send a mismatched AddressSid.
-                                // It is better to send NO AddressSid and let Twilio resolve the Bundle.
-                                delete updateParams.addressSid;
+                                console.warn('[Port] No Address found inside Bundle items. Using the Address found in previous step (cross-fingers).');
+                                // Previously we deleted updateParams.addressSid here. 
+                                // But if Twilio threw 21631 (Address Required), sending NO address might fail again.
+                                // Let's keep the fallback address. Worst case: "Bundle not found" (Mismatch).
+                                // Best case: Twilio accepts the standalone address + bundle.
                             }
 
                             updateParams.bundleSid = validBundleSid;
