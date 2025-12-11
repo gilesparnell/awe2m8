@@ -240,10 +240,12 @@ export async function POST(request: Request) {
         // PERFORM THE NUMBER TRANSFER
         // =======================================================================
         let updatedNumber;
+        // IMPORTANT: Only pass accountSid in the initial transfer
+        // The target account's bundle and address will be auto-detected
+        // Passing bundleSid/addressSid explicitly causes "Bundle not found" errors
+        // because the source account can't see the target account's resources
         let updateParams: any = {
-            accountSid: targetAccountSid,
-            ...(validatedAddressSid && { addressSid: validatedAddressSid }),
-            ...(targetBundleSid && { bundleSid: targetBundleSid })
+            accountSid: targetAccountSid
         };
         let attempts = 0;
         const maxAttempts = 3;
@@ -289,7 +291,7 @@ export async function POST(request: Request) {
 
                 // Handle missing address
                 if (portError.code === 21631 || portError.message?.includes('AddressSid')) {
-                    console.warn(`[Port] Missing Address (21631). Creating address in TARGET account...`);
+                    console.warn(`[Port] Missing Address (21631). Attempting to add address to retry params...`);
 
                     try {
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
@@ -306,6 +308,7 @@ export async function POST(request: Request) {
                         if (validatedAddresses.length > 0) {
                             const addressToUse = validatedAddresses[0];
                             console.log(`[Port] ✅ Found existing validated address ${addressToUse.sid}`);
+                            // On retry, we can add the addressSid since Twilio specifically requested it
                             updateParams.addressSid = addressToUse.sid;
                             continue;
                         } else {
@@ -333,8 +336,17 @@ export async function POST(request: Request) {
                 }
                 // Handle missing bundle on retry
                 else if (portError.code === 21649 || portError.message?.includes('Bundle')) {
-                    console.error(`[Port] Bundle error on retry. This shouldn't happen after cloning.`);
-                    throw portError;
+                    console.warn(`[Port] Missing Bundle (21649). Attempting to add bundle to retry params...`);
+
+                    // If we have a target bundle, add it to retry params
+                    if (targetBundleSid) {
+                        console.log(`[Port] Adding bundle ${targetBundleSid} to retry params`);
+                        updateParams.bundleSid = targetBundleSid;
+                        continue;
+                    } else {
+                        console.error(`[Port] No target bundle available to use`);
+                        throw portError;
+                    }
                 }
                 else {
                     throw portError;
