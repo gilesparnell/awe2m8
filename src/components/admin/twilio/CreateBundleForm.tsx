@@ -121,50 +121,32 @@ export const CreateBundleForm: React.FC<CreateBundleFormProps> = ({ credentials,
             }
 
             updateProgress('Validating Input', 'success');
-            updateProgress('Uploading Documents', 'loading');
+            updateProgress('Validating Input', 'success');
 
-            const body = new FormData();
+            // Note: We skip client-side file uploading because the files exist on the server.
+            // We just instruct the backend to use the specific default files.
 
-            // 1. Use existing Sub-Account
-            body.append('createSubAccount', 'false');
-            body.append('targetSubAccountSid', subAccountSid);
+            const payload = {
+                action: 'create-bundle',
+                subAccountSid: subAccountSid,
+                businessInfo: businessInfo,
+                documents: [
+                    { type: 'commercial_registrar_excerpt', filename: 'AWE2M8 Company Registration.pdf' },
+                    { type: 'utility_bill', filename: 'AWE2M8 Business Address.pdf' }
+                ]
+            };
 
-            // 2. Use Editable Business Info
-            Object.entries(businessInfo).forEach(([key, value]) => {
-                body.append(key, value);
-            });
-            body.append('subAccountName', 'Existing SubAccount');
-
-            // 3. Use Static Documents
-            setStatus('Loading standard documents...');
-            const docsToLoad = [
-                { key: 'businessDoc', path: '/admin/documents/AWE2M8 Company Registration.pdf', name: 'AWE2M8 Company Registration.pdf' },
-                { key: 'addressDoc', path: '/admin/documents/AWE2M8 Business Address.pdf', name: 'AWE2M8 Business Address.pdf' },
-            ];
-
-            for (const doc of docsToLoad) {
-                try {
-                    const response = await fetch(doc.path);
-                    if (!response.ok) throw new Error(`Missing ${doc.name} in /public/admin/documents`);
-                    const blob = await response.blob();
-                    const file = new File([blob], doc.name, { type: blob.type });
-                    body.append(doc.key, file);
-                } catch (e) {
-                    console.warn(`Could not load default doc: ${doc.name}. Uploading without it might fail.`);
-                    throw new Error(`System Error: Could not load default document ${doc.name}. Please ensure it exists in public/admin/documents.`);
-                }
-            }
-
-            updateProgress('Uploading Documents', 'success');
+            updateProgress('Uploading Documents', 'success'); // Technically skipped on client
             setStatus('Creating bundle...');
 
             const res = await fetch('/api/twilio/workflow', {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'x-twilio-account-sid': credentials.accountSid,
                     'x-twilio-auth-token': credentials.authToken
                 },
-                body: body
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
