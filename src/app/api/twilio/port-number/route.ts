@@ -105,10 +105,44 @@ export async function POST(request: Request) {
         console.log(`Porting Number SID: ${sidToPort} to ${targetAccountSid}`);
 
         // Update the Phone Number resource
-        const updatedNumber = await client.api.v2010
-            .accounts(sourceAccountSid)
-            .incomingPhoneNumbers(sidToPort)
-            .update({ accountSid: targetAccountSid });
+        // Update the Phone Number resource
+        let updatedNumber;
+        try {
+            updatedNumber = await client.api.v2010
+                .accounts(sourceAccountSid)
+                .incomingPhoneNumbers(sidToPort)
+                .update({ accountSid: targetAccountSid });
+        } catch (portError: any) {
+            // Handle Address Requirement (Error 21631)
+            // "Phone Number Requires an Address but the 'AddressSid' parameter was empty."
+            if (portError.code === 21631 || portError.message?.includes('AddressSid')) {
+                console.warn('Port failed due to missing Address (21631). Attempting to find a valid address on target account...');
+
+                // 1. Fetch addresses from TARGET account
+                const addresses = await client.api.v2010
+                    .accounts(targetAccountSid)
+                    .addresses
+                    .list({ limit: 1 });
+
+                if (addresses.length > 0) {
+                    const validAddressSid = addresses[0].sid;
+                    console.log(`Found address ${validAddressSid} on target account. Retrying port...`);
+
+                    // 2. Retry Update WITH AddressSid
+                    updatedNumber = await client.api.v2010
+                        .accounts(sourceAccountSid)
+                        .incomingPhoneNumbers(sidToPort)
+                        .update({
+                            accountSid: targetAccountSid,
+                            addressSid: validAddressSid
+                        });
+                } else {
+                    throw new Error(`Port Failed: The phone number requires a valid Address on the target account (Error 21631), but no addresses were found on account ${targetAccountSid}. Please create an address on the target subaccount first.`);
+                }
+            } else {
+                throw portError;
+            }
+        }
 
         console.log(`Successfully ported number ${updatedNumber.phoneNumber} to ${targetAccountSid}`);
 
