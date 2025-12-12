@@ -84,7 +84,9 @@ export async function GET(req: NextRequest) {
             // We store generic info to attach helpful context if possible
             const targets = [
                 { sid: accountSid, name: 'Master Account' },
-                ...subAccounts.map(a => ({ sid: a.sid, name: a.friendlyName }))
+                ...subAccounts
+                    .filter(a => a.sid !== accountSid)
+                    .map(a => ({ sid: a.sid, name: a.friendlyName }))
             ];
 
             console.log(`Aggregating bundles from ${targets.length} accounts...`);
@@ -114,7 +116,20 @@ export async function GET(req: NextRequest) {
             });
 
             const results = await Promise.all(promises);
-            const allBundles = results.flat();
+            const rawBundles = results.flat();
+
+            // Deduplicate by Bundle SID
+            const seenSids = new Set();
+            const allBundles = [];
+            for (const b of rawBundles) {
+                if (!seenSids.has(b.sid)) {
+                    seenSids.add(b.sid);
+                    allBundles.push(b);
+                }
+            }
+            if (rawBundles.length !== allBundles.length) {
+                console.log(`[Bundle Aggregation] Deduplicated: Removed ${rawBundles.length - allBundles.length} duplicates.`);
+            }
 
             // 4. Sort Globally by DateCreated Descending
             bundles = allBundles.sort((a, b) => {
