@@ -45,42 +45,81 @@ export async function GET(req: NextRequest) {
         const pageSize = parseInt(url.searchParams.get("pageSize") || "10", 10);
         const page = parseInt(url.searchParams.get("page") || "0", 10);
 
-        console.log(`Fetching bundles for ${subAccountSid || 'Master Account'}... Page: ${page}, Size: ${pageSize}`);
+        let bundles: any[] = [];
 
-        // If subAccountSid is provided, we act on behalf of that account
-        // using the Master Credentials
-        const client = subAccountSid
-            ? twilio(accountSid, authToken, { accountSid: subAccountSid })
-            : twilio(accountSid, authToken);
+        if (subAccountSid) {
+            // SINGLE ACCOUNT MODE
+            console.log(`Fetching bundles for SubAccount: ${subAccountSid}...`);
+            const client = twilio(accountSid, authToken, { accountSid: subAccountSid });
 
-        // Note: The Twilio Node helper library 'list' method often automates paging to get 'limit' items.
-        // To get a specific 'page', we might need to use 'page' method instead of 'list',
-        // OR rely on the fact that 'list' fetches the first N items.
-        // If we want "Page 2" (items 11-20), 'list' isn't the best tool if we want efficient server-side paging without fetching everything.
-        // However, for simplicity in this V2 implementation:
-        // Twilio's `list` fetches up to `limit`. If we want page 2, we can't easily jump there without `page` method or URL from previous page.
-        // BUT, `regulatoryCompliance.bundles.page({ pageNumber: X, pageSize: Y })` IS available.
-
-        let bundles;
-        if (url.searchParams.has("page")) {
-            // Use explicit paging
-            const pageResponse = await client.numbers.v2.regulatoryCompliance.bundles.page({
-                pageSize: pageSize,
-                pageNumber: page
-            });
-            bundles = pageResponse.instances;
-        } else {
-            // Default "list" behavior (fetch top N)
-            const listParams: any = {
-                limit: Math.min(limit, 100), // Cap at 100
-            };
-            if (friendlyName) {
-                listParams.friendlyName = friendlyName;
+            if (url.searchParams.has("page")) {
+                const pageResponse = await client.numbers.v2.regulatoryCompliance.bundles.page({
+                    pageSize: pageSize,
+                    pageNumber: page
+                });
+                bundles = pageResponse.instances;
+            } else {
+                const listParams: any = { limit: Math.min(limit, 100) };
+                if (friendlyName) listParams.friendlyName = friendlyName;
+                bundles = await client.numbers.v2.regulatoryCompliance.bundles.list(listParams);
             }
-            bundles = await client.numbers.v2.regulatoryCompliance.bundles.list(listParams);
+        } else {
+            // AGGREGATION MODE (Master + All Subs)
+            console.log("Fetching bundles for Master + All Active Subaccounts (Aggregation Mode)...");
+
+            // 1. Get List of All Active Accounts (Master is implicit, Actvity returns Subs)
+            const subAccounts = await twilio(accountSid, authToken).api.v2010.accounts.list({ status: 'active', limit: 50 });
+
+            // 2. Build list of targets: [Master, ...Subs]
+            // We store generic info to attach helpful context if possible
+            const targets = [
+                { sid: accountSid, name: 'Master Account' },
+                ...subAccounts.map(a => ({ sid: a.sid, name: a.friendlyName }))
+            ];
+
+            console.log(`Aggregating bundles from ${targets.length} accounts...`);
+
+            // 3. Fetch recent bundles for each in parallel
+            const promises = targets.map(async (target) => {
+                try {
+                    const subClient = twilio(accountSid, authToken, { accountSid: target.sid });
+                    // We fetch 'limit' for EACH to ensure we don't miss recent ones from a busy subaccount, 
+                    // then we sort globally.
+                    const res = await subClient.numbers.v2.regulatoryCompliance.bundles.list({
+                        limit: 10 // Fetch top 10 from each to keep payload manageable yet representative
+                    });
+
+                    // Attach context? The BundleInstance object is complex, spreading it might lose prototype methods if not careful,
+                    // but for JSON serialization it's fine.
+                    // We'll attach 'accountName' for UI if needed.
+                    return res.map(b => ({
+                        ...b.toJSON(), // Ensure we serialize strictly properties 
+                        accountName: target.name,
+                        _accountSid: target.sid // Helper for debugging
+                    }));
+                } catch (err: any) {
+                    console.warn(`Failed to fetch bundles for ${target.name} (${target.sid}): ${err.message}`);
+                    return [];
+                }
+            });
+
+            const results = await Promise.all(promises);
+            const allBundles = results.flat();
+
+            // 4. Sort Globally by DateCreated Descending
+            bundles = allBundles.sort((a, b) => {
+                const da = new Date(a.dateCreated).getTime();
+                const db = new Date(b.dateCreated).getTime();
+                return db - da; // Descending
+            });
+
+            // 5. Apply Limit globally
+            if (!url.searchParams.has("page")) { // Only limit if not paging (though paging aggregate is unsupported here)
+                bundles = bundles.slice(0, limit);
+            }
         }
 
-        console.log(`Found ${bundles.length} bundles.`);
+        console.log(`Found ${bundles ? bundles.length : 0} bundles total.`);
 
         return NextResponse.json({ results: bundles });
     } catch (error: any) {
