@@ -17,6 +17,7 @@ interface Bundle {
     dateCreated?: string;
     email: string;
     accountName?: string;
+    _accountSid?: string;
 }
 
 export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
@@ -299,7 +300,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                         body: JSON.stringify({
                                             action: 'delete-bundle',
                                             bundleSid: bundle.sid,
-                                            subAccountSid: targetSubAccountSid || credentials.accountSid
+                                            subAccountSid: bundle._accountSid || targetSubAccountSid || credentials.accountSid
                                         }),
                                         headers: { 'Content-Type': 'application/json' }
                                     });
@@ -326,7 +327,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                             bundleSid: bundle.sid,
                                             accountSid: credentials.accountSid,
                                             authToken: credentials.authToken,
-                                            subAccountSid: targetSubAccountSid || credentials.accountSid
+                                            subAccountSid: bundle._accountSid || targetSubAccountSid || credentials.accountSid
                                         }),
                                         headers: { 'Content-Type': 'application/json' }
                                     });
