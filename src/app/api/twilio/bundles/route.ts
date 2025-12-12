@@ -46,10 +46,20 @@ export async function GET(req: NextRequest) {
         const page = parseInt(url.searchParams.get("page") || "0", 10);
 
         let bundles: any[] = [];
+        let accountFriendlyName: string | undefined;
 
         if (subAccountSid) {
             // SINGLE ACCOUNT MODE
             console.log(`Fetching bundles for SubAccount: ${subAccountSid}...`);
+
+            // Fetch Account Details for UI context
+            try {
+                const subAccount = await twilio(accountSid, authToken).api.v2010.accounts(subAccountSid).fetch();
+                accountFriendlyName = subAccount.friendlyName;
+            } catch (e) {
+                console.warn("Could not fetch subaccount details:", e);
+            }
+
             const client = twilio(accountSid, authToken, { accountSid: subAccountSid });
 
             if (url.searchParams.has("page")) {
@@ -121,7 +131,7 @@ export async function GET(req: NextRequest) {
 
         console.log(`Found ${bundles ? bundles.length : 0} bundles total.`);
 
-        return NextResponse.json({ results: bundles });
+        return NextResponse.json({ results: bundles, accountFriendlyName });
     } catch (error: any) {
         console.error("Twilio API Error:", error);
         return NextResponse.json(
