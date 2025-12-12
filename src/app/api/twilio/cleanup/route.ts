@@ -190,10 +190,53 @@ export async function POST(request: Request) {
         }
 
         // =====================================================================
+        // HELPER: Audit Bundle Dependencies
+        // =====================================================================
+        async function getUsedAddressSids(client: any): Promise<Map<string, string[]>> {
+            console.log("[Cleanup] Auditing Bundle Dependencies...");
+            const usedMap = new Map<string, string[]>(); // AddressSid -> [BundleSids]
+
+            try {
+                // Fetch recent bundles (cover enough to be safe, e.g. 100)
+                const bundles = await client.numbers.v2.regulatoryCompliance.bundles.list({ limit: 100 });
+
+                // Fetch assignments in parallel (with concurrency limit ideally, but simple map for now)
+                // We'll process in chunks of 5 to not hammer API
+                const chunk = (arr: any[], size: number) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+                const batches = chunk(bundles, 5);
+
+                for (const batch of batches) {
+                    await Promise.all(batch.map(async (b: any) => {
+                        try {
+                            const items = await client.numbers.v2.regulatoryCompliance.bundles(b.sid).itemAssignments.list();
+                            for (const item of items) {
+                                if (item.objectSid && item.objectSid.startsWith('AD')) { // AD is prefix for Address
+                                    const existing = usedMap.get(item.objectSid) || [];
+                                    existing.push(`${b.friendlyName} (${b.status})`);
+                                    usedMap.set(item.objectSid, existing);
+                                }
+                            }
+                        } catch (e) {
+                            console.warn(`[Cleanup] Failed to check items for bundle ${b.sid}`, e);
+                        }
+                    }));
+                }
+
+                console.log(`[Cleanup] Audit Complete. Found ${usedMap.size} addresses in use.`);
+            } catch (err) {
+                console.error("[Cleanup] Failed to audit dependencies", err);
+            }
+            return usedMap;
+        }
+
+        // =====================================================================
         // ACTION: CLEANUP ADDRESSES (Keep one per country, delete rest)
         // =====================================================================
         if (action === 'cleanup-addresses') {
             console.log(`[Cleanup] Cleaning up addresses for ${subAccountSid}`);
+
+            // 1. Audit Dependencies First
+            const usedAddresses = await getUsedAddressSids(client);
 
             const addresses = await client.addresses.list({ limit: 100 });
 
@@ -239,18 +282,19 @@ export async function POST(request: Request) {
 
                 // Delete duplicates with safety check
                 for (const addr of deleteAddresses) {
+                    // CHECK DEPENDENCY
+                    if (usedAddresses.has(addr.sid)) {
+                        const usages = usedAddresses.get(addr.sid);
+                        results[results.length - 1].deleted.push({
+                            sid: addr.sid,
+                            customerName: addr.customerName,
+                            success: false,
+                            error: `Protected: Used in ${usages?.[0] || 'active bundle'}`
+                        });
+                        continue;
+                    }
+
                     try {
-                        // Check if address is used by ANY bundle first
-                        // Note: This is an expensive operation but safer
-                        const bundles = await client.numbers.v2.regulatoryCompliance.bundles.list({ limit: 50 });
-                        let isUsed = false;
-
-                        // We can't easily query "bundles using this address", we have to inspect items?
-                        // Scanning all bundles is too slow.
-                        // Better Heuristic: Don't delete if we can't be sure?
-                        // ACTUALLY: The safest way is to catch the error. Twilio API throws 400 if used.
-                        // "Address ... is in use by one or more bundles"
-
                         await client.addresses(addr.sid).remove();
 
                         results[results.length - 1].deleted.push({
@@ -302,9 +346,24 @@ export async function POST(request: Request) {
 
             console.log(`[Cleanup] Deleting ${addressSids.length} addresses from ${subAccountSid}`);
 
+            // 1. Audit Dependencies First
+            const usedAddresses = await getUsedAddressSids(client);
+
             const results = [];
 
             for (const addressSid of addressSids) {
+                // CHECK DEPENDENCY
+                if (usedAddresses.has(addressSid)) {
+                    const usages = usedAddresses.get(addressSid);
+                    results.push({
+                        sid: addressSid,
+                        customerName: '',
+                        success: false,
+                        error: `Protected: Used in ${usages?.[0] || 'active bundle'}`
+                    });
+                    continue;
+                }
+
                 try {
                     await client.addresses(addressSid).remove();
                     results.push({
