@@ -45,7 +45,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         setLoadingRecent(true);
         setError(null);
         try {
-            const query = targetSubAccountSid ? `?subAccountSid=${targetSubAccountSid}&limit=20` : '?limit=20';
+            const trimmedSid = targetSubAccountSid.trim();
+            const query = trimmedSid ? `?subAccountSid=${trimmedSid}&limit=20` : '?limit=20';
             const res = await fetch(`/api/twilio/bundles${query}`, {
                 headers: {
                     'x-twilio-account-sid': credentials.accountSid,
@@ -370,6 +371,11 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                 onChange={(e) => {
                                     setTargetSubAccountSid(e.target.value);
                                     localStorage.setItem('twilio_last_subaccount_sid', e.target.value);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        fetchRecentActivity();
+                                    }
                                 }}
                                 placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                                 className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white font-mono placeholder:text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
