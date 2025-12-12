@@ -51,6 +51,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     // Effect to trigger fetch on mount
     useEffect(() => {
         fetchRecentActivity();
+        fetchHistory(0);
     }, []);
 
     const fetchRecentActivity = async () => {
@@ -539,7 +540,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                         <History className="w-4 h-4" />
                         Previously Approved Bundles
                         <span className="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/50 ml-2">
-                            {historyBundles.length ? `${historyBundles.length}+` : 'view'}
+                            {loadingHistory && !historyBundles.length ? '...' : historyBundles.length < HISTORY_PAGE_SIZE ? historyBundles.length : `${historyBundles.length}+`}
                         </span>
                     </h4>
                     <div className="p-1 rounded-lg bg-gray-900/50 text-gray-500 group-hover:text-white transition-colors">
