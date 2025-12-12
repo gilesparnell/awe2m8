@@ -73,6 +73,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             });
             const data = await res.json();
 
+            console.log("Bundle Fetch Response:", data); // Debugging
+
             if (res.ok) {
                 const allFetched = data.results || [];
                 // Sort by date descending
@@ -83,11 +85,18 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                 });
 
                 setRecentBundles(sorted);
-                setFilteredAccountName(data.accountFriendlyName || null);
+
+                if (data.accountFriendlyName) {
+                    console.log("Setting Friendly Name:", data.accountFriendlyName);
+                    setFilteredAccountName(data.accountFriendlyName);
+                } else {
+                    setFilteredAccountName(null);
+                }
             } else {
                 throw new Error(data.error || 'Failed to fetch items');
             }
         } catch (err: any) {
+            console.error("Fetch Bundle Error:", err);
             setError(err.message);
         } finally {
             setLoadingRecent(false);
@@ -159,14 +168,19 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     };
 
 
-    // Reload when credentials or subaccount changes
+    // Reload when credentials change (but NOT on typing targetSubAccountSid, manual refresh only)
     useEffect(() => {
         fetchRecentActivity();
         // Reset history when context changes
         setHistoryBundles([]);
         setHistoryPage(0);
         setIsHistoryOpen(false);
-    }, [credentials, targetSubAccountSid]); // Reload if subaccount changes (basic scope)
+    }, [credentials]);
+
+    // Trigger initial fetch if we restored a SID from localstorage
+    useEffect(() => {
+        if (targetSubAccountSid) fetchRecentActivity();
+    }, []); // Only on mount/initial restore check
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -392,6 +406,8 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                         </label>
                         <div className="relative">
                             <input
+                                id="subAccountSidFilter"
+                                name="subAccountSidFilter"
                                 type="text"
                                 value={targetSubAccountSid}
                                 onChange={(e) => {
@@ -514,78 +530,59 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
             </div>
 
             {/* SECTION 3: History (Collapsible) */}
-            <div className="pt-4 border-t border-gray-800/50">
+            <div className="space-y-4 pt-4 border-t border-gray-800/50">
                 <button
                     onClick={toggleHistory}
-                    className="w-full flex items-center justify-between bg-gray-900/50 hover:bg-gray-800/50 p-4 rounded-xl border border-gray-800 transition-all group"
+                    className="w-full flex items-center justify-between text-left group focus:outline-none"
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
-                            <History className="w-5 h-5 text-gray-400" />
-                        </div>
-                        <div className="text-left">
-                            <h4 className="font-bold text-gray-200">Previously Approved Bundles</h4>
-                            <p className="text-xs text-gray-600">View complete history</p>
-                        </div>
-                        <span className="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/50 ml-2 self-center">
-                            {historyBundles.length ? `${historyBundles.length}+` : '?'}
+                    <h4 className="text-sm font-bold text-blue-400/80 uppercase tracking-wider flex items-center gap-2 ml-1">
+                        <History className="w-4 h-4" />
+                        Previously Approved Bundles
+                        <span className="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/50 ml-2">
+                            {historyBundles.length ? `${historyBundles.length}+` : 'view'}
                         </span>
+                    </h4>
+                    <div className="p-1 rounded-lg bg-gray-900/50 text-gray-500 group-hover:text-white transition-colors">
+                        {isHistoryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
-                    {isHistoryOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                 </button>
 
+                {/* ... History Section continued ... */}
                 {isHistoryOpen && (
-                    <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
-
-                        {/* Pagination Controls */}
-                        <div className="flex justify-between items-center bg-gray-950/50 p-2 rounded-lg border border-gray-800/50 mb-4">
-                            <button
-                                onClick={handlePrevPage}
-                                disabled={historyPage === 0 || loadingHistory}
-                                className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 px-3 py-1"
-                            >
-                                <ChevronLeft className="w-4 h-4" /> Prev
-                            </button>
-                            <span className="text-xs font-mono text-gray-500">Page {historyPage + 1}</span>
-                            <button
-                                onClick={handleNextPage}
-                                disabled={historyBundles.length < HISTORY_PAGE_SIZE || loadingHistory} // Rough check for 'last page'
-                                className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 px-3 py-1"
-                            >
-                                Next <ChevronRight className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        {loadingHistory ? (
-                            <div className="text-center py-12 text-gray-500"><RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />Loading history...</div>
-                        ) : (
-                            <div className="grid gap-2">
-                                {historyBundles.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500 text-sm">No bundles found on this page.</div>
-                                ) : (
-                                    historyBundles.filter(b => b.status !== 'pending-review').map(renderBundleRow)
-                                )}
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                        {loadingHistory && !historyBundles.length ? (
+                            <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <RefreshCw className="w-6 h-6 animate-spin text-gray-600 mx-auto mb-2" />
+                                <p className="text-gray-500 text-sm">Loading history...</p>
                             </div>
-                        )}
+                        ) : historyBundles.length > 0 ? (
+                            <>
+                                <div className="grid gap-3">
+                                    {historyBundles.map(renderBundleRow)}
+                                </div>
 
-                        {/* Bottom Pagination (Convenience) */}
-                        {!loadingHistory && historyBundles.length > 3 && (
-                            <div className="flex justify-center items-center gap-4 mt-6 pt-4 border-t border-gray-900">
-                                <button
-                                    onClick={handlePrevPage}
-                                    disabled={historyPage === 0}
-                                    className="p-2 rounded-full hover:bg-gray-800 disabled:opacity-30"
-                                >
-                                    <ChevronLeft className="w-4 h-4 text-gray-400" />
-                                </button>
-                                <span className="text-xs font-mono text-gray-600">Page {historyPage + 1}</span>
-                                <button
-                                    onClick={handleNextPage}
-                                    disabled={historyBundles.length < HISTORY_PAGE_SIZE}
-                                    className="p-2 rounded-full hover:bg-gray-800 disabled:opacity-30"
-                                >
-                                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                                </button>
+                                {/* Pagination Controls */}
+                                <div className="flex justify-between items-center mt-4 px-2">
+                                    <button
+                                        onClick={() => setHistoryPage(p => Math.max(0, p - 1))}
+                                        disabled={historyPage === 0 || loadingHistory}
+                                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" /> Previous
+                                    </button>
+                                    <span className="text-xs text-gray-500 font-mono">Page {historyPage + 1}</span>
+                                    <button
+                                        onClick={() => setHistoryPage(p => p + 1)}
+                                        disabled={historyBundles.length < HISTORY_PAGE_SIZE || loadingHistory}
+                                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400"
+                                    >
+                                        Next <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <p className="text-gray-500 text-sm">No historical bundles found.</p>
                             </div>
                         )}
                     </div>
