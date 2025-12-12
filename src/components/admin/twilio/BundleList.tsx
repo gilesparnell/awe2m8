@@ -16,6 +16,7 @@ interface Bundle {
     date_created?: string;
     dateCreated?: string;
     email: string;
+    accountName?: string;
 }
 
 export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
@@ -29,36 +30,51 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     // History Panel State
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [historyPage, setHistoryPage] = useState(0);
-    const HISTORY_PAGE_SIZE = 10;
 
     const [error, setError] = useState<string | null>(null);
     const [targetSubAccountSid, setTargetSubAccountSid] = useState('');
+    const [filteredAccountName, setFilteredAccountName] = useState<string | null>(null);
+
     const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
+    // Constants
+    const HISTORY_PAGE_SIZE = 10;
+
+    // Initial Load
     useEffect(() => {
-        const lastSub = localStorage.getItem('twilio_last_subaccount_sid');
-        if (lastSub) setTargetSubAccountSid(lastSub);
+        const stored = localStorage.getItem('twilio_last_subaccount_sid');
+        if (stored) setTargetSubAccountSid(stored);
+        // We defer fetch until after mount to avoid double call if needed, but here it's fine
+        // fetchRecentActivity(); // Logic moved below to be callable
     }, []);
 
-    // Initial load: Fetch Recent Activity
+    // Effect to trigger fetch on mount
+    useEffect(() => {
+        fetchRecentActivity();
+    }, []);
+
     const fetchRecentActivity = async () => {
         setLoadingRecent(true);
         setError(null);
         try {
-            const trimmedSid = targetSubAccountSid.trim();
-            const query = trimmedSid ? `?subAccountSid=${trimmedSid}&limit=20` : '?limit=20';
-            const res = await fetch(`/api/twilio/bundles${query}`, {
+            // Build URL with optional params
+            let url = `/api/twilio/bundles?limit=50`;
+
+            const effectiveSubAccount = targetSubAccountSid.trim();
+            if (effectiveSubAccount) {
+                url += `&subAccountSid=${effectiveSubAccount}`;
+            }
+
+            const res = await fetch(url, {
                 headers: {
                     'x-twilio-account-sid': credentials.accountSid,
                     'x-twilio-auth-token': credentials.authToken
                 }
             });
-
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to fetch bundles');
 
-            const allFetched = data.results || [];
-            if (allFetched.length > 0) {
+            if (res.ok) {
+                const allFetched = data.results || [];
                 // Sort by date descending
                 const sorted = allFetched.sort((a: Bundle, b: Bundle) => {
                     const dateA = new Date(a.dateCreated || a.date_created || 0);
@@ -66,12 +82,11 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     return dateB.getTime() - dateA.getTime();
                 });
 
-                // For "Recent Activity", we want Pending + Top Approved/Rejected
                 setRecentBundles(sorted);
+                setFilteredAccountName(data.accountFriendlyName || null);
             } else {
-                setRecentBundles([]);
+                throw new Error(data.error || 'Failed to fetch items');
             }
-
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -201,7 +216,12 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     <h4 className="text-sm font-bold text-white group-hover:text-green-400 transition-colors truncate" title={bundle.friendlyName || bundle.friendly_name}>
                         {bundle.friendlyName || bundle.friendly_name}
                     </h4>
-                    <div className="text-[10px] text-gray-600 font-mono">{bundle.sid}</div>
+                    <div className="text-[10px] text-gray-600 font-mono mt-0.5">{bundle.sid}</div>
+                    {bundle.accountName && (
+                        <div className="text-[9px] text-blue-400/80 mt-0.5 truncate" title={bundle.accountName}>
+                            {bundle.accountName}
+                        </div>
+                    )}
                 </div>
 
                 {/* 2. Date Created (AEST) (col-span-3) */}
@@ -345,10 +365,16 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
         </div >
     );
 
-    return (
-        <div className="space-y-8 animate-in fade-in">
+    // Section Visibility State
+    const [isPendingOpen, setIsPendingOpen] = useState(true);
+    const [isRecentApprovedOpen, setIsRecentApprovedOpen] = useState(true);
 
-            {/* Header / Subaccount Filter */}
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500">
+
+            {/* ... Header and Input ... */}
+            {/* (This part remains unchanged, just referring to context) */}
+
             <div className="flex flex-col gap-4 bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
                 <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -370,6 +396,7 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                                 value={targetSubAccountSid}
                                 onChange={(e) => {
                                     setTargetSubAccountSid(e.target.value);
+                                    setFilteredAccountName(null); // Clear name on change until refreshed
                                     localStorage.setItem('twilio_last_subaccount_sid', e.target.value);
                                 }}
                                 onKeyDown={(e) => {
@@ -382,6 +409,17 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                             />
                             <Database className="w-4 h-4 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
                         </div>
+                        {/* Friendly Account Name Display */}
+                        {filteredAccountName && (
+                            <div className="mt-2 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                                <div className="text-[10px] uppercase tracking-wider text-green-500 font-bold bg-green-900/20 px-2 py-0.5 rounded border border-green-900/30">
+                                    Active Account
+                                </div>
+                                <div className="text-xs text-green-400 font-semibold">
+                                    {filteredAccountName}
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <button
                         onClick={fetchRecentActivity}
@@ -402,55 +440,97 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
 
             {/* SECTION 1: Pending Reviews */}
             <div className="space-y-4">
-                <h4 className="text-sm font-bold text-yellow-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
-                    <Activity className="w-4 h-4" />
-                    Pending Reviews
-                </h4>
-
-                {loadingRecent && !recentBundles.length ? (
-                    <div className="flex justify-center p-4"><RefreshCw className="w-5 h-5 animate-spin text-gray-600" /></div>
-                ) : !showPendingSection ? (
-                    <div className="bg-gray-900/20 border border-gray-800/50 border-dashed rounded-xl p-4 text-center text-gray-500 text-xs">
-                        No bundles currently pending review.
+                <button
+                    onClick={() => setIsPendingOpen(!isPendingOpen)}
+                    className="w-full flex items-center justify-between text-left group focus:outline-none"
+                >
+                    <h4 className="text-sm font-bold text-yellow-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
+                        <Activity className="w-4 h-4" />
+                        Pending Review
+                        <span className="text-xs bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-800/50 ml-2">
+                            {pendingReviewBundles.length}
+                        </span>
+                    </h4>
+                    <div className="p-1 rounded-lg bg-gray-900/50 text-gray-500 group-hover:text-white transition-colors">
+                        {isPendingOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
-                ) : (
-                    <div className="grid gap-2">
-                        {pendingReviewBundles.map(renderBundleRow)}
+                </button>
+
+                {isPendingOpen && (
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                        {loadingRecent ? (
+                            <div className="text-center py-12 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <RefreshCw className="w-6 h-6 animate-spin text-gray-600 mx-auto mb-2" />
+                                <p className="text-gray-500 text-sm">Loading activity...</p>
+                            </div>
+                        ) : pendingReviewBundles.length > 0 ? (
+                            <div className="grid gap-3">
+                                {pendingReviewBundles.map(renderBundleRow)}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <p className="text-gray-500 text-sm">No pending bundles found.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
             {/* SECTION 2: Recently Approved */}
-            <div className="space-y-4">
-                <h4 className="text-sm font-bold text-green-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
-                    <CheckCircle className="w-4 h-4" />
-                    Recently Approved
-                </h4>
-
-                {loadingRecent && !recentBundles.length ? (
-                    <div className="flex justify-center p-4"><RefreshCw className="w-5 h-5 animate-spin text-gray-600" /></div>
-                ) : !showApprovedSection ? (
-                    <div className="bg-gray-900/20 border border-gray-800/50 border-dashed rounded-xl p-4 text-center text-gray-500 text-xs">
-                        No recently approved bundles found.
+            <div className="space-y-4 pt-4 border-t border-gray-800/50">
+                <button
+                    onClick={() => setIsRecentApprovedOpen(!isRecentApprovedOpen)}
+                    className="w-full flex items-center justify-between text-left group focus:outline-none"
+                >
+                    <h4 className="text-sm font-bold text-green-500/80 uppercase tracking-wider flex items-center gap-2 ml-1">
+                        <CheckCircle className="w-4 h-4" />
+                        Recently Approved
+                        <span className="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full border border-green-800/50 ml-2">
+                            {latestApproved.length}
+                        </span>
+                    </h4>
+                    <div className="p-1 rounded-lg bg-gray-900/50 text-gray-500 group-hover:text-white transition-colors">
+                        {isRecentApprovedOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
-                ) : (
-                    <div className="grid gap-2">
-                        {latestApproved.map(renderBundleRow)}
+                </button>
+
+                {isRecentApprovedOpen && (
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                        {loadingRecent ? (
+                            <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <p className="text-gray-500 text-sm">Loading...</p>
+                            </div>
+                        ) : latestApproved.length > 0 ? (
+                            <div className="grid gap-3">
+                                {latestApproved.map(renderBundleRow)}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 bg-gray-900/30 rounded-lg border border-dashed border-gray-800">
+                                <p className="text-gray-500 text-sm">No recently approved bundles.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
-
-            {/* SECTION 2: Previously Approved (Collapsible & Paginated) */}
-            <div className="pt-2 border-t border-gray-800/50">
+            {/* SECTION 3: History (Collapsible) */}
+            <div className="pt-4 border-t border-gray-800/50">
                 <button
                     onClick={toggleHistory}
-                    className="w-full bg-gray-900/30 hover:bg-gray-900/60 border border-gray-800 rounded-xl p-4 flex justify-between items-center group transition-all"
+                    className="w-full flex items-center justify-between bg-gray-900/50 hover:bg-gray-800/50 p-4 rounded-xl border border-gray-800 transition-all group"
                 >
-                    <h4 className="text-sm font-bold text-gray-400 group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                        <History className="w-4 h-4" />
-                        Previously Approved Bundles
-                    </h4>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-gray-700 transition-colors">
+                            <History className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div className="text-left">
+                            <h4 className="font-bold text-gray-200">Previously Approved Bundles</h4>
+                            <p className="text-xs text-gray-600">View complete history</p>
+                        </div>
+                        <span className="text-xs bg-blue-900/40 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/50 ml-2 self-center">
+                            {historyBundles.length ? `${historyBundles.length}+` : '?'}
+                        </span>
+                    </div>
                     {isHistoryOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                 </button>
 
