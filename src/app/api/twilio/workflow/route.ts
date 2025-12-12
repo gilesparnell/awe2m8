@@ -65,19 +65,49 @@ export async function POST(request: Request) {
             const path = require('path');
             const https = require('https');
 
-            // 2. Create Address
-            console.log(`[Create Bundle] Creating Address...`);
-            const address = await subClient.addresses.create({
-                customerName: businessInfo.businessName || 'AWE2M8 Pty Ltd',
-                street: businessInfo.street || '50a Habitat Way',
-                city: businessInfo.city || 'Lennox Head',
-                region: businessInfo.state || 'NSW',
-                postalCode: businessInfo.postalCode || '2478',
-                isoCountry: businessInfo.country || 'AU',
-                emergencyEnabled: false,
-                friendlyName: 'Regulatory Address (Created via API)'
-            });
-            console.log(`[Create Bundle] Address Created: ${address.sid}`);
+            // 2. Address Managment - Reuse if exists
+            console.log(`[Create Bundle] Checking for existing validated address in ${businessInfo.country || 'AU'}...`);
+            let addressSid;
+
+            try {
+                const existingAddrs = await subClient.addresses.list({
+                    isoCountry: businessInfo.country || 'AU',
+                    customerName: businessInfo.businessName || 'AWE2M8 Pty Ltd',
+                    limit: 5
+                });
+
+                // Find one that matches critical fields
+                const match = existingAddrs.find((a: any) =>
+                    a.street === (businessInfo.street || '50a Habitat Way') &&
+                    a.region === (businessInfo.state || 'NSW') &&
+                    a.city === (businessInfo.city || 'Lennox Head')
+                );
+
+                if (match) {
+                    console.log(`[Create Bundle] ✅ Found existing matching address: ${match.sid}`);
+                    addressSid = match.sid;
+                }
+            } catch (addrCheckErr) {
+                console.warn(`[Create Bundle] Failed to check existing addresses, proceeding to create new one.`, addrCheckErr);
+            }
+
+            if (!addressSid) {
+                console.log(`[Create Bundle] Creating NEW Address...`);
+                const address = await subClient.addresses.create({
+                    customerName: businessInfo.businessName || 'AWE2M8 Pty Ltd',
+                    street: businessInfo.street || '50a Habitat Way',
+                    city: businessInfo.city || 'Lennox Head',
+                    region: businessInfo.state || 'NSW',
+                    postalCode: businessInfo.postalCode || '2478',
+                    isoCountry: businessInfo.country || 'AU',
+                    emergencyEnabled: false,
+                    friendlyName: 'Regulatory Address (Created via API)'
+                });
+                console.log(`[Create Bundle] New Address Created: ${address.sid}`);
+                addressSid = address.sid;
+            } else {
+                console.log(`[Create Bundle] Using Existing Address: ${addressSid}`);
+            }
 
             // 3. Upload Documents (Helper)
             const uploadDocument = (docType: string, filename: string, attributes: any) => new Promise<string>((resolve, reject) => {
@@ -139,7 +169,7 @@ export async function POST(request: Request) {
                 document_number: businessInfo.ein // Maps 'ein' form field to 'document_number' (ABN)
             };
             const addrAttrs = {
-                address_sids: [address.sid]
+                address_sids: [addressSid]
             };
 
             const regDocSid = await uploadDocument('commercial_registrar_excerpt', 'AWE2M8 Company Registration.pdf', regAttrs);
@@ -191,7 +221,7 @@ export async function POST(request: Request) {
                 success: true,
                 bundleSid: bundle.sid,
                 status: submitted.status,
-                addressSid: address.sid,
+                addressSid: addressSid,
                 friendlyName: submitted.friendlyName
             });
         }
@@ -246,6 +276,38 @@ export async function POST(request: Request) {
                 return NextResponse.json({ success: true, status: updated.status });
             } catch (e: any) {
                 console.error(`[Submit Bundle] Failed: ${e.message}`);
+                return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+            }
+        }
+
+        // =====================================================================
+        // ACTION: DELETE BUNDLE (Drafts Only ideally)
+        // =====================================================================
+        if (action === 'delete-bundle') {
+            const { bundleSid, subAccountSid } = body;
+            if (!bundleSid) {
+                return NextResponse.json({ success: false, error: 'Missing bundleSid' }, { status: 400 });
+            }
+
+            let targetClient = client;
+            // If subAccountSid provided and different from master, switch context
+            if (subAccountSid && subAccountSid !== accountSid) {
+                try {
+                    const subAccount = await client.api.v2010.accounts(subAccountSid).fetch();
+                    targetClient = twilio(subAccountSid, subAccount.authToken);
+                } catch (err: any) {
+                    return NextResponse.json({ success: false, error: `Invalid subAccountSid: ${err.message}` }, { status: 400 });
+                }
+            }
+
+            try {
+                // Determine status first? Or just try delete. Twilio only allows deleting DRAFT bundles usually.
+                // We'll trust the API to throw if not allowed.
+                await targetClient.numbers.v2.regulatoryCompliance.bundles(bundleSid).remove();
+                console.log(`[Delete Bundle] Deleted bundle ${bundleSid}`);
+                return NextResponse.json({ success: true });
+            } catch (e: any) {
+                console.error(`[Delete Bundle] Failed: ${e.message}`);
                 return NextResponse.json({ success: false, error: e.message }, { status: 500 });
             }
         }
