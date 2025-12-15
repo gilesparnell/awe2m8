@@ -473,6 +473,9 @@ export async function POST(request: Request) {
                         );
                     }
 
+                    // Reset params to avoid polluting state with previous attempts
+                    updateParams = { accountSid: targetAccountSid };
+
                     console.warn(`[Port] Compliance Constraint (AU/Bundle). Checking for valid bundles in target account...`);
 
                     try {
