@@ -476,10 +476,14 @@ export async function POST(request: Request) {
                     // Reset params to avoid polluting state with previous attempts
                     updateParams = { accountSid: targetAccountSid };
 
-                    console.warn(`[Port] Compliance Constraint (AU/Bundle). Checking for valid bundles in target account...`);
+                    console.error(`[Port] Compliance Constraint (AU/Bundle). Fetching credentials for ${targetAccountSid}...`);
 
                     try {
-                        const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+                        // FIX: Iterate using DIRECT SUBACCOUNT AUTH (Mirrors Debug Script)
+                        // Using Master+accountSid override sometimes hides Regulatory resources
+                        const subAccount = await client.api.v2010.accounts(targetAccountSid).fetch();
+                        const targetClient = twilio(targetAccountSid, subAccount.authToken);
+
 
                         // STRATEGY: Iterate ALL Approved Bundles, and for each, Iterate ALL Addresses
                         // This solves:
