@@ -579,16 +579,15 @@ export async function POST(request: Request) {
                             break;
                         } else {
                             console.warn("[Port] Exhausted all Bundle+Address combinations without success.");
-                            // Let the outer loop retry or fail
+                            throw new Error(
+                                `Target account ${targetAccountSid} requires an APPROVED Regulatory Bundle for ${targetCountryCode} (${numberType}). ` +
+                                `Tried ${allBundles.length} bundles and ${addrs.length} addresses, but none worked.`
+                            );
                         }
-                    } catch (checkErr) {
-                        console.warn(`[Port] Failed to check for bundles:`, checkErr);
+                    } catch (checkErr: any) {
+                        console.error(`[Port] Bundle/Address iteration failed:`, checkErr.message);
+                        throw checkErr;
                     }
-
-                    throw new Error(
-                        `Target account ${targetAccountSid} requires an APPROVED Regulatory Bundle for ${targetCountryCode} (${numberType}). ` +
-                        `No existing approved bundles for this type were found. Please create/approve a bundle in the target account.`
-                    );
                 }
 
                 // CASE 2: Generic Address Requirement (Legacy/Non-strict regions)
