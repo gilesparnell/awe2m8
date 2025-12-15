@@ -496,17 +496,16 @@ export async function POST(request: Request) {
                             updateParams.bundleSid = bundleSid;
 
                             // CRITICAL FIX: AU numbers often require BOTH BundleSid and AddressSid
-                            try {
-                                const addrs = await targetClient.addresses.list({
-                                    isoCountry: targetCountryCode || 'AU',
-                                    limit: 1
-                                });
+                            // AND the Address must be CONTAINED in the Bundle (Error 21651)
+                            // We must find which Address in the account is the correct one.
 
-                                if (addrs.length > 0) {
-                                    console.log(`[Port] Also attaching Address ${addrs[0].sid} to satisfy 21631.`);
-                                    updateParams.addressSid = addrs[0].sid;
-                                } else {
-                                    console.warn("[Port] No existing address found. Creating default address to satisfy 21631...");
+                            try {
+                                const addrs = await targetClient.addresses.list({ isoCountry: targetCountryCode || 'AU' });
+
+                                if (addrs.length === 0) {
+                                    // Create one if none exist, though it likely won't be in the bundle yet.
+                                    // This is a hail mary.
+                                    console.warn("[Port] No addresses found. Creating one...");
                                     const newAddr = await targetClient.addresses.create({
                                         customerName: 'AWE2M8 Porting',
                                         street: '50a Habitat Way',
@@ -515,15 +514,49 @@ export async function POST(request: Request) {
                                         postalCode: '2478',
                                         isoCountry: 'AU'
                                     });
-                                    updateParams.addressSid = newAddr.sid;
-                                    console.log(`[Port] Created Address ${newAddr.sid}`);
+                                    addrs.push(newAddr);
                                 }
+
+                                // ITERATIVE RETRY STRATEGY
+                                // We don't know which address is linked to the bundle.
+                                // We will try them sequentially until one works.
+                                let success = false;
+
+                                for (const addr of addrs) {
+                                    console.log(`[Port] Trying Bundle ${bundleSid} + Address ${addr.sid}...`);
+                                    updateParams.addressSid = addr.sid;
+
+                                    try {
+                                        updatedNumber = await client.api.v2010
+                                            .accounts(sourceAccountSid)
+                                            .incomingPhoneNumbers(sidToPort)
+                                            .update(updateParams);
+
+                                        console.log(`[Port] ✅ MATCH! Successfully transferred using Address ${addr.sid}`);
+                                        success = true;
+                                        break; // Success!
+                                    } catch (addrMismatchErr: any) {
+                                        // If it's the "Not contained in bundle" error, try next address
+                                        if (addrMismatchErr.code === 21651) {
+                                            console.warn(`[Port] Address ${addr.sid} mismatch (21651). Trying next...`);
+                                            continue;
+                                        }
+                                        // If it's a different error (e.g. invalid request), throw it.
+                                        throw addrMismatchErr;
+                                    }
+                                }
+
+                                if (success) break; // Break outer loop
+
+                                // If we ran out of addresses and none worked:
+                                console.warn("[Port] Failed to find a matching address for this bundle.");
+                                throw new Error(`Bundle ${bundleSid} requires a linked address, but none of the ${addrs.length} addresses in the account matched.`);
+
                             } catch (addrCheckErr) {
-                                console.warn("[Port] Failed to fetch/create address:", addrCheckErr);
+                                console.warn("[Port] Address iteration failed:", addrCheckErr);
+                                // Fall through to allow outer loop to handle or retry
                             }
 
-                            console.log("Retrying transfer with Bundle + Address...");
-                            continue;
                         } else {
                             // Fallback: Try searching for 'mobile' explicitly if numberType was undefined but we suspect mobile?
                             // No, strict matching is safer.
