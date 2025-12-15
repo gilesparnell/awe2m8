@@ -58,16 +58,19 @@ export async function POST(request: Request) {
 
         const numberDetails = await mainClient.api.v2010.accounts(sourceAccountSid).incomingPhoneNumbers(sidToPort).fetch();
 
-        // FIXED: Parse country from E.164 phoneNumber (no extra libs)
-        let countryCode = 'US'; // Default
+        // Parse country from E.164 phoneNumber
+        let countryCode = 'US';
+        let numberType = 'local';
         const phone = numberDetails.phoneNumber || '';
-        if (phone.startsWith('+61')) countryCode = 'AU';
-        else if (phone.startsWith('+1')) countryCode = 'US'; // Add more as needed
-        console.log(`[Port] Parsed country: ${countryCode}`);
+        if (phone.startsWith('+61')) {
+            countryCode = 'AU';
+            if (phone.startsWith('+614')) numberType = 'mobile';
+        } else if (phone.startsWith('+1')) {
+            countryCode = 'US';
+        }
+        console.log(`[Port] Parsed country: ${countryCode}, type: ${numberType}`);
 
         let updatedNumber: any;
-        let needsBundle = false;
-        let needsAddress = false;
 
         // Attempt 1 – simple transfer
         try {
@@ -78,45 +81,100 @@ export async function POST(request: Request) {
             console.log("[Port] Success – no regulatory requirements");
         } catch (err: any) {
             console.log(`[Port] Attempt 1 failed: ${err.code} - ${err.message}`);
-            if (err.code === 21649) needsBundle = true;
-            else if (err.code === 21631) needsAddress = true;
-            else throw err;
-        }
 
-        // Attempt 2 – add missing regulatory items
-        if (needsBundle || needsAddress) {
-            const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
-            const params: any = { accountSid: targetAccountSid };
+            // For AU numbers, we need BOTH bundle AND address
+            if (err.code === 21649 || err.code === 21631) {
+                console.log(`[Port] Regulatory requirement detected. Fetching resources from target account...`);
 
-            if (needsAddress) {
-                const addresses = await targetClient.addresses.list({ isoCountry: countryCode, limit: 20 });
-                const validAddr = addresses.find(a => a.validated === true);
-                if (!validAddr) return NextResponse.json({ success: false, error: `No validated address in target for ${countryCode}` }, { status: 400 });
-                params.addressSid = validAddr.sid;
-            }
+                // Get target account's own auth token for proper API access
+                const targetAccountDetails = await mainClient.api.v2010.accounts(targetAccountSid).fetch();
+                const targetClient = twilio(targetAccountSid, targetAccountDetails.authToken);
 
-            if (needsBundle) {
-                const sourceBundleSid = numberDetails.bundleSid;
-                if (!sourceBundleSid) return NextResponse.json({ success: false, error: 'Source number has no bundle' }, { status: 400 });
+                // Fetch ALL approved bundles for the country
+                const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                    status: 'twilio-approved',
+                    isoCountry: countryCode
+                });
 
-                // Clone source bundle → target (auto-approved)
-                const cloned = await mainClient.numbers.v2
-                    .bundleClone(sourceBundleSid)
-                    .create({
-                        targetAccountSid,
-                        friendlyName: `Clone for ${numberDetails.phoneNumber}`
+                console.log(`[Port] Found ${bundles.length} approved bundles in target account`);
+
+                if (bundles.length === 0) {
+                    return NextResponse.json({
+                        success: false,
+                        error: `Target account has no approved regulatory bundles for ${countryCode}. Please create and approve a bundle first.`
+                    }, { status: 400 });
+                }
+
+                // Fetch ALL addresses for the country
+                const addresses = await targetClient.addresses.list({ isoCountry: countryCode });
+
+                console.log(`[Port] Found ${addresses.length} addresses in target account`);
+
+                if (addresses.length === 0) {
+                    // Create a default address
+                    console.log(`[Port] No addresses found. Creating default address...`);
+                    const newAddr = await targetClient.addresses.create({
+                        customerName: 'AWE2M8 Porting',
+                        street: '50a Habitat Way',
+                        city: 'Lennox Head',
+                        region: 'NSW',
+                        postalCode: '2478',
+                        isoCountry: 'AU'
                     });
+                    addresses.push(newAddr);
+                }
 
-                params.bundleSid = cloned.bundleSid;
-                console.log(`[Port] Cloned bundle ${cloned.bundleSid}`);
+                // NESTED ITERATION: Try all Bundle + Address combinations
+                let portSuccess = false;
+
+                bundleLoop:
+                for (const bundle of bundles) {
+                    console.log(`[Port] Trying bundle: ${bundle.sid}`);
+
+                    for (const addr of addresses) {
+                        console.log(`[Port]   Trying address: ${addr.sid}`);
+
+                        try {
+                            updatedNumber = await mainClient.api.v2010
+                                .accounts(sourceAccountSid)
+                                .incomingPhoneNumbers(sidToPort)
+                                .update({
+                                    accountSid: targetAccountSid,
+                                    bundleSid: bundle.sid,
+                                    addressSid: addr.sid
+                                });
+
+                            console.log(`[Port] ✅ SUCCESS with bundle ${bundle.sid} + address ${addr.sid}`);
+                            portSuccess = true;
+                            break bundleLoop;
+
+                        } catch (innerErr: any) {
+                            if (innerErr.code === 21651) {
+                                // Address not in bundle - try next address
+                                console.log(`[Port]   Address mismatch (21651), trying next...`);
+                                continue;
+                            } else if (innerErr.code === 21649) {
+                                // Bundle rejected - try next bundle
+                                console.log(`[Port]   Bundle rejected (21649), trying next bundle...`);
+                                break;
+                            } else {
+                                // Unknown error - log but continue trying
+                                console.log(`[Port]   Error ${innerErr.code}: ${innerErr.message}`);
+                            }
+                        }
+                    }
+                }
+
+                if (!portSuccess) {
+                    return NextResponse.json({
+                        success: false,
+                        error: `Failed to port number. Tried ${bundles.length} bundles and ${addresses.length} addresses but none worked. Ensure target account has a valid bundle for ${countryCode} ${numberType} numbers.`
+                    }, { status: 400 });
+                }
+            } else {
+                // Different error - throw it
+                throw err;
             }
-
-            updatedNumber = await mainClient.api.v2010
-                .accounts(sourceAccountSid)
-                .incomingPhoneNumbers(sidToPort)
-                .update(params);
-
-            console.log("[Port] Success with regulatory requirements");
         }
 
         return NextResponse.json({
