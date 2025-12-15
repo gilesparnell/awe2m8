@@ -470,12 +470,25 @@ export async function POST(request: Request) {
 
                     try {
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
-                        const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+
+                        // STRATEGY 1: Strict Match (Mobile/Local/etc)
+                        console.log(`[Port] searching for bundles with strict match: ${numberType}`);
+                        let bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
                             status: 'twilio-approved',
                             isoCountry: targetCountryCode || 'AU',
-                            numberType: numberType, // STRICT MATCH: e.g. 'mobile'
+                            numberType: numberType, // STRICT MATCH
                             limit: 1
                         });
+
+                        // STRATEGY 2: Fallback (Any Approved Bundle for Country)
+                        if (bundles.length === 0) {
+                            console.warn(`[Port] No bundles found for ${numberType}. Trying broadly for country ${targetCountryCode || 'AU'}...`);
+                            bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                                status: 'twilio-approved',
+                                isoCountry: targetCountryCode || 'AU',
+                                limit: 1
+                            });
+                        }
 
                         if (bundles.length > 0) {
                             const bundleSid = bundles[0].sid;
