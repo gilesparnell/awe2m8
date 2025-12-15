@@ -478,96 +478,101 @@ export async function POST(request: Request) {
                     try {
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
 
-                        // STRATEGY 1: Strict Match (Mobile/Local/etc)
-                        console.log(`[Port] searching for bundles with strict match: ${numberType}`);
-                        let bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                        // STRATEGY: Iterate ALL Approved Bundles, and for each, Iterate ALL Addresses
+                        // This solves:
+                        // 1. "Bundle Rejected" (21649) -> Bundle doesn't match number capabilities -> Try next bundle
+                        // 2. "Address Not In Bundle" (21651) -> Address mismatch -> Try next address
+
+                        // 1. Fetch All Candidates
+                        let allBundles = [];
+
+                        // Strict First
+                        const strictBundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
                             status: 'twilio-approved',
                             isoCountry: targetCountryCode || 'AU',
-                            numberType: numberType, // STRICT MATCH
-                            limit: 1
+                            numberType: numberType
+                        });
+                        allBundles.push(...strictBundles);
+
+                        // Loose/Legacy (undefined type) Second
+                        const looseBundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                            status: 'twilio-approved',
+                            isoCountry: targetCountryCode || 'AU'
+                        });
+                        // Filter out duplicates (if strict found same as loose)
+                        const seenSids = new Set(allBundles.map(b => b.sid));
+                        looseBundles.forEach(b => {
+                            if (!seenSids.has(b.sid)) allBundles.push(b);
                         });
 
-                        // STRATEGY 2: Fallback (Any Approved Bundle for Country)
-                        if (bundles.length === 0) {
-                            console.warn(`[Port] No bundles found for ${numberType}. Trying broadly for country ${targetCountryCode || 'AU'}...`);
-                            bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
-                                status: 'twilio-approved',
-                                isoCountry: targetCountryCode || 'AU',
-                                limit: 1
-                            });
+                        if (allBundles.length === 0) {
+                            throw new Error(`Target account ${targetAccountSid} has NO approved bundles for ${targetCountryCode}.`);
                         }
 
-                        if (bundles.length > 0) {
-                            const bundleSid = bundles[0].sid;
-                            console.log(`[Port] ✅ Found approved matches-all bundle ${bundleSid}.`);
-                            updateParams.bundleSid = bundleSid;
+                        // 2. Fetch All Addresses
+                        const addrs = await targetClient.addresses.list({ isoCountry: targetCountryCode || 'AU' });
+                        if (addrs.length === 0) {
+                            console.warn("[Port] No addresses found. Creating temporary address...");
+                            const newAddr = await targetClient.addresses.create({
+                                customerName: 'AWE2M8 Porting',
+                                street: '50a Habitat Way',
+                                city: 'Lennox Head',
+                                region: 'NSW',
+                                postalCode: '2478',
+                                isoCountry: 'AU'
+                            });
+                            addrs.push(newAddr);
+                        }
 
-                            // CRITICAL FIX: AU numbers often require BOTH BundleSid and AddressSid
-                            // AND the Address must be CONTAINED in the Bundle (Error 21651)
-                            // We must find which Address in the account is the correct one.
+                        // 3. Nested Execution Loop
+                        let success = false;
 
-                            try {
-                                const addrs = await targetClient.addresses.list({ isoCountry: targetCountryCode || 'AU' });
+                        // Outer Loop: Bundles
+                        bundleLoop:
+                        for (const bundle of allBundles) {
+                            console.log(`[Port] Attempting with Bundle ${bundle.sid} (${bundle.numberType || 'generic'})...`);
+                            updateParams.bundleSid = bundle.sid;
 
-                                if (addrs.length === 0) {
-                                    // Create one if none exist, though it likely won't be in the bundle yet.
-                                    // This is a hail mary.
-                                    console.warn("[Port] No addresses found. Creating one...");
-                                    const newAddr = await targetClient.addresses.create({
-                                        customerName: 'AWE2M8 Porting',
-                                        street: '50a Habitat Way',
-                                        city: 'Lennox Head',
-                                        region: 'NSW',
-                                        postalCode: '2478',
-                                        isoCountry: 'AU'
-                                    });
-                                    addrs.push(newAddr);
-                                }
+                            // Inner Loop: Addresses
+                            for (const addr of addrs) {
+                                updateParams.addressSid = addr.sid;
 
-                                // ITERATIVE RETRY STRATEGY
-                                // We don't know which address is linked to the bundle.
-                                // We will try them sequentially until one works.
-                                let success = false;
+                                try {
+                                    updatedNumber = await client.api.v2010
+                                        .accounts(sourceAccountSid)
+                                        .incomingPhoneNumbers(sidToPort)
+                                        .update(updateParams);
 
-                                for (const addr of addrs) {
-                                    console.log(`[Port] Trying Bundle ${bundleSid} + Address ${addr.sid}...`);
-                                    updateParams.addressSid = addr.sid;
+                                    console.log(`[Port] ✅ MATCH! Port succeeded with Bundle ${bundle.sid} + Address ${addr.sid}`);
+                                    success = true;
+                                    break bundleLoop; // Break EVERYTHING, we are done!
 
-                                    try {
-                                        updatedNumber = await client.api.v2010
-                                            .accounts(sourceAccountSid)
-                                            .incomingPhoneNumbers(sidToPort)
-                                            .update(updateParams);
-
-                                        console.log(`[Port] ✅ MATCH! Successfully transferred using Address ${addr.sid}`);
-                                        success = true;
-                                        break; // Success!
-                                    } catch (addrMismatchErr: any) {
-                                        // If it's the "Not contained in bundle" error, try next address
-                                        if (addrMismatchErr.code === 21651) {
-                                            console.warn(`[Port] Address ${addr.sid} mismatch (21651). Trying next...`);
-                                            continue;
-                                        }
-                                        // If it's a different error (e.g. invalid request), throw it.
-                                        throw addrMismatchErr;
+                                } catch (innerErr: any) {
+                                    // Diagnose and Continue
+                                    if (innerErr.code === 21651) {
+                                        // Address mismatch - Try next address
+                                        // console.log(`[Port] Address ${addr.sid} not in bundle. Continuing...`);
+                                        continue;
                                     }
+                                    if (innerErr.code === 21649 || innerErr.message?.includes('Bundle required')) {
+                                        // Bundle rejected (even though we sent it). This means this bundle isn't valid for this number.
+                                        console.warn(`[Port] Bundle ${bundle.sid} rejected by Twilio (21649). Trying next bundle...`);
+                                        break; // Break inner loop, try next Bundle
+                                    }
+
+                                    // Any other error? We can't handle it here.
+                                    console.error(`[Port] Unexpected error with Bundle ${bundle.sid}: ${innerErr.message}`);
+                                    throw innerErr;
                                 }
-
-                                if (success) break; // Break outer loop
-
-                                // If we ran out of addresses and none worked:
-                                console.warn("[Port] Failed to find a matching address for this bundle.");
-                                throw new Error(`Bundle ${bundleSid} requires a linked address, but none of the ${addrs.length} addresses in the account matched.`);
-
-                            } catch (addrCheckErr) {
-                                console.warn("[Port] Address iteration failed:", addrCheckErr);
-                                // Fall through to allow outer loop to handle or retry
                             }
+                        }
 
+                        if (success) {
+                            // Break the outer retry loop 'while (attempts < max)'
+                            break;
                         } else {
-                            // Fallback: Try searching for 'mobile' explicitly if numberType was undefined but we suspect mobile?
-                            // No, strict matching is safer.
-                            console.warn(`[Port] No bundles found matching type ${numberType}.`);
+                            console.warn("[Port] Exhausted all Bundle+Address combinations without success.");
+                            // Let the outer loop retry or fail
                         }
                     } catch (checkErr) {
                         console.warn(`[Port] Failed to check for bundles:`, checkErr);
