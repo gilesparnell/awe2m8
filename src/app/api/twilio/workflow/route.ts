@@ -438,19 +438,48 @@ export async function POST(request: Request) {
                     throw portError;
                 }
 
-                // CASE 1: Address Requirement (Error 21631)
-                if (portError.code === 21631 || portError.message?.includes('AddressSid')) {
-                    console.warn(`[Port] Missing Address (21631). Creating address in TARGET account...`);
+                // CASE 1: Bundle Requirement (or AU Address Requirement which needs Bundle)
+                // Error 21649 = Bundle Required
+                // Error 21631 = Address Required (But for AU, we need Bundle)
+                const isBundleError = portError.code === 21649 || portError.message?.includes('Bundle required');
+                const isAddressError = portError.code === 21631 || portError.message?.includes('AddressSid');
+                const needsBundle = isBundleError || (isAddressError && targetCountryCode === 'AU');
 
-                    // Create a generic address in the TARGET account
-                    // This is better than trying to reference an existing one
+                if (needsBundle) {
+                    console.warn(`[Port] Compliance Constraint (AU/Bundle). Checking for valid bundles in target account...`);
+
                     try {
-                        // Use target account credentials to create address
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+                        const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
+                            status: 'twilio-approved',
+                            isoCountry: targetCountryCode || 'AU',
+                            limit: 1
+                        });
 
+                        if (bundles.length > 0) {
+                            const bundleSid = bundles[0].sid;
+                            console.log(`[Port] ✅ Found approved bundle ${bundleSid}. Retrying transfer using this bundle.`);
+                            updateParams.bundleSid = bundleSid;
+                            continue;
+                        }
+                    } catch (checkErr) {
+                        console.warn(`[Port] Failed to check for bundles:`, checkErr);
+                    }
+
+                    throw new Error(
+                        `Target account ${targetAccountSid} requires an APPROVED Regulatory Bundle for ${targetCountryCode}. ` +
+                        `No existing approved bundles were found. Please create and approve a bundle in the target account, then try again.`
+                    );
+                }
+
+                // CASE 2: Generic Address Requirement (Legacy/Non-strict regions)
+                if (isAddressError) {
+                    console.warn(`[Port] Missing Address (21631). Creating generic address in TARGET account...`);
+                    try {
+                        const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
                         const newAddress = await targetClient.addresses.create({
                             customerName: 'Transfer Address',
-                            street: '123 Transfer Street', // Placeholder
+                            street: '123 Transfer Street',
                             city: 'Sydney',
                             region: targetCountryCode === 'AU' ? 'NSW' : 'CA',
                             postalCode: targetCountryCode === 'AU' ? '2000' : '94102',
@@ -458,55 +487,13 @@ export async function POST(request: Request) {
                             emergencyEnabled: false
                         });
 
-                        console.log(`[Port] Created Address ${newAddress.sid} in target account. Retrying transfer with this address...`);
-
-                        // Now add the address to update params
+                        console.log(`[Port] Created Address ${newAddress.sid}. Retrying...`);
                         updateParams.addressSid = newAddress.sid;
-                        continue; // Retry the transfer
+                        continue;
                     } catch (addrErr: any) {
                         console.error(`[Port] Failed to create address:`, addrErr);
-                        throw new Error(
-                            `Failed to create address in target account: ${addrErr.message}. ` +
-                            `Please create an address manually in account ${targetAccountSid}.`
-                        );
+                        throw new Error(`Failed to create fallback address: ${addrErr.message}`);
                     }
-                }
-                // CASE 2: Bundle Requirement (Error 21649)
-                else if (portError.code === 21649 || portError.message?.includes('Bundle required')) {
-                    console.error(
-                        `[Port] Bundle Required (21649). Target account ${targetAccountSid} needs an approved regulatory bundle for ` +
-                        `${targetCountryCode || 'this country'} ${numberType || 'mobile'} numbers.`
-                    );
-
-                    // OPTION A: Check if target has ANY approved bundles
-                    try {
-                        const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
-
-                        const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
-                            status: 'twilio-approved',
-                            isoCountry: targetCountryCode,
-                            limit: 1
-                        });
-
-                        if (bundles.length > 0) {
-                            const bundleSid = bundles[0].sid;
-                            console.log(`[Port] Found approved bundle ${bundleSid} in target account, but cannot directly reference it.`);
-                            console.log(`[Port] Twilio should auto-match this bundle. The issue may be that the bundle doesn't match the number type.`);
-                        }
-                    } catch (bundleCheckErr) {
-                        console.warn(`[Port] Could not check for bundles:`, bundleCheckErr);
-                    }
-
-                    throw new Error(
-                        `Target account ${targetAccountSid} needs a 'twilio-approved' regulatory bundle for ` +
-                        `${targetCountryCode || 'AU'} ${numberType || 'mobile'} numbers. ` +
-                        `\n\nSteps to fix:\n` +
-                        `1. Create a bundle in the TARGET account (${targetAccountSid})\n` +
-                        `2. Ensure bundle is for country: ${targetCountryCode}, number type: ${numberType}\n` +
-                        `3. Wait for bundle to be approved (status: 'twilio-approved')\n` +
-                        `4. Then retry the transfer\n\n` +
-                        `Use the Bundle Manager tool or Twilio Console to create the bundle.`
-                    );
                 }
                 else {
                     // Unknown error, rethrow

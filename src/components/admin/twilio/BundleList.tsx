@@ -38,6 +38,10 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
 
     const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
+    // Confirmation Modal State
+    const [confirmation, setConfirmation] = useState<{ type: 'delete' | 'submit'; bundle: Bundle } | null>(null);
+    const [actionLoading, setActionLoading] = useState(false);
+
     // Constants
     const HISTORY_PAGE_SIZE = 10;
 
@@ -209,6 +213,51 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
     // We no longer block on missing credentials, as the server might have them in Env Vars.
     const isUsingServerCreds = !credentials.accountSid;
 
+    const proceedWithAction = async () => {
+        if (!confirmation) return;
+        setActionLoading(true);
+        const { type, bundle } = confirmation;
+        const subAccountSid = bundle._accountSid || targetSubAccountSid || credentials.accountSid;
+
+        try {
+            const res = await fetch('/api/twilio/workflow', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: type === 'delete' ? 'delete-bundle' : 'submit-bundle',
+                    bundleSid: bundle.sid,
+                    subAccountSid,
+                    ...(type === 'submit' ? {
+                        accountSid: credentials.accountSid,
+                        authToken: credentials.authToken
+                    } : {})
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const d = await res.json();
+
+            if (d.success) {
+                fetchRecentActivity();
+                setConfirmation(null);
+                if (type === 'submit') {
+                    // Clear any previous error for this bundle
+                    setActionErrors(prev => { const n = { ...prev }; delete n[bundle.sid]; return n; });
+                }
+            } else {
+                if (type === 'submit') {
+                    setActionErrors(prev => ({ ...prev, [bundle.sid]: d.error }));
+                } else {
+                    alert('Error: ' + d.error);
+                }
+                setConfirmation(null);
+            }
+        } catch (e: any) {
+            alert('Failed to execute action');
+            setConfirmation(null);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     // Filter Recent List for display
     const pendingReviewBundles = recentBundles.filter(b => b.status === 'pending-review' || b.status === 'in-review' || b.status === 'draft');
 
@@ -292,56 +341,13 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     <span className="text-[10px] text-yellow-500/80 mb-1 font-mono">Draft State</span>
                     <div className="flex gap-2">
                         <button
-                            onClick={async () => {
-                                if (!confirm('Are you sure you want to PERMANENTLY delete this draft bundle?')) return;
-                                try {
-                                    const res = await fetch('/api/twilio/workflow', {
-                                        method: 'POST',
-                                        body: JSON.stringify({
-                                            action: 'delete-bundle',
-                                            bundleSid: bundle.sid,
-                                            subAccountSid: bundle._accountSid || targetSubAccountSid || credentials.accountSid
-                                        }),
-                                        headers: { 'Content-Type': 'application/json' }
-                                    });
-                                    const d = await res.json();
-                                    if (d.success) fetchRecentActivity();
-                                    else alert('Error: ' + d.error);
-                                } catch (e) { alert('Failed to delete'); }
-                            }}
+                            onClick={() => setConfirmation({ type: 'delete', bundle })}
                             className="text-xs bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1 rounded border border-red-900/50 transition-colors"
                         >
                             Delete
                         </button>
                         <button
-                            onClick={async () => {
-                                // Clear previous error
-                                setActionErrors(prev => { const n = { ...prev }; delete n[bundle.sid]; return n; });
-
-                                if (!confirm('This bundle is in Draft. Submit for review now?')) return;
-                                try {
-                                    const res = await fetch('/api/twilio/workflow', {
-                                        method: 'POST',
-                                        body: JSON.stringify({
-                                            action: 'submit-bundle',
-                                            bundleSid: bundle.sid,
-                                            accountSid: credentials.accountSid,
-                                            authToken: credentials.authToken,
-                                            subAccountSid: bundle._accountSid || targetSubAccountSid || credentials.accountSid
-                                        }),
-                                        headers: { 'Content-Type': 'application/json' }
-                                    });
-                                    const d = await res.json();
-                                    if (d.success) {
-                                        fetchRecentActivity();
-                                    }
-                                    else {
-                                        setActionErrors(prev => ({ ...prev, [bundle.sid]: d.error }));
-                                    }
-                                } catch (e: any) {
-                                    setActionErrors(prev => ({ ...prev, [bundle.sid]: e.message || 'Failed to submit' }));
-                                }
-                            }}
+                            onClick={() => setConfirmation({ type: 'submit', bundle })}
                             className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-700 transition-colors"
                         >
                             Submit Now
@@ -590,6 +596,42 @@ export const BundleList: React.FC<BundleListProps> = ({ credentials }) => {
                     </div>
                 )}
             </div>
+            {/* Confirmation Modal */}
+            {confirmation && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-gray-900 border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-xl font-bold text-white mb-2">
+                            {confirmation.type === 'delete' ? 'Delete Bundle?' : 'Submit Bundle?'}
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-6">
+                            {confirmation.type === 'delete'
+                                ? "Are you sure you want to PERMANENTLY delete this bundle? This cannot be undone."
+                                : "Are you sure you want to submit this bundle for review? It will be locked."}
+                        </p>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setConfirmation(null)}
+                                disabled={actionLoading}
+                                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={proceedWithAction}
+                                disabled={actionLoading}
+                                className={`px-4 py-2 rounded-lg font-bold text-white transition-all flex items-center gap-2 ${confirmation.type === 'delete'
+                                        ? 'bg-red-600 hover:bg-red-500'
+                                        : 'bg-blue-600 hover:bg-blue-500'
+                                    }`}
+                            >
+                                {actionLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                                {confirmation.type === 'delete' ? 'Delete' : 'Submit'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
