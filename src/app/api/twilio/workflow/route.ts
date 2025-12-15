@@ -432,6 +432,13 @@ export async function POST(request: Request) {
             } catch (portError: any) {
                 console.error(`[Port] Update failed on attempt ${attempts}. Code: ${portError.code}, Message: ${portError.message}`);
 
+                // Friendly 404: Number likely already moved
+                if (portError.code === 20404 || portError.status === 404) {
+                    throw new Error(
+                        `The phone number could not be found in the Source Account. It may have already been moved to the Target Account. Refresh the page to check.`
+                    );
+                }
+
                 // If last attempt, throw the error
                 if (attempts >= maxAttempts) {
                     // Provide helpful error message
