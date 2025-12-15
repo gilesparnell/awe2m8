@@ -371,12 +371,18 @@ export async function POST(request: Request) {
                 else if (numberDetails.phoneNumber.startsWith('+44')) targetCountryCode = 'GB';
             }
 
-            // Determine number type (mobile, local, toll-free)
-            const capabilities = numberDetails.capabilities;
-            if (capabilities?.mms || capabilities?.sms) {
+            // Determine number type
+            // Explicitly check for mobile pattern for AU
+            if (numberDetails.phoneNumber && numberDetails.phoneNumber.startsWith('+614')) {
                 numberType = 'mobile';
             } else {
-                numberType = 'local';
+                // Fallback to capabilities
+                const capabilities = numberDetails.capabilities;
+                if (capabilities?.mms || capabilities?.sms) {
+                    numberType = 'mobile';
+                } else {
+                    numberType = 'local';
+                }
             }
 
             if (targetCountryCode) {
@@ -384,6 +390,11 @@ export async function POST(request: Request) {
             }
         } catch (detailsErr) {
             console.warn(`[Port] Failed to fetch details for number ${sidToPort}, defaulting to broader search.`, detailsErr);
+            // Fallback inference if API fails
+            if (phoneNumber && phoneNumber.startsWith('+614')) {
+                targetCountryCode = 'AU';
+                numberType = 'mobile';
+            }
         }
 
         // =======================================================================
@@ -446,6 +457,15 @@ export async function POST(request: Request) {
                 const needsBundle = isBundleError || (isAddressError && targetCountryCode === 'AU');
 
                 if (needsBundle) {
+                    // LOOP PREVENTION: If we already provided a bundleSid and it Failed again with 21649, 
+                    // that means the bundle we provided was REJECTED. Don't loop infinitely.
+                    if (updateParams.bundleSid && portError.code === 21649) {
+                        throw new Error(
+                            `The target account has a bundle (${updateParams.bundleSid}), but it was rejected for this number type. ` +
+                            `Ensure you have an approved bundle specifically for ${numberType || 'this number type'}.`
+                        );
+                    }
+
                     console.warn(`[Port] Compliance Constraint (AU/Bundle). Checking for valid bundles in target account...`);
 
                     try {
@@ -453,22 +473,56 @@ export async function POST(request: Request) {
                         const bundles = await targetClient.numbers.v2.regulatoryCompliance.bundles.list({
                             status: 'twilio-approved',
                             isoCountry: targetCountryCode || 'AU',
+                            numberType: numberType, // STRICT MATCH: e.g. 'mobile'
                             limit: 1
                         });
 
                         if (bundles.length > 0) {
                             const bundleSid = bundles[0].sid;
-                            console.log(`[Port] ✅ Found approved bundle ${bundleSid}. Retrying transfer using this bundle.`);
+                            console.log(`[Port] ✅ Found approved matches-all bundle ${bundleSid}.`);
                             updateParams.bundleSid = bundleSid;
+
+                            // CRITICAL FIX: AU numbers often require BOTH BundleSid and AddressSid
+                            try {
+                                const addrs = await targetClient.addresses.list({
+                                    isoCountry: targetCountryCode || 'AU',
+                                    limit: 1
+                                });
+
+                                if (addrs.length > 0) {
+                                    console.log(`[Port] Also attaching Address ${addrs[0].sid} to satisfy 21631.`);
+                                    updateParams.addressSid = addrs[0].sid;
+                                } else {
+                                    console.warn("[Port] No existing address found. Creating default address to satisfy 21631...");
+                                    const newAddr = await targetClient.addresses.create({
+                                        customerName: 'AWE2M8 Porting',
+                                        street: '50a Habitat Way',
+                                        city: 'Lennox Head',
+                                        region: 'NSW',
+                                        postalCode: '2478',
+                                        isoCountry: 'AU'
+                                    });
+                                    updateParams.addressSid = newAddr.sid;
+                                    console.log(`[Port] Created Address ${newAddr.sid}`);
+                                }
+                            } catch (addrCheckErr) {
+                                console.warn("[Port] Failed to fetch/create address:", addrCheckErr);
+                            }
+
+                            console.log("Retrying transfer with Bundle + Address...");
                             continue;
+                        } else {
+                            // Fallback: Try searching for 'mobile' explicitly if numberType was undefined but we suspect mobile?
+                            // No, strict matching is safer.
+                            console.warn(`[Port] No bundles found matching type ${numberType}.`);
                         }
                     } catch (checkErr) {
                         console.warn(`[Port] Failed to check for bundles:`, checkErr);
                     }
 
                     throw new Error(
-                        `Target account ${targetAccountSid} requires an APPROVED Regulatory Bundle for ${targetCountryCode}. ` +
-                        `No existing approved bundles were found. Please create and approve a bundle in the target account, then try again.`
+                        `Target account ${targetAccountSid} requires an APPROVED Regulatory Bundle for ${targetCountryCode} (${numberType}). ` +
+                        `No existing approved bundles for this type were found. Please create/approve a bundle in the target account.`
                     );
                 }
 
