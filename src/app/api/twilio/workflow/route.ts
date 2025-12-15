@@ -530,7 +530,7 @@ export async function POST(request: Request) {
                         // Outer Loop: Bundles
                         bundleLoop:
                         for (const bundle of allBundles) {
-                            console.log(`[Port] Attempting with Bundle ${bundle.sid} (${bundle.numberType || 'generic'})...`);
+                            console.log(`[Port] Attempting with Bundle ${bundle.sid} (${(bundle as any).numberType || 'generic'})...`);
                             updateParams.bundleSid = bundle.sid;
 
                             // Inner Loop: Addresses
