@@ -73,6 +73,7 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
         }
 
         console.log("NumberManager: Starting fetchAllData...");
+        setOpenMenuSid(null); // Close any open menus so overlay doesn't block UI
         setLoading(true);
         setError(null);
         setSubAccounts([]);
