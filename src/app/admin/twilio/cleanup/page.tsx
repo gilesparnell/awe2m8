@@ -229,8 +229,7 @@ export default function CleanupPage() {
                                     <table className="w-full text-left text-sm">
                                         <thead>
                                             <tr className="bg-gray-800/50 text-gray-400 border-b border-gray-800">
-                                                <th className="px-6 py-3 font-semibold">Address</th>
-                                                <th className="px-6 py-3 font-semibold">Details</th>
+                                                <th className="px-6 py-3 font-semibold">Address Details</th>
                                                 <th className="px-6 py-3 font-semibold">Created</th>
                                                 <th className="px-6 py-3 font-semibold">Status</th>
                                                 <th className="px-6 py-3 font-semibold text-right">Action</th>
@@ -241,13 +240,11 @@ export default function CleanupPage() {
                                                 <tr key={dup.sid} className="hover:bg-gray-800/30 transition-colors">
                                                     <td className="px-6 py-3">
                                                         <div className="font-medium text-white">{dup.customerName}</div>
-                                                        <div className="text-[10px] text-gray-500 font-mono space-y-0.5">
+                                                        <div className="text-[10px] text-gray-500 font-mono space-y-0.5 mt-1">
                                                             <div>{dup.sid}</div>
-                                                            <div className="text-gray-600 truncate max-w-[150px]">{dup.friendlyName}</div>
+                                                            <div className="text-gray-400 font-sans">{dup.street}, {dup.city}, {dup.isoCountry}</div>
+                                                            <div className="text-gray-600 truncate max-w-[200px]">{dup.friendlyName}</div>
                                                         </div>
-                                                    </td>
-                                                    <td className="px-6 py-3 text-gray-400 text-xs">
-                                                        {dup.street}, {dup.city}, {dup.isoCountry}
                                                     </td>
                                                     <td className="px-6 py-3 text-gray-400 text-xs whitespace-nowrap">
                                                         {new Date(dup.dateCreated).toLocaleString()}
