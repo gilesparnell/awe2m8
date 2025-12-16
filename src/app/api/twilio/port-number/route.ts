@@ -42,6 +42,19 @@ export async function POST(request: Request) {
             });
         }
 
+        // LIST SUBACCOUNTS (Automatic Discovery)
+        if (action === 'list-accounts') {
+            const subAccounts = await mainClient.api.v2010.accounts.list({ status: 'active', limit: 100 });
+
+            return NextResponse.json({
+                success: true,
+                subAccounts: subAccounts.map(a => ({
+                    sid: a.sid,
+                    friendlyName: a.friendlyName
+                }))
+            });
+        }
+
         // PORT NUMBER
         if (!sourceAccountSid || !targetAccountSid) {
             return NextResponse.json({ success: false, error: 'Missing sourceAccountSid or targetAccountSid' }, { status: 400 });

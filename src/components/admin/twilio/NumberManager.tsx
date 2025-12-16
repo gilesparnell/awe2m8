@@ -76,7 +76,15 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
         try {
             // First get list of subaccounts
-            const accountsRes = await fetch('/api/twilio/config');
+            const accountsRes = await fetch('/api/twilio/port-number', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'list-accounts',
+                    accountSid: credentials.accountSid,
+                    authToken: credentials.authToken
+                })
+            });
             const accountsData = await accountsRes.json();
 
             // Fetch numbers from each known subaccount
