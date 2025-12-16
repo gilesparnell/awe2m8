@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { ModuleType } from '@/types';
 import { useAdminState } from '@/hooks/useAdminState';
-import { AdminHeader, InstructionsPanel } from '@/components/admin/AdminHeader';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+// InstructionsPanel removed as it's not exported
 import { ModeSelector } from '@/components/admin/ModeSelector';
 import { PageSelector } from '@/components/admin/PageSelector';
 import { URLInput } from '@/components/admin/URLInput';
@@ -54,7 +55,6 @@ export default function AdminPage() {
     return (
         <div className="min-h-screen bg-gray-950 text-white p-8 font-sans">
             <div className="max-w-4xl mx-auto">
-                <AdminHeader />
 
                 <div className="mb-6">
                     <Link href="/admin" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
@@ -63,7 +63,6 @@ export default function AdminPage() {
                     </Link>
                 </div>
 
-                <InstructionsPanel />
 
                 <ModeSelector mode={mode} onModeChange={handleModeChange} />
 

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
-import { auth } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/api-auth';
 
 export async function POST(request: Request) {
-    const session = await auth();
-    if (!session?.user) {
+    if (!await isAuthenticated(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

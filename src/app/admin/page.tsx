@@ -64,6 +64,23 @@ export default function AdminDashboard() {
                         <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
                     </Link>
 
+                    {/* Tool 3: Admin Users */}
+                    <Link href="/admin/users" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-amber-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-500/20 transition-colors">
+                                <ShieldCheck className="w-6 h-6 text-amber-400 group-hover:text-amber-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">Admin Users</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Manage admin access, add new team members, and review user roles.
+                            </p>
+                            <div className="flex items-center text-amber-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all"></div>
+                    </Link>
+
                     {/* Tool 3: Placeholder / System Config */}
                     <div className="group relative overflow-hidden bg-gray-900/50 border border-gray-800 rounded-2xl p-6 opacity-60">
                         <div className="relative z-10">

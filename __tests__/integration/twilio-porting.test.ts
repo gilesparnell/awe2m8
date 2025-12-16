@@ -11,17 +11,45 @@
  * Set TEST_PHONE_NUMBER to specify the number to test with
  */
 
-const API_BASE_URL = process.env.API_BASE_URL || 'https://internal.awe2m8.ai';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 const TEST_PHONE_NUMBER = process.env.TEST_PHONE_NUMBER || '+61468170318';
+// Key must match what is set in server .env.local
+const TEST_API_KEY = process.env.TEST_API_KEY || 'INTEGRATION_TEST_KEY';
+
+// ... ACCOUNTS const ...
+
+// Helper for authenticated fetch
+const authedFetch = (url: string, options: RequestInit = {}) => {
+    return fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'x-test-api-key': TEST_API_KEY,
+            ...options.headers,
+        },
+    });
+};
+
+// ... replace fetch with authedFetch ...
+
 
 // Test account SIDs from environment variables
 // Set these in your CI/CD environment or .env.test file
-const ACCOUNTS = {
+// function to get accounts lazily
+const getAccounts = () => ({
     AWE2M8: process.env.TEST_ACCOUNT_AWE2M8 || '',
     TEST: process.env.TEST_ACCOUNT_TEST || '',
     ACCOUNT77: process.env.TEST_ACCOUNT_77 || '',
     FITNESS_BOXX: process.env.TEST_ACCOUNT_FITNESS || '',
-};
+});
+
+// Logs for debugging
+const accs = getAccounts();
+console.log('DEBUG: Loaded Accounts:', {
+    AWE2M8: accs.AWE2M8 ? '***' + accs.AWE2M8.slice(-4) : 'MISSING',
+    TEST: accs.TEST ? '***' + accs.TEST.slice(-4) : 'MISSING'
+});
+
 
 // Skip tests if not explicitly enabled
 const isIntegrationEnabled = process.env.INTEGRATION_TEST === 'true';
@@ -38,12 +66,11 @@ describe('Integration: Twilio Porting', () => {
         it('should respond to port-number endpoint', async () => {
             if (!isIntegrationEnabled) return;
 
-            const response = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const response = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list',
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
+                    sourceAccountSid: getAccounts().AWE2M8,
                 }),
             });
 
@@ -55,12 +82,11 @@ describe('Integration: Twilio Porting', () => {
         it('should list numbers in an account', async () => {
             if (!isIntegrationEnabled) return;
 
-            const response = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const response = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list',
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
+                    sourceAccountSid: getAccounts().AWE2M8,
                 }),
             });
 
@@ -77,12 +103,11 @@ describe('Integration: Twilio Porting', () => {
             if (!isIntegrationEnabled) return;
 
             // First, find where the number currently is
-            const findResponse = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const findResponse = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list',
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
+                    sourceAccountSid: getAccounts().AWE2M8,
                 }),
             });
 
@@ -97,12 +122,11 @@ describe('Integration: Twilio Porting', () => {
             }
 
             // Perform the port
-            const portResponse = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const portResponse = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
-                    targetAccountSid: ACCOUNTS.TEST,
+                    sourceAccountSid: getAccounts().AWE2M8,
+                    targetAccountSid: getAccounts().TEST,
                     phoneNumber: TEST_PHONE_NUMBER,
                 }),
             });
@@ -110,19 +134,18 @@ describe('Integration: Twilio Porting', () => {
             const portData = await portResponse.json();
 
             expect(portData.success).toBe(true);
-            expect(portData.data.newAccountSid).toBe(ACCOUNTS.TEST);
+            expect(portData.data.newAccountSid).toBe(getAccounts().TEST);
         }, 60000); // 60s timeout for live API calls
 
         it('should port number back to AWE2M8', async () => {
             if (!isIntegrationEnabled) return;
 
             // Find where number is now
-            const findResponse = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const findResponse = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list',
-                    sourceAccountSid: ACCOUNTS.TEST,
+                    sourceAccountSid: getAccounts().TEST,
                 }),
             });
 
@@ -137,12 +160,11 @@ describe('Integration: Twilio Porting', () => {
             }
 
             // Port back to AWE2M8
-            const portResponse = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const portResponse = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sourceAccountSid: ACCOUNTS.TEST,
-                    targetAccountSid: ACCOUNTS.AWE2M8,
+                    sourceAccountSid: getAccounts().TEST,
+                    targetAccountSid: getAccounts().AWE2M8,
                     phoneNumber: TEST_PHONE_NUMBER,
                 }),
             });
@@ -150,7 +172,7 @@ describe('Integration: Twilio Porting', () => {
             const portData = await portResponse.json();
 
             expect(portData.success).toBe(true);
-            expect(portData.data.newAccountSid).toBe(ACCOUNTS.AWE2M8);
+            expect(portData.data.newAccountSid).toBe(getAccounts().AWE2M8);
         }, 60000);
     });
 });
@@ -160,12 +182,11 @@ describe('Regression: Known Bug Fixes', () => {
         it('should NOT throw raw 21649 error for AU numbers', async () => {
             if (!isIntegrationEnabled) return;
 
-            const response = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const response = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
-                    targetAccountSid: ACCOUNTS.TEST,
+                    sourceAccountSid: getAccounts().AWE2M8,
+                    targetAccountSid: getAccounts().TEST,
                     phoneNumber: TEST_PHONE_NUMBER,
                 }),
             });
@@ -187,12 +208,11 @@ describe('Regression: Known Bug Fixes', () => {
             // This is tested implicitly by the port sequence succeeding
             // If it fails with 21651, the iteration logic is broken
 
-            const response = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const response = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
-                    targetAccountSid: ACCOUNTS.ACCOUNT77,
+                    sourceAccountSid: getAccounts().AWE2M8,
+                    targetAccountSid: getAccounts().ACCOUNT77,
                     phoneNumber: TEST_PHONE_NUMBER,
                 }),
             });
@@ -210,12 +230,11 @@ describe('Regression: Known Bug Fixes', () => {
             if (!isIntegrationEnabled) return;
 
             // Verify the correct route is being used by checking response format
-            const response = await fetch(`${API_BASE_URL}/api/twilio/port-number`, {
+            const response = await authedFetch(`${API_BASE_URL}/api/twilio/port-number`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list',
-                    sourceAccountSid: ACCOUNTS.AWE2M8,
+                    sourceAccountSid: getAccounts().AWE2M8,
                 }),
             });
 

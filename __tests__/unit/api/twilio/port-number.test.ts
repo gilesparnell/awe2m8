@@ -27,6 +27,11 @@ jest.mock('twilio', () => ({
     default: jest.fn().mockImplementation(createMockTwilioClient),
 }));
 
+// Mock Auth
+jest.mock('@/lib/auth', () => ({
+    auth: jest.fn().mockResolvedValue({ user: { email: 'test@example.com' } })
+}));
+
 // Mock NextResponse
 jest.mock('next/server', () => ({
     NextResponse: {

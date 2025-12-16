@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom';
-import dotenv from 'dotenv';
+import { loadEnvConfig } from '@next/env';
 import path from 'path';
 
-// Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+// Load environment variables from all .env files using Next.js logic
+loadEnvConfig(process.cwd());
 
 // Global test timeout
 jest.setTimeout(30000);

@@ -37,6 +37,7 @@ const config: Config = {
                 '<rootDir>/__tests__/unit/api/**/*.test.ts',
                 '<rootDir>/__tests__/unit/lib/**/*.test.ts'
             ],
+            setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
             transform: {
                 '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
             },
@@ -68,6 +69,7 @@ const config: Config = {
             displayName: 'integration',
             testEnvironment: 'node',
             testMatch: ['<rootDir>/__tests__/integration/**/*.test.ts'],
+            setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
             transform: {
                 '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
             },
