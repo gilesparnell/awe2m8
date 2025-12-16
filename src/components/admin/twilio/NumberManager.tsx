@@ -67,9 +67,12 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
     // Fetch all subaccounts and their numbers
     const fetchAllData = useCallback(async () => {
+        // We allow the request to proceed even without client-side credentials,
+        // as the backend may have server-side environment variables configured.
         if (!credentials.accountSid || !credentials.authToken) {
-            console.log("NumberManager: No credentials available yet.");
-            return;
+            console.log("NumberManager: No client credentials provided. Attempting to use Server Environment Variables via API...");
+        } else {
+            console.log("NumberManager: Using provided client credentials.");
         }
 
         console.log("NumberManager: Starting fetchAllData...");
@@ -86,13 +89,14 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'list-accounts',
-                    accountSid: credentials.accountSid,
-                    authToken: credentials.authToken
+                    accountSid: credentials.accountSid || '',
+                    authToken: credentials.authToken || ''
                 })
             });
 
             if (!accountsRes.ok) {
-                throw new Error(`Failed to fetch accounts: ${accountsRes.statusText}`);
+                const errorData = await accountsRes.json().catch(() => ({}));
+                throw new Error(errorData.error || `Failed to fetch accounts: ${accountsRes.statusText}`);
             }
 
             const accountsData = await accountsRes.json();
