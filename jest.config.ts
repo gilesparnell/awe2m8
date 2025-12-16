@@ -31,11 +31,28 @@ const config: Config = {
     // Separate test projects for unit vs integration
     projects: [
         {
-            displayName: 'unit',
+            displayName: 'unit-api',
             testEnvironment: 'node',
-            testMatch: ['<rootDir>/__tests__/unit/**/*.test.ts'],
+            testMatch: ['<rootDir>/__tests__/unit/api/**/*.test.ts'],
             transform: {
                 '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
+            },
+            moduleNameMapper: {
+                '^@/(.*)$': '<rootDir>/src/$1',
+            },
+        },
+        {
+            displayName: 'unit-components',
+            testEnvironment: 'jsdom',
+            testMatch: ['<rootDir>/__tests__/unit/components/**/*.test.tsx'],
+            setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+            transform: {
+                '^.+\\.tsx?$': ['ts-jest', {
+                    useESM: true,
+                    tsconfig: {
+                        jsx: 'react-jsx'
+                    }
+                }],
             },
             moduleNameMapper: {
                 '^@/(.*)$': '<rootDir>/src/$1',
