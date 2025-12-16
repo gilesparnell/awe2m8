@@ -210,6 +210,73 @@ export default function CleanupPage() {
                             </div>
                         </div>
 
+                        {/* Duplicate Details Table */}
+                        {healthData.addresses.duplicates && healthData.addresses.duplicates.length > 0 && (
+                            <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden mt-6">
+                                <div className="px-6 py-4 border-b border-gray-800 bg-gray-900 flex justify-between items-center">
+                                    <h3 className="text-gray-200 font-bold flex items-center gap-2">
+                                        <ShieldAlert className="w-4 h-4 text-orange-400" />
+                                        Detected Duplicates
+                                        <span className="text-xs font-normal text-gray-500 ml-2 bg-gray-800 px-2 py-0.5 rounded-full">
+                                            {healthData.addresses.duplicates.length} items
+                                        </span>
+                                    </h3>
+                                    <span className="text-xs text-blue-400 font-mono">
+                                        Subaccount: {subAccountSid}
+                                    </span>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-sm">
+                                        <thead>
+                                            <tr className="bg-gray-800/50 text-gray-400 border-b border-gray-800">
+                                                <th className="px-6 py-3 font-semibold">Address</th>
+                                                <th className="px-6 py-3 font-semibold">Details</th>
+                                                <th className="px-6 py-3 font-semibold">Status</th>
+                                                <th className="px-6 py-3 font-semibold text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-800">
+                                            {healthData.addresses.duplicates.map((dup: any) => (
+                                                <tr key={dup.sid} className="hover:bg-gray-800/30 transition-colors">
+                                                    <td className="px-6 py-3">
+                                                        <div className="font-medium text-white">{dup.customerName}</div>
+                                                        <div className="text-xs text-gray-500 font-mono">{dup.sid}</div>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-gray-400 text-xs">
+                                                        {dup.street}, {dup.city}, {dup.isoCountry}
+                                                    </td>
+                                                    <td className="px-6 py-3">
+                                                        {dup.isUsedInBundle ? (
+                                                            <div className="flex items-center gap-2 text-red-300 bg-red-900/20 px-2 py-1 rounded inline-flex">
+                                                                <ShieldAlert className="w-3 h-3" />
+                                                                <span className="text-xs font-bold">Locked: {dup.bundleName}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2 text-green-300 bg-green-900/20 px-2 py-1 rounded inline-flex">
+                                                                <CheckCircle className="w-3 h-3" />
+                                                                <span className="text-xs">Safe to Delete</span>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-3 text-right">
+                                                        {dup.isUsedInBundle ? (
+                                                            <span className="text-xs text-gray-600 italic cursor-not-allowed">
+                                                                Cannot Delete
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-xs text-red-400 opacity-50">
+                                                                Pending Cleanup
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Actions */}
                         <div className="flex justify-end gap-4 pt-4 border-t border-gray-800/50">
                             {healthData.addresses.hasDuplicates && (
