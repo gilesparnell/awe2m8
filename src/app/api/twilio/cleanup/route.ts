@@ -467,6 +467,7 @@ export async function POST(request: Request) {
                             isoCountry: dup.isoCountry,
                             region: dup.region,
                             postalCode: dup.postalCode,
+                            dateCreated: dup.dateCreated,
                             isUsedInBundle: isUsed,
                             bundleName: isUsed ? usage![0] : null,
                             canDelete: !isUsed

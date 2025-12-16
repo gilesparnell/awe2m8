@@ -592,16 +592,28 @@ export async function POST(request: Request) {
 
                 // CASE 2: Generic Address Requirement (Legacy/Non-strict regions)
                 if (isAddressError) {
-                    console.warn(`[Port] Missing Address (21631). Creating generic address in TARGET account...`);
+                    console.warn(`[Port] Missing Address (21631). Checking for existing address in TARGET account...`);
                     try {
                         const targetClient = twilio(accountSid, authToken, { accountSid: targetAccountSid });
+                        const targetCountry = targetCountryCode || 'AU';
+
+                        // Check for existing addresses first
+                        const existingAddrs = await targetClient.addresses.list({ isoCountry: targetCountry, limit: 1 });
+
+                        if (existingAddrs.length > 0) {
+                            console.log(`[Port] Found existing address ${existingAddrs[0].sid}. Retrying...`);
+                            updateParams.addressSid = existingAddrs[0].sid;
+                            continue;
+                        }
+
+                        console.log(`[Port] No address found. Creating generic address...`);
                         const newAddress = await targetClient.addresses.create({
                             customerName: 'Transfer Address',
                             street: '123 Transfer Street',
                             city: 'Sydney',
-                            region: targetCountryCode === 'AU' ? 'NSW' : 'CA',
-                            postalCode: targetCountryCode === 'AU' ? '2000' : '94102',
-                            isoCountry: targetCountryCode || 'AU',
+                            region: targetCountry === 'AU' ? 'NSW' : 'CA',
+                            postalCode: targetCountry === 'AU' ? '2000' : '94102',
+                            isoCountry: targetCountry,
                             emergencyEnabled: false
                         });
 
