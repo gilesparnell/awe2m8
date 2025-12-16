@@ -84,9 +84,7 @@ describe('NumberManager Component', () => {
     });
 
     it('renders and fetches data on mount', async () => {
-        await act(async () => {
-            render(<NumberManager credentials={mockCredentials} />);
-        });
+        render(<NumberManager credentials={mockCredentials} />);
 
         // Check for loading state or content
         expect(screen.getByText('Number Manager')).toBeInTheDocument();
@@ -102,9 +100,7 @@ describe('NumberManager Component', () => {
     });
 
     it('opens dropdown and executes move on click', async () => {
-        await act(async () => {
-            render(<NumberManager credentials={mockCredentials} />);
-        });
+        render(<NumberManager credentials={mockCredentials} />);
 
         await waitFor(() => {
             expect(screen.getByText('+1234567890')).toBeInTheDocument();
@@ -122,9 +118,7 @@ describe('NumberManager Component', () => {
         expect(targetOption).toBeVisible();
 
         // Click target account to move
-        await act(async () => {
-            fireEvent.click(targetOption);
-        });
+        fireEvent.click(targetOption);
 
         // Check API call
         expect(global.fetch).toHaveBeenCalledWith('/api/twilio/port-number', expect.objectContaining({
