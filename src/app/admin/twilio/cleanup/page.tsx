@@ -241,13 +241,16 @@ export default function CleanupPage() {
                                                 <tr key={dup.sid} className="hover:bg-gray-800/30 transition-colors">
                                                     <td className="px-6 py-3">
                                                         <div className="font-medium text-white">{dup.customerName}</div>
-                                                        <div className="text-xs text-gray-500 font-mono">{dup.sid}</div>
+                                                        <div className="text-[10px] text-gray-500 font-mono space-y-0.5">
+                                                            <div>{dup.sid}</div>
+                                                            <div className="text-gray-600 truncate max-w-[150px]">{dup.friendlyName}</div>
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-3 text-gray-400 text-xs">
                                                         {dup.street}, {dup.city}, {dup.isoCountry}
                                                     </td>
                                                     <td className="px-6 py-3 text-gray-400 text-xs whitespace-nowrap">
-                                                        {new Date(dup.dateCreated).toLocaleDateString()}
+                                                        {new Date(dup.dateCreated).toLocaleString()}
                                                     </td>
                                                     <td className="px-6 py-3">
                                                         {dup.isUsedInBundle ? (
