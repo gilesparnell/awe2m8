@@ -67,15 +67,19 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
     // Fetch all subaccounts and their numbers
     const fetchAllData = useCallback(async () => {
-        if (!credentials.accountSid || !credentials.authToken) return;
+        if (!credentials.accountSid || !credentials.authToken) {
+            console.log("NumberManager: No credentials available yet.");
+            return;
+        }
 
+        console.log("NumberManager: Starting fetchAllData...");
         setLoading(true);
         setError(null);
-        // Clear previous state to show we are reloading
         setSubAccounts([]);
 
         try {
             // First get list of subaccounts
+            console.log("NumberManager: Fetching subaccounts list...");
             const accountsRes = await fetch('/api/twilio/port-number', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -85,14 +89,17 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                     authToken: credentials.authToken
                 })
             });
+
+            if (!accountsRes.ok) {
+                throw new Error(`Failed to fetch accounts: ${accountsRes.statusText}`);
+            }
+
             const accountsData = await accountsRes.json();
-
-            // Fetch numbers from each known subaccount
             const knownAccounts = accountsData.subAccounts || [];
+            console.log(`NumberManager: Found ${knownAccounts.length} subaccounts.`);
 
-            const accountsWithNumbers: SubAccount[] = [];
-
-            for (const account of knownAccounts) {
+            // Fetch numbers from each known subaccount in PARALLEL
+            const accountsWithNumbers = await Promise.all(knownAccounts.map(async (account: any) => {
                 try {
                     const response = await fetch('/api/twilio/port-number', {
                         method: 'POST',
@@ -107,30 +114,40 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
                     const data = await response.json();
 
+                    let numbers: TwilioNumber[] = [];
                     if (data.success && data.numbers) {
-                        const numbersWithAccount = data.numbers.map((n: any) => ({
+                        numbers = data.numbers.map((n: any) => ({
                             ...n,
                             accountSid: account.sid,
                             accountName: account.friendlyName
                         }));
-
-                        accountsWithNumbers.push({
-                            sid: account.sid,
-                            friendlyName: account.friendlyName,
-                            numbers: numbersWithAccount
-                        });
                     }
+
+                    return {
+                        sid: account.sid,
+                        friendlyName: account.friendlyName,
+                        numbers: numbers
+                    };
+
                 } catch (e) {
                     console.warn(`Failed to fetch numbers for ${account.friendlyName}:`, e);
+                    // Return account with empty numbers on error to preserve it in the list
+                    return {
+                        sid: account.sid,
+                        friendlyName: account.friendlyName,
+                        numbers: []
+                    };
                 }
-            }
+            }));
 
             setSubAccounts(accountsWithNumbers);
 
         } catch (err: any) {
+            console.error("NumberManager Error:", err);
             setError('Failed to load accounts and numbers: ' + err.message);
         } finally {
             setLoading(false);
+            console.log("NumberManager: Fetch complete.");
         }
     }, [credentials.accountSid, credentials.authToken]);
 
