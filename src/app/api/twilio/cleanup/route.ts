@@ -424,14 +424,56 @@ export async function POST(request: Request) {
                 String(a.validated) === 'true' || a.validated === true
             );
 
+            // 1. Audit Dependencies First (to check if addresses are used in bundles)
+            const usedAddresses = await getUsedAddressSids(client);
+
             // Group addresses by country
-            const addressesByCountry: { [key: string]: number } = {};
-            addresses.forEach(addr => {
+            const byCountry: { [key: string]: any[] } = {};
+            addresses.forEach((addr: any) => {
                 const country = addr.isoCountry || 'UNKNOWN';
-                addressesByCountry[country] = (addressesByCountry[country] || 0) + 1;
+                if (!byCountry[country]) byCountry[country] = [];
+                byCountry[country].push(addr);
             });
 
-            const hasDuplicateAddresses = Object.values(addressesByCountry).some(count => count > 1);
+            const duplicateDetails: any[] = [];
+            let hasDuplicateAddresses = false;
+
+            Object.entries(byCountry).forEach(([country, countryAddresses]) => {
+                if (countryAddresses.length > 1) {
+                    hasDuplicateAddresses = true;
+
+                    // Sort: Validated first, then by creation date (oldest first)
+                    countryAddresses.sort((a, b) => {
+                        const aValidated = String(a.validated) === 'true' || a.validated === true;
+                        const bValidated = String(b.validated) === 'true' || b.validated === true;
+                        if (aValidated && !bValidated) return -1;
+                        if (!aValidated && bValidated) return 1;
+                        return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+                    });
+
+                    // First one is kept, rest are potential duplicates
+                    const potentialDuplicates = countryAddresses.slice(1);
+
+                    potentialDuplicates.forEach(dup => {
+                        const usage = usedAddresses.get(dup.sid);
+                        const isUsed = !!usage;
+
+                        duplicateDetails.push({
+                            sid: dup.sid,
+                            friendlyName: dup.friendlyName,
+                            customerName: dup.customerName,
+                            street: dup.street,
+                            city: dup.city,
+                            isoCountry: dup.isoCountry,
+                            region: dup.region,
+                            postalCode: dup.postalCode,
+                            isUsedInBundle: isUsed,
+                            bundleName: isUsed ? usage![0] : null,
+                            canDelete: !isUsed
+                        });
+                    });
+                }
+            });
 
             // Health assessment
             const issues = [];
@@ -454,8 +496,18 @@ export async function POST(request: Request) {
             }
 
             if (hasDuplicateAddresses) {
-                warnings.push('Duplicate addresses detected - recommend cleanup');
+                warnings.push(`${duplicateDetails.filter(d => d.canDelete).length} duplicate addresses detected and safe to delete`);
+                if (duplicateDetails.some(d => !d.canDelete)) {
+                    issues.push(`${duplicateDetails.filter(d => !d.canDelete).length} duplicate addresses are locked by bundles`);
+                }
             }
+
+
+            // Generate summary for stats
+            const addressesByCountry: { [key: string]: number } = {};
+            Object.keys(byCountry).forEach(k => {
+                addressesByCountry[k] = byCountry[k].length;
+            });
 
             const isHealthy = issues.length === 0;
 
@@ -475,7 +527,8 @@ export async function POST(request: Request) {
                     total: addresses.length,
                     validated: validatedAddresses.length,
                     byCountry: addressesByCountry,
-                    hasDuplicates: hasDuplicateAddresses
+                    hasDuplicates: hasDuplicateAddresses,
+                    duplicates: duplicateDetails
                 }
             });
         }
