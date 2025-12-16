@@ -67,10 +67,10 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
     // Fetch all subaccounts and their numbers
     const fetchAllData = useCallback(async () => {
+        if (!credentials.accountSid || !credentials.authToken) return;
+
         setLoading(true);
         setError(null);
-        // Do not clear subAccounts immediately to avoid flash if just refreshing data
-        // setSubAccounts([]); 
 
         try {
             // First get list of subaccounts
@@ -130,14 +130,12 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
         } finally {
             setLoading(false);
         }
-    }, [credentials]);
+    }, [credentials.accountSid, credentials.authToken]);
 
-    // Initial load
+    // Initial load - ensures runs on mount and when creds become available
     useEffect(() => {
-        if (credentials.accountSid) {
-            fetchAllData();
-        }
-    }, [credentials, fetchAllData]);
+        fetchAllData();
+    }, [fetchAllData]);
 
     const executePort = async (number: TwilioNumber, targetSid: string) => {
         setPorting(true);
@@ -295,7 +293,9 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
                                                     {/* Dropdown Menu */}
                                                     {openMenuSid === number.sid && (
-                                                        <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
+                                                        <div className={`absolute right-0 z-50 w-64 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 origin-top-right
+                                                            ${(accountIndex > subAccounts.length / 2) ? 'bottom-full mb-2' : 'top-full mt-2'}
+                                                        `}>
                                                             <div className="bg-gray-800/50 px-3 py-2 border-b border-gray-800">
                                                                 <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Move to Account</div>
                                                             </div>
