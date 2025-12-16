@@ -3,15 +3,16 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft, Loader2 } from 'lucide-react';
+import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft, Loader2, Phone } from 'lucide-react';
 import { ConfigurationForm } from '@/components/admin/twilio/ConfigurationForm';
 import { CreateBundleForm } from '@/components/admin/twilio/CreateBundleForm';
 import { BundleList } from '@/components/admin/twilio/BundleList';
 import { NumberPortForm } from '@/components/admin/twilio/NumberPortForm';
+import { NumberManager } from '@/components/admin/twilio/NumberManager';
 
 function TwilioAdminContent() {
     const searchParams = useSearchParams();
-    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port'>('config');
+    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port' | 'numbers'>('config');
     const [credentials, setCredentials] = useState({ accountSid: '', authToken: '' });
 
     useEffect(() => {
@@ -24,7 +25,7 @@ function TwilioAdminContent() {
 
         // Check URL params for tab
         const tabParam = searchParams.get('tab');
-        if (tabParam && ['config', 'create', 'list', 'port'].includes(tabParam)) {
+        if (tabParam && ['config', 'create', 'list', 'port', 'numbers'].includes(tabParam)) {
             setActiveTab(tabParam as any);
         } else if (sid && token) {
             // Default to 'create' if configured and no specific tab requested
@@ -62,7 +63,7 @@ function TwilioAdminContent() {
                 </header>
 
                 {/* Modern Navigation Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-10">
                     <TabButton
                         active={activeTab === 'config'}
                         onClick={() => { setActiveTab('config'); window.history.pushState({}, '', '?tab=config'); }}
@@ -85,11 +86,18 @@ function TwilioAdminContent() {
                         desc="View All"
                     />
                     <TabButton
+                        active={activeTab === 'numbers'}
+                        onClick={() => { setActiveTab('numbers'); window.history.pushState({}, '', '?tab=numbers'); }}
+                        icon={<Phone className="w-5 h-5" />}
+                        label="Numbers"
+                        desc="Manage All"
+                    />
+                    <TabButton
                         active={activeTab === 'port'}
                         onClick={() => { setActiveTab('port'); window.history.pushState({}, '', '?tab=port'); }}
                         icon={<ArrowRightLeft className="w-5 h-5" />}
                         label="Porting"
-                        desc="Move Number"
+                        desc="Legacy UI"
                     />
 
                     {/* Maintenance Tool */}
@@ -120,6 +128,10 @@ function TwilioAdminContent() {
 
                     {activeTab === 'list' && (
                         <BundleList credentials={credentials} />
+                    )}
+
+                    {activeTab === 'numbers' && (
+                        <NumberManager credentials={credentials} />
                     )}
 
                     {activeTab === 'port' && (
