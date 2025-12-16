@@ -128,6 +128,7 @@ export async function POST(request: Request) {
                     console.log(`[Port] No addresses found. Creating default address...`);
                     const newAddr = await targetClient.addresses.create({
                         customerName: 'AWE2M8 Porting',
+                        friendlyName: 'AWE2M8 Porting Address', // Explicit name to avoid defaults
                         street: '50a Habitat Way',
                         city: 'Lennox Head',
                         region: 'NSW',
