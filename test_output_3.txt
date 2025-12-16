@@ -1,0 +1,68 @@
+
+> next-app@0.1.0 test:integration
+> NODE_ENV=test INTEGRATION_TEST=true jest --selectProjects integration --verbose
+
+Running one project: integration
+  console.log
+    DEBUG: Loaded Accounts: { AWE2M8: 'MISSING', TEST: 'MISSING' }
+
+      at Object.<anonymous> (__tests__/integration/twilio-porting.test.ts:49:13)
+
+FAIL integration __tests__/integration/twilio-porting.test.ts
+  Integration: Twilio Porting
+    API Health Check
+      ✓ should respond to port-number endpoint (165 ms)
+    Number Listing
+      ✕ should list numbers in an account (31 ms)
+    Number Porting Sequence
+      ✕ should port number from AWE2M8 to TEST (32 ms)
+      ✕ should port number back to AWE2M8 (25 ms)
+  Regression: Known Bug Fixes
+    21649 Bundle Required Error
+      ✕ should NOT throw raw 21649 error for AU numbers (21 ms)
+    21651 Address Not In Bundle Error
+      ✕ should iterate through addresses to find matching one (23 ms)
+    Wrong Route Bug
+      ✕ should use port-number route, not workflow route (16 ms)
+
+  ● Integration: Twilio Porting › Number Listing › should list numbers in an account
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+  ● Integration: Twilio Porting › Number Porting Sequence › should port number from AWE2M8 to TEST
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+  ● Integration: Twilio Porting › Number Porting Sequence › should port number back to AWE2M8
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+  ● Regression: Known Bug Fixes › 21649 Bundle Required Error › should NOT throw raw 21649 error for AU numbers
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+  ● Regression: Known Bug Fixes › 21651 Address Not In Bundle Error › should iterate through addresses to find matching one
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+  ● Regression: Known Bug Fixes › Wrong Route Bug › should use port-number route, not workflow route
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+        at JSON.parse (<anonymous>)
+
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 1 passed, 7 total
+Snapshots:   0 total
+Time:        0.679 s, estimated 6 s
+Ran all test suites.

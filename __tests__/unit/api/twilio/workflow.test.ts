@@ -1,21 +1,38 @@
 
+import { POST } from '@/app/api/twilio/workflow/route';
+import { auth } from '@/lib/auth';
 import {
     resetMockState,
     addMockAccount,
     addMockNumber,
     addMockBundle,
     addMockAddress,
-    getMockNumbers,
     getMockAddresses,
     createMockTwilioClient,
 } from '../../../mocks/twilio.mock';
+import { NextResponse } from 'next/server';
 
-// Mock Modules
-jest.mock('twilio', () => ({
-    __esModule: true,
-    default: jest.fn().mockImplementation(createMockTwilioClient),
+// Mock Auth
+jest.mock('@/lib/auth', () => ({
+    auth: jest.fn()
 }));
 
+// Mock Twilio using the helper
+jest.mock('twilio', () => {
+    const { createMockTwilioClient } = require('../../../mocks/twilio.mock');
+    return {
+        __esModule: true,
+        default: jest.fn().mockImplementation(createMockTwilioClient),
+    };
+});
+
+// Mock Firebase Admin (if used)
+jest.mock('@/lib/firebase-admin', () => ({
+    getAdminDb: jest.fn(),
+    isAdminEmail: jest.fn().mockResolvedValue(true),
+}));
+
+// Mock NextResponse
 jest.mock('next/server', () => ({
     NextResponse: {
         json: (data: any, init?: { status?: number }) => ({
@@ -28,8 +45,13 @@ jest.mock('next/server', () => ({
 
 describe('Workflow API (Porting Logic)', () => {
     beforeEach(() => {
-        process.env.TWILIO_ACCOUNT_SID = 'AC_MASTER';
+        jest.clearAllMocks();
+        process.env.TWILIO_ACCOUNT_SID = 'AC_TEST';
         process.env.TWILIO_AUTH_TOKEN = 'AUTH_TOKEN';
+
+        // Default authenticated session
+        (auth as jest.Mock).mockResolvedValue({ user: { email: 'test@example.com' } });
+
         resetMockState();
         addMockAccount('AC_MASTER', 'Master Account');
         addMockAccount('AC_SOURCE', 'Source Account');
@@ -62,9 +84,6 @@ describe('Workflow API (Porting Logic)', () => {
             postalCode: '2000',
             isoCountry: 'AU'
         });
-
-        // Import Handler
-        const { POST } = await import('@/app/api/twilio/workflow/route');
 
         const req = new Request('http://localhost/api/twilio/workflow', {
             method: 'POST',

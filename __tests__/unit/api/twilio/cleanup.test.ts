@@ -32,6 +32,11 @@ const mockClient = {
 
 jest.mock('twilio', () => jest.fn(() => mockClient));
 
+// Mock Auth
+jest.mock('@/lib/auth', () => ({
+    auth: jest.fn().mockResolvedValue({ user: { email: 'test@example.com' } })
+}));
+
 describe('Twilio Cleanup API', () => {
     beforeEach(() => {
         jest.clearAllMocks();
