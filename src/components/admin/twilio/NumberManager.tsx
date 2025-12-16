@@ -2,9 +2,9 @@
  * Number Manager - Clean UI for viewing and porting Twilio numbers
  * 
  * Features:
- * - Shows all numbers across all subaccounts in one view
+ * - Shows all numbers across all subaccounts in a condensed list view
+ * - Horizontal layout: Account Info | Numbers
  * - Inline move functionality with dropdown
- * - Compact card layout
  * - Confetti celebration on successful port
  */
 
@@ -17,7 +17,7 @@ import {
     AlertCircle,
     Building2,
     Sparkles,
-    Search
+    Copy
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -69,7 +69,8 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
     const fetchAllData = useCallback(async () => {
         setLoading(true);
         setError(null);
-        setSubAccounts([]); // Clear previous data while loading to show fresh state
+        // Do not clear subAccounts immediately to avoid flash if just refreshing data
+        // setSubAccounts([]); 
 
         try {
             // First get list of subaccounts
@@ -233,9 +234,9 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                 </div>
             )}
 
-            {/* Grid Layout for Accounts */}
+            {/* List Layout for Accounts */}
             {!loading && subAccounts.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-3">
                     {subAccounts.map((account, accountIndex) => {
                         const colors = getAccountColor(accountIndex);
                         const hasNumbers = account.numbers.length > 0;
@@ -243,63 +244,53 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                         return (
                             <div
                                 key={account.sid}
-                                className={`${colors.bg} ${colors.border} border rounded-xl overflow-visible flex flex-col transition-all duration-200 hover:shadow-lg`}
+                                className={`${colors.bg} ${colors.border} border rounded-lg px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-200 hover:shadow-lg hover:bg-opacity-50`}
                             >
-                                {/* Compact Account Header */}
-                                <div className="px-4 py-3 border-b border-gray-800/50 flex justify-between items-center bg-gray-900/40 rounded-t-xl">
-                                    <div className="flex items-center gap-2 overflow-hidden">
-                                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${colors.badge}`} />
-                                        <div className="flex flex-col min-w-0">
-                                            <span className={`font-bold truncate ${colors.text} text-sm leading-tight`} title={account.friendlyName}>
-                                                {account.friendlyName}
-                                            </span>
-                                            <code className="text-[10px] text-gray-600 font-mono truncate">
-                                                {account.sid.substring(0, 10)}...
+                                {/* Account Info (Left) */}
+                                <div className="flex items-center gap-3 min-w-[250px]">
+                                    <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${colors.badge}`} />
+                                    <div>
+                                        <div className={`font-bold ${colors.text} text-sm`}>
+                                            {account.friendlyName}
+                                        </div>
+                                        <div className="flex items-center gap-2 group cursor-pointer" title="Copy SID">
+                                            <code className="text-xs text-gray-500 font-mono">
+                                                {account.sid}
                                             </code>
                                         </div>
                                     </div>
-                                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${hasNumbers ? 'bg-gray-800 text-gray-300' : 'bg-gray-800/50 text-gray-600'}`}>
-                                        {account.numbers.length}
-                                    </span>
                                 </div>
 
-                                {/* Numbers List */}
-                                <div className="divide-y divide-gray-800/30 flex-1 relative">
+                                {/* Numbers List (Right/Flex) */}
+                                <div className="flex-1 flex flex-wrap items-center gap-2 justify-start md:justify-end">
                                     {!hasNumbers ? (
-                                        <div className="p-6 text-center text-xs text-gray-600 italic">
+                                        <div className="text-xs text-gray-600 italic px-2">
                                             No numbers
                                         </div>
                                     ) : (
                                         account.numbers.map((number) => (
                                             <div
                                                 key={number.sid}
-                                                className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group relative"
+                                                className="relative group flex items-center bg-gray-900 border border-gray-700 rounded-md pl-3 pr-1 py-1 gap-2 hover:border-gray-600 transition-colors"
                                             >
-                                                <div className="min-w-0 pr-4">
-                                                    <div className="font-mono text-sm text-gray-200 truncate flex items-center gap-2">
+                                                <div className="flex flex-col">
+                                                    <span className="font-mono text-xs text-gray-200 font-medium">
                                                         {number.phoneNumber}
-                                                    </div>
-                                                    {number.friendlyName && number.friendlyName !== number.phoneNumber && (
-                                                        <div className="text-[10px] text-gray-500 truncate mt-0.5">
-                                                            {number.friendlyName}
-                                                        </div>
-                                                    )}
+                                                    </span>
                                                 </div>
 
-                                                {/* Action */}
+                                                {/* Move Action */}
                                                 <div className="relative">
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setOpenMenuSid(openMenuSid === number.sid ? null : number.sid);
                                                         }}
-                                                        className={`p-1.5 rounded-lg transition-colors ${openMenuSid === number.sid
-                                                                ? 'bg-blue-500/20 text-blue-400'
-                                                                : 'text-gray-600 hover:text-blue-400 hover:bg-blue-500/10'
+                                                        className={`p-1 rounded hover:bg-gray-700 transition-colors ${openMenuSid === number.sid ? 'text-blue-400 bg-gray-800' : 'text-gray-500 hover:text-blue-400'
                                                             }`}
                                                         title="Move Number"
                                                     >
-                                                        <ArrowRight className="w-4 h-4" />
+                                                        <ArrowRight className="w-3.5 h-3.5" />
                                                     </button>
 
                                                     {/* Dropdown Menu */}
@@ -324,7 +315,7 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                                                                                     e.stopPropagation();
                                                                                     executePort(number, target.sid);
                                                                                 }}
-                                                                                className="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors truncate flex items-center justify-between group/item"
+                                                                                className="w-full text-left px-3 py-2 text-xs text-gray-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors truncate flex items-center justify-between group/item"
                                                                             >
                                                                                 <span className="truncate">{target.friendlyName}</span>
                                                                             </button>
