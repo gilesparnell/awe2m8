@@ -7,12 +7,12 @@ import { Settings, FilePlus, List, ChevronLeft, ArrowRightLeft, Loader2, Phone }
 import { ConfigurationForm } from '@/components/admin/twilio/ConfigurationForm';
 import { CreateBundleForm } from '@/components/admin/twilio/CreateBundleForm';
 import { BundleList } from '@/components/admin/twilio/BundleList';
-import { NumberPortForm } from '@/components/admin/twilio/NumberPortForm';
+
 import { NumberManager } from '@/components/admin/twilio/NumberManager';
 
 function TwilioAdminContent() {
     const searchParams = useSearchParams();
-    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'port' | 'numbers'>('config');
+    const [activeTab, setActiveTab] = useState<'config' | 'create' | 'list' | 'numbers'>('config');
     const [credentials, setCredentials] = useState({ accountSid: '', authToken: '' });
 
     useEffect(() => {
@@ -25,7 +25,7 @@ function TwilioAdminContent() {
 
         // Check URL params for tab
         const tabParam = searchParams.get('tab');
-        if (tabParam && ['config', 'create', 'list', 'port', 'numbers'].includes(tabParam)) {
+        if (tabParam && ['config', 'create', 'list', 'numbers'].includes(tabParam)) {
             setActiveTab(tabParam as any);
         } else if (sid && token) {
             // Default to 'create' if configured and no specific tab requested
@@ -92,13 +92,7 @@ function TwilioAdminContent() {
                         label="Numbers"
                         desc="Manage All"
                     />
-                    <TabButton
-                        active={activeTab === 'port'}
-                        onClick={() => { setActiveTab('port'); window.history.pushState({}, '', '?tab=port'); }}
-                        icon={<ArrowRightLeft className="w-5 h-5" />}
-                        label="Porting"
-                        desc="Legacy UI"
-                    />
+
 
                     {/* Maintenance Tool */}
                     <Link
@@ -132,10 +126,6 @@ function TwilioAdminContent() {
 
                     {activeTab === 'numbers' && (
                         <NumberManager credentials={credentials} />
-                    )}
-
-                    {activeTab === 'port' && (
-                        <NumberPortForm credentials={credentials} />
                     )}
                 </div>
             </div>
