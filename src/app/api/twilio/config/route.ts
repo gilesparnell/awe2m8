@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getNotificationNumbers, saveNotificationNumbers } from '@/lib/twilio-helpers';
+import { auth } from '@/lib/auth';
 
 export async function GET() {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const notificationNumbers = getNotificationNumbers();
 
     // Check for existence of Env Vars (do NOT return values)
@@ -17,6 +23,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const { notificationNumbers } = await request.json();
 

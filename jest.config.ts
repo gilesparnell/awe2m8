@@ -33,11 +33,17 @@ const config: Config = {
         {
             displayName: 'unit-api',
             testEnvironment: 'node',
-            testMatch: ['<rootDir>/__tests__/unit/api/**/*.test.ts'],
+            testMatch: [
+                '<rootDir>/__tests__/unit/api/**/*.test.ts',
+                '<rootDir>/__tests__/unit/lib/**/*.test.ts'
+            ],
             transform: {
                 '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
             },
             moduleNameMapper: {
+                '^@/lib/auth$': '<rootDir>/__mocks__/auth.ts',
+                '^next-auth$': '<rootDir>/__mocks__/next-auth.ts',
+                '^next-auth/react$': '<rootDir>/__mocks__/next-auth-react.ts',
                 '^@/(.*)$': '<rootDir>/src/$1',
             },
         },

@@ -1,6 +1,6 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import twilio from "twilio";
+import { auth } from '@/lib/auth';
 
 // Helper to get Twilio Client from headers OR env
 const getTwilioClient = (req: NextRequest) => {
@@ -22,6 +22,11 @@ const getTwilioClient = (req: NextRequest) => {
 };
 
 export async function GET(req: NextRequest) {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const url = new URL(req.url);
         const subAccountSid = url.searchParams.get("subAccountSid");

@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     console.log("Twilio Port/List request received");
     try {
         const body = await request.json();
@@ -126,13 +132,18 @@ export async function POST(request: Request) {
                 if (addresses.length === 0) {
                     // Create a default address
                     console.log(`[Port] No addresses found. Creating default address...`);
+
+                    // Use provided details or valid generic defaults (AU-centric fallback for now due to strict validation)
+                    const biz = body.businessInfo || {};
+                    const customAddr = body.address || {};
+
                     const newAddr = await targetClient.addresses.create({
-                        customerName: 'AWE2M8 Porting',
-                        friendlyName: 'AWE2M8 Porting Address', // Explicit name to avoid defaults
-                        street: '50a Habitat Way',
-                        city: 'Lennox Head',
-                        region: 'NSW',
-                        postalCode: '2478',
+                        customerName: biz.businessName || customAddr.customerName || 'Regulatory Compliance',
+                        friendlyName: biz.friendlyName || customAddr.friendlyName || 'Regulatory Address',
+                        street: biz.street || customAddr.street || '50a Habitat Way',
+                        city: biz.city || customAddr.city || 'Lennox Head',
+                        region: biz.state || biz.region || customAddr.region || 'NSW',
+                        postalCode: biz.postalCode || customAddr.postalCode || '2478',
                         isoCountry: countryCode
                     });
                     addresses.push(newAddr);
