@@ -13,16 +13,7 @@ export async function GET() {
         OPENAI_API_KEY: !!process.env.OPENAI_API_KEY
     };
 
-    // Subaccounts for Number Manager
-    // These can be extended via a database in the future
-    const subAccounts = [
-        { sid: process.env.TWILIO_SUBACCOUNT_AWE2M8 || '', friendlyName: 'AWE2M8' },
-        { sid: process.env.TWILIO_SUBACCOUNT_TEST || '', friendlyName: 'Test' },
-        { sid: process.env.TWILIO_SUBACCOUNT_77 || '', friendlyName: 'Account 77' },
-        { sid: process.env.TWILIO_SUBACCOUNT_FITNESS || '', friendlyName: 'Fitness Boxx' },
-    ].filter(a => a.sid); // Only return accounts with configured SIDs
-
-    return NextResponse.json({ notificationNumbers, envStatus, subAccounts });
+    return NextResponse.json({ notificationNumbers, envStatus });
 }
 
 export async function POST(request: Request) {

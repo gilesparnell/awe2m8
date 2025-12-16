@@ -146,6 +146,24 @@ describe('Port Number API', () => {
             expect(data.numbers).toHaveLength(2);
             expect(data.numbers[0].phoneNumber).toBe('+61468170318');
         });
+
+        it('should list all subaccounts', async () => {
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'list-accounts',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.subAccounts).toHaveLength(3); // AC_SOURCE, AC_TARGET, AC_MASTER
+            expect(data.subAccounts.find((a: any) => a.friendlyName === 'Source Account')).toBeTruthy();
+        });
     });
 
     describe('Port US Numbers (Simple)', () => {

@@ -105,91 +105,100 @@ export const createMockTwilioClient = (accountSid: string, authToken: string, op
     return {
         api: {
             v2010: {
-                accounts: (sid: string) => ({
-                    fetch: async () => {
-                        if (simulateError) {
-                            const err = new Error(simulateError.message) as any;
-                            err.code = simulateError.code;
-                            throw err;
+                accounts: Object.assign(
+                    (sid: string) => ({
+                        fetch: async () => {
+                            if (simulateError) {
+                                const err = new Error(simulateError.message) as any;
+                                err.code = simulateError.code;
+                                throw err;
+                            }
+                            const account = mockAccounts.get(sid);
+                            if (!account) throw new Error(`Account ${sid} not found`);
+                            return account;
+                        },
+                        incomingPhoneNumbers: Object.assign(
+                            // ... existing incomingPhoneNumbers implementation ...
+                            (numberSid: string) => ({
+                                fetch: async () => {
+                                    const numbers = mockNumbers.get(sid) || [];
+                                    const number = numbers.find(n => n.sid === numberSid);
+                                    if (!number) {
+                                        const err = new Error(`Number ${numberSid} not found`) as any;
+                                        err.code = 20404;
+                                        throw err;
+                                    }
+                                    return number;
+                                },
+                                update: async (params: any) => {
+                                    if (simulateError) {
+                                        const err = new Error(simulateError.message) as any;
+                                        err.code = simulateError.code;
+                                        throw err;
+                                    }
+
+                                    // Simulate bundle/address requirements for AU
+                                    const numbers = mockNumbers.get(sid) || [];
+                                    const number = numbers.find(n => n.sid === numberSid);
+                                    if (!number) {
+                                        const err = new Error(`Number not found`) as any;
+                                        err.code = 20404;
+                                        throw err;
+                                    }
+
+                                    if (number.phoneNumber.startsWith('+61')) {
+                                        if (!params.bundleSid) {
+                                            const err = new Error('Bundle required for AU') as any;
+                                            err.code = 21649;
+                                            throw err;
+                                        }
+                                        if (!params.addressSid) {
+                                            const err = new Error('Address required for AU') as any;
+                                            err.code = 21631;
+                                            throw err;
+                                        }
+
+                                        // Verify bundle exists in target
+                                        const targetBundles = mockBundles.get(params.accountSid) || [];
+                                        const bundle = targetBundles.find(b => b.sid === params.bundleSid);
+                                        if (!bundle) {
+                                            const err = new Error('Bundle not found in target') as any;
+                                            err.code = 21649;
+                                            throw err;
+                                        }
+
+                                        // Verify address exists in target
+                                        const targetAddresses = mockAddresses.get(params.accountSid) || [];
+                                        const address = targetAddresses.find(a => a.sid === params.addressSid);
+                                        if (!address) {
+                                            const err = new Error('Address not in bundle') as any;
+                                            err.code = 21651;
+                                            throw err;
+                                        }
+                                    }
+
+                                    // Perform the move
+                                    return moveNumber(numberSid, sid, params.accountSid);
+                                },
+                            }),
+                            {
+                                list: async (opts?: { phoneNumber?: string; limit?: number }) => {
+                                    let numbers = mockNumbers.get(sid) || [];
+                                    if (opts?.phoneNumber) {
+                                        numbers = numbers.filter(n => n.phoneNumber === opts.phoneNumber);
+                                    }
+                                    return numbers.slice(0, opts?.limit || 100);
+                                },
+                            }
+                        ),
+                    }),
+                    {
+                        list: async (opts?: { status?: string; limit?: number }) => {
+                            // Return all mock accounts
+                            return Array.from(mockAccounts.values());
                         }
-                        const account = mockAccounts.get(sid);
-                        if (!account) throw new Error(`Account ${sid} not found`);
-                        return account;
-                    },
-                    incomingPhoneNumbers: Object.assign(
-                        (numberSid: string) => ({
-                            fetch: async () => {
-                                const numbers = mockNumbers.get(sid) || [];
-                                const number = numbers.find(n => n.sid === numberSid);
-                                if (!number) {
-                                    const err = new Error(`Number ${numberSid} not found`) as any;
-                                    err.code = 20404;
-                                    throw err;
-                                }
-                                return number;
-                            },
-                            update: async (params: any) => {
-                                if (simulateError) {
-                                    const err = new Error(simulateError.message) as any;
-                                    err.code = simulateError.code;
-                                    throw err;
-                                }
-
-                                // Simulate bundle/address requirements for AU
-                                const numbers = mockNumbers.get(sid) || [];
-                                const number = numbers.find(n => n.sid === numberSid);
-                                if (!number) {
-                                    const err = new Error(`Number not found`) as any;
-                                    err.code = 20404;
-                                    throw err;
-                                }
-
-                                if (number.phoneNumber.startsWith('+61')) {
-                                    if (!params.bundleSid) {
-                                        const err = new Error('Bundle required for AU') as any;
-                                        err.code = 21649;
-                                        throw err;
-                                    }
-                                    if (!params.addressSid) {
-                                        const err = new Error('Address required for AU') as any;
-                                        err.code = 21631;
-                                        throw err;
-                                    }
-
-                                    // Verify bundle exists in target
-                                    const targetBundles = mockBundles.get(params.accountSid) || [];
-                                    const bundle = targetBundles.find(b => b.sid === params.bundleSid);
-                                    if (!bundle) {
-                                        const err = new Error('Bundle not found in target') as any;
-                                        err.code = 21649;
-                                        throw err;
-                                    }
-
-                                    // Verify address exists in target
-                                    const targetAddresses = mockAddresses.get(params.accountSid) || [];
-                                    const address = targetAddresses.find(a => a.sid === params.addressSid);
-                                    if (!address) {
-                                        const err = new Error('Address not in bundle') as any;
-                                        err.code = 21651;
-                                        throw err;
-                                    }
-                                }
-
-                                // Perform the move
-                                return moveNumber(numberSid, sid, params.accountSid);
-                            },
-                        }),
-                        {
-                            list: async (opts?: { phoneNumber?: string; limit?: number }) => {
-                                let numbers = mockNumbers.get(sid) || [];
-                                if (opts?.phoneNumber) {
-                                    numbers = numbers.filter(n => n.phoneNumber === opts.phoneNumber);
-                                }
-                                return numbers.slice(0, opts?.limit || 100);
-                            },
-                        }
-                    ),
-                }),
+                    }
+                ),
             },
         },
         numbers: {
