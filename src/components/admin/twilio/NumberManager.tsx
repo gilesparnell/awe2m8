@@ -219,9 +219,12 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                     </p>
                 </div>
                 <button
-                    onClick={fetchAllData}
+                    onClick={() => {
+                        console.log("Refesh clicked");
+                        fetchAllData();
+                    }}
                     disabled={loading}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors disabled:opacity-50 text-sm"
+                    className="relative z-10 flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors disabled:opacity-50 text-sm cursor-pointer"
                 >
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     Refresh
