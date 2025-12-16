@@ -609,6 +609,7 @@ export async function POST(request: Request) {
                         console.log(`[Port] No address found. Creating generic address...`);
                         const newAddress = await targetClient.addresses.create({
                             customerName: 'Transfer Address',
+                            friendlyName: 'AWE2M8 Transfer Address', // Explicit name
                             street: '123 Transfer Street',
                             city: 'Sydney',
                             region: targetCountry === 'AU' ? 'NSW' : 'CA',
