@@ -15,6 +15,7 @@ import {
     addMockBundle,
     addMockAddress,
     getMockNumbers,
+    getMockAddresses,
     setMockError,
     clearMockError,
     createMockTwilioClient,
@@ -339,12 +340,50 @@ describe('Port Number API', () => {
                 }),
             });
 
+            const initialCount = getMockAddresses('AC_TARGET').length;
             const response = await POST(request);
             const data = await response.json();
 
             // Should create address and succeed
             expect(data.success).toBe(true);
             expect(getMockNumbers('AC_TARGET')[0].phoneNumber).toBe('+61468170318');
+            expect(getMockAddresses('AC_TARGET').length).toBe(initialCount + 1);
+        });
+
+        it('should reuse existing address if one exists', async () => {
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_1',
+                friendlyName: 'AU Mobile Bundle',
+                status: 'twilio-approved',
+                isoCountry: 'AU',
+            });
+            addMockAddress('AC_TARGET', {
+                sid: 'AD_EXISTING',
+                street: '50a Habitat Way',
+                city: 'Lennox Head',
+                region: 'NSW',
+                postalCode: '2478',
+                isoCountry: 'AU'
+            });
+
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    sourceAccountSid: 'AC_SOURCE',
+                    targetAccountSid: 'AC_TARGET',
+                    phoneNumber: '+61468170318',
+                }),
+            });
+
+            const initialCount = getMockAddresses('AC_TARGET').length;
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            // Verify no new address was created
+            expect(getMockAddresses('AC_TARGET').length).toBe(initialCount);
         });
     });
 
