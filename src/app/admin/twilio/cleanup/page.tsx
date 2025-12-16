@@ -231,6 +231,7 @@ export default function CleanupPage() {
                                             <tr className="bg-gray-800/50 text-gray-400 border-b border-gray-800">
                                                 <th className="px-6 py-3 font-semibold">Address</th>
                                                 <th className="px-6 py-3 font-semibold">Details</th>
+                                                <th className="px-6 py-3 font-semibold">Created</th>
                                                 <th className="px-6 py-3 font-semibold">Status</th>
                                                 <th className="px-6 py-3 font-semibold text-right">Action</th>
                                             </tr>
@@ -244,6 +245,9 @@ export default function CleanupPage() {
                                                     </td>
                                                     <td className="px-6 py-3 text-gray-400 text-xs">
                                                         {dup.street}, {dup.city}, {dup.isoCountry}
+                                                    </td>
+                                                    <td className="px-6 py-3 text-gray-400 text-xs whitespace-nowrap">
+                                                        {new Date(dup.dateCreated).toLocaleDateString()}
                                                     </td>
                                                     <td className="px-6 py-3">
                                                         {dup.isUsedInBundle ? (

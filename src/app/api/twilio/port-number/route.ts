@@ -132,7 +132,7 @@ export async function POST(request: Request) {
                         city: 'Lennox Head',
                         region: 'NSW',
                         postalCode: '2478',
-                        isoCountry: 'AU'
+                        isoCountry: countryCode
                     });
                     addresses.push(newAddr);
                 }
