@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     console.log("Twilio Port/List request received");
     try {
         const body = await request.json();
@@ -607,13 +613,17 @@ export async function POST(request: Request) {
                         }
 
                         console.log(`[Port] No address found. Creating generic address...`);
+
+                        const biz = body.businessInfo || {};
+                        const customAddr = body.address || {};
+
                         const newAddress = await targetClient.addresses.create({
-                            customerName: 'Transfer Address',
-                            friendlyName: 'AWE2M8 Transfer Address', // Explicit name
-                            street: '123 Transfer Street',
-                            city: 'Sydney',
-                            region: targetCountry === 'AU' ? 'NSW' : 'CA',
-                            postalCode: targetCountry === 'AU' ? '2000' : '94102',
+                            customerName: biz.businessName || customAddr.customerName || 'Transfer Address',
+                            friendlyName: biz.friendlyName || customAddr.friendlyName || 'Transfer Address',
+                            street: biz.street || customAddr.street || '123 Transfer Street',
+                            city: biz.city || customAddr.city || 'Sydney',
+                            region: biz.state || biz.region || customAddr.region || (targetCountry === 'AU' ? 'NSW' : 'CA'),
+                            postalCode: biz.postalCode || customAddr.postalCode || (targetCountry === 'AU' ? '2000' : '94102'),
                             isoCountry: targetCountry,
                             emergencyEnabled: false
                         });

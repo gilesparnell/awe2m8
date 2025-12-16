@@ -2,12 +2,18 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings, Sparkles, Shield } from 'lucide-react';
+import { Settings, Sparkles, Shield } from 'lucide-react';
+import { UserAvatar } from '@/components/auth/UserAvatar';
 
 export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-gray-950 text-white font-sans p-8">
             <div className="max-w-5xl mx-auto">
+                {/* User Avatar */}
+                <div className="flex justify-end mb-4">
+                    <UserAvatar />
+                </div>
+
                 {/* Header */}
                 <header className="mb-12 text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-4">

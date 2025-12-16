@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // For SMS sending, we need to use the account that owns the phone number
     // The phone number +61485009296 belongs to a specific account
     // Use TWILIO_SMS_ACCOUNT_SID and TWILIO_SMS_AUTH_TOKEN if available
