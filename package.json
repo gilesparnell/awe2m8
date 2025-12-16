@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:unit": "jest --selectProjects unit-api unit-components",
+    "test:unit": "NODE_ENV=test jest --selectProjects unit-api unit-components",
     "test:integration": "INTEGRATION_TEST=true jest --selectProjects integration",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
