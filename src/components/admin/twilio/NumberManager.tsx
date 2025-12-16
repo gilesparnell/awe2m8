@@ -71,6 +71,8 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
         setLoading(true);
         setError(null);
+        // Clear previous state to show we are reloading
+        setSubAccounts([]);
 
         try {
             // First get list of subaccounts
