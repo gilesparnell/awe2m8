@@ -9,11 +9,30 @@ function initializeFirebaseAdmin(): App {
     return getApps()[0];
   }
 
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+
+  if (!privateKey) {
+    console.error('FIREBASE_ADMIN_PRIVATE_KEY is missing');
+    throw new Error('Missing Firebase Admin SDK credentials');
+  }
+
+  // Handle various formatting issues
+  // 1. Remove surrounding quotes if present
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1);
+  }
+
+  // 2. Handle escaped newlines (e.g. from .env files or Vercel env vars)
+  if (privateKey.includes('\\n')) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+
+  console.log(`[Firebase] Initializing with Project ID: ${process.env.FIREBASE_ADMIN_PROJECT_ID}`);
+  console.log(`[Firebase] Private Key length: ${privateKey.length}`);
+  console.log(`[Firebase] Private Key start: ${privateKey.substring(0, 30)}...`);
 
   if (!process.env.FIREBASE_ADMIN_PROJECT_ID ||
-    !process.env.FIREBASE_ADMIN_CLIENT_EMAIL ||
-    !privateKey) {
+    !process.env.FIREBASE_ADMIN_CLIENT_EMAIL) {
     throw new Error('Missing Firebase Admin SDK credentials');
   }
 
