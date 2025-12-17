@@ -27,6 +27,13 @@ function initializeFirebaseAdmin(): App {
     privateKey = privateKey.replace(/\\n/g, '\n');
   }
 
+  // 3. Fix missing PEM headers/footers (common Vercel copy-paste error)
+  if (!privateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+    console.warn('[Firebase] Private Key is missing PEM headers. Attempting to fix...');
+    const body = privateKey.trim();
+    privateKey = `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----`;
+  }
+
   console.log(`[Firebase] Initializing with Project ID: ${process.env.FIREBASE_ADMIN_PROJECT_ID}`);
   console.log(`[Firebase] Private Key length: ${privateKey.length}`);
   console.log(`[Firebase] Private Key start: ${privateKey.substring(0, 30)}...`);
