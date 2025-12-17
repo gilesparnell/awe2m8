@@ -20,22 +20,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user }) {
+      console.log(`[Auth] Attempting sign-in for: ${user.email}`);
+
       if (!user.email) {
+        console.error('[Auth] No email provided in user object');
         return false;
       }
 
-      // Check if email is in admin whitelist
-      const isAdmin = await isAdminEmail(user.email);
-      if (!isAdmin) {
-        return '/login?error=AccessDenied';
-      }
-
-      // Update last login timestamp
       try {
+        // Check if email is in admin whitelist
+        const isAdmin = await isAdminEmail(user.email);
+        console.log(`[Auth] isAdminEmail result for ${user.email}:`, isAdmin);
+
+        if (!isAdmin) {
+          console.warn(`[Auth] Access denied for ${user.email} - not in whitelist`);
+          return '/login?error=AccessDenied';
+        }
+
+        // Update last login timestamp
         await updateLastLogin(user.email);
-      } catch (e) {
-        // Don't block login if update fails
-        console.error('Failed to update last login:', e);
+        console.log(`[Auth] Login successful and timestamp updated for ${user.email}`);
+      } catch (error: any) {
+        console.error('[Auth] Critical error during sign-in check:', error);
+        // Return generic error to avoid exposing stack trace details if needed, or allow fail
+        return '/login?error=AccessDenied';
       }
 
       return true;
