@@ -43,8 +43,9 @@ export const useAdminState = () => {
                 ...doc.data()
             }));
             setExistingPages(pages);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to load pages:', err);
+            setError(`Failed to load pages: ${err.message || 'Unknown error'}`);
         }
     };
 
