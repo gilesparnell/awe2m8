@@ -8,7 +8,13 @@ interface SuccessScreenProps {
 }
 
 export const SuccessScreen: React.FC<SuccessScreenProps> = ({ mode, pageId, onReset }) => {
-    const liveUrl = `https://demos.awe2m8.ai/${pageId}`;
+    const [origin, setOrigin] = React.useState('');
+
+    React.useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
+
+    const liveUrl = `${origin}/${pageId}`;
 
     return (
         <div className="text-center space-y-8 animate-in zoom-in duration-300">
