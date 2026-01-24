@@ -1,8 +1,10 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import { getAuth, Auth } from 'firebase-admin/auth';
 
 let adminApp: App;
 let adminDb: Firestore;
+let adminAuth: Auth;
 
 function initializeFirebaseAdmin(): App {
   if (getApps().length > 0) {
@@ -35,8 +37,7 @@ function initializeFirebaseAdmin(): App {
   }
 
   console.log(`[Firebase] Initializing with Project ID: ${process.env.FIREBASE_ADMIN_PROJECT_ID}`);
-  console.log(`[Firebase] Private Key length: ${privateKey.length}`);
-  console.log(`[Firebase] Private Key start: ${privateKey.substring(0, 30)}...`);
+  // console.log(`[Firebase] Private Key length: ${privateKey.length}`);
 
   if (!process.env.FIREBASE_ADMIN_PROJECT_ID ||
     !process.env.FIREBASE_ADMIN_CLIENT_EMAIL) {
@@ -60,6 +61,21 @@ export function getAdminDb(): Firestore {
     adminDb = getFirestore(adminApp);
   }
   return adminDb;
+}
+
+export function getAdminAuth(): Auth {
+  if (!adminApp) {
+    adminApp = initializeFirebaseAdmin();
+  }
+  if (!adminAuth) {
+    adminAuth = getAuth(adminApp);
+  }
+  return adminAuth;
+}
+
+export async function createFirebaseCustomToken(uid: string): Promise<string> {
+  const auth = getAdminAuth();
+  return auth.createCustomToken(uid);
 }
 
 export interface AdminUser {
