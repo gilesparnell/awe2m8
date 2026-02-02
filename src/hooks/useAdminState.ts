@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ModuleType } from '@/types';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { doc, setDoc, deleteDoc, collection, getDocs, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export const useAdminState = () => {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -30,9 +31,25 @@ export const useAdminState = () => {
 
     // Load existing pages for edit mode
     useEffect(() => {
+        let unsubscribe: () => void;
+
         if (mode === 'edit') {
-            loadExistingPages();
+            setLoading(true);
+            // Wait for auth to initialize before fetching
+            unsubscribe = onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadExistingPages();
+                } else {
+                    // If no user, we can't fetch. The AuthProvider handles the sign-in.
+                    // We just wait. Potentially add a timeout/error if it takes too long.
+                    console.log('Waiting for Firebase Auth...');
+                }
+            });
         }
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
     }, [mode]);
 
     const loadExistingPages = async () => {
