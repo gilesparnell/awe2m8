@@ -12,7 +12,8 @@
     "test:integration": "NODE_ENV=test INTEGRATION_TEST=true jest --selectProjects integration --verbose",
     "test:watch": "jest --watch --verbose",
     "test:coverage": "jest --coverage",
-    "prebuild": "npm run test:unit"
+    "prebuild": "npm run test:unit",
+    "db:seed": "node scripts/seed-firebase.js"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

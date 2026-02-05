@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings } from 'lucide-react';
+import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings, Bot } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
@@ -81,7 +81,24 @@ export default function AdminDashboard() {
                         <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all"></div>
                     </Link>
 
-                    {/* Tool 3: Placeholder / System Config */}
+                    {/* Tool 4: Mission Control */}
+                    <Link href="/admin/mission-control" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-purple-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-500/20 transition-colors">
+                                <Bot className="w-6 h-6 text-purple-400 group-hover:text-purple-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Mission Control</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                AI Agent Squad dashboard. Track agent progress, manage tasks, and monitor squad activity.
+                            </p>
+                            <div className="flex items-center text-purple-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all"></div>
+                    </Link>
+
+                    {/* Tool 5: Placeholder / System Config */}
                     <div className="group relative overflow-hidden bg-gray-900/50 border border-gray-800 rounded-2xl p-6 opacity-60">
                         <div className="relative z-10">
                             <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mb-4">
