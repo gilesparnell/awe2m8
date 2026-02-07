@@ -279,11 +279,11 @@ export function useTaskDetail(taskId: string | null) {
     // Get task document
     const taskUnsub = onSnapshot(
       doc(db, 'tasks', taskId),
-      (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
+      (taskDoc) => {
+        if (taskDoc.exists()) {
+          const data = taskDoc.data();
           setTask({
-            id: doc.id,
+            id: taskDoc.id,
             title: data.title || 'Untitled Task',
             agentId: data.agentId || '',
             status: data.status || 'inbox',
@@ -325,6 +325,10 @@ export function useTaskDetail(taskId: string | null) {
             );
           }
         }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching task:', error);
         setLoading(false);
       }
     );
