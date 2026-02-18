@@ -1,0 +1,23 @@
+# OS files
+.DS_Store
+*.log
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Firebase
+.firebase/
+
+# Large media
+*.mp4
+*.mov
