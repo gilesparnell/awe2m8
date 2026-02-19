@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { isAuthenticated } from '@/lib/api-auth';
+import { getNumberCustomer, saveNumberCustomer } from '@/lib/twilio-helpers';
 
 export async function POST(request: Request) {
     if (!await isAuthenticated(request)) {
@@ -31,6 +32,162 @@ export async function POST(request: Request) {
 
         const mainClient = twilio(accountSid, authToken);
 
+        const getValidatedSubAccount = async (subAccountSid: string) => {
+            try {
+                return await mainClient.api.v2010.accounts(subAccountSid).fetch();
+            } catch (err) {
+                throw new Error(`Subaccount ${subAccountSid} does not exist or is not accessible`);
+            }
+        };
+
+        const getApprovedBundle = async (subAccountSid: string, isoCountry: string) => {
+            const subAccount = await getValidatedSubAccount(subAccountSid);
+            const subClient = twilio(subAccountSid, subAccount.authToken);
+            const approvedBundles = await subClient.numbers.v2.regulatoryCompliance.bundles.list({
+                status: 'twilio-approved',
+                isoCountry
+            });
+
+            if (approvedBundles.length === 0) {
+                throw new Error(`No Twilio-approved regulatory bundle found for ${isoCountry} in subaccount ${subAccountSid}`);
+            }
+
+            return approvedBundles[0];
+        };
+
+        const getApprovedBundleCountries = async (subAccountSid: string) => {
+            await getValidatedSubAccount(subAccountSid);
+            const subClient = twilio(accountSid, authToken, { accountSid: subAccountSid });
+
+            // Twilio list filters can vary in behavior by account context; fetch and filter locally.
+            const allBundles = await subClient.numbers.v2.regulatoryCompliance.bundles.list({ limit: 200 });
+            const approvedBundles = allBundles.filter((bundle: any) => {
+                const serialized = typeof bundle?.toJSON === 'function' ? bundle.toJSON() : bundle;
+                const status = String(
+                    serialized?.status ??
+                    bundle?.status ??
+                    ''
+                ).toLowerCase();
+                // Be permissive across Twilio status variants while still excluding non-approved statuses.
+                return status.includes('approved') && !status.includes('rejected');
+            });
+
+            const extractIsoCountry = (bundle: any): string => {
+                const serialized = typeof bundle?.toJSON === 'function' ? bundle.toJSON() : bundle;
+                const directIso = (
+                    serialized?.isoCountry ??
+                    serialized?.iso_country ??
+                    bundle?.isoCountry ??
+                    bundle?.iso_country ??
+                    ''
+                ).toString().toUpperCase();
+                if (directIso.length === 2) return directIso;
+
+                const regulationType = (
+                    serialized?.regulationType ??
+                    serialized?.regulation_type ??
+                    bundle?.regulationType ??
+                    bundle?.regulation_type ??
+                    ''
+                ).toString().toUpperCase();
+                // Fallback for shapes like "au_mobile_business"
+                const prefix = regulationType.split(/[^A-Z]/).find(Boolean) || '';
+                return prefix.length === 2 ? prefix : '';
+            };
+
+            return Array.from(
+                new Set(
+                    approvedBundles
+                        .map((bundle: any) => extractIsoCountry(bundle))
+                        .filter((iso: string) => iso.length === 2)
+                )
+            ).sort();
+        };
+
+        // LIST APPROVED BUNDLE COUNTRIES FOR A SUBACCOUNT
+        if (action === 'list-approved-bundle-countries') {
+            const subAccountSid = body.subAccountSid;
+            if (!subAccountSid) {
+                return NextResponse.json({ success: false, error: 'Missing subAccountSid' }, { status: 400 });
+            }
+
+            const countries = await getApprovedBundleCountries(subAccountSid);
+            return NextResponse.json({
+                success: true,
+                countries
+            });
+        }
+
+        // SEARCH AVAILABLE NUMBERS
+        if (action === 'search-available-numbers') {
+            const subAccountSid = body.subAccountSid;
+            const isoCountry = (body.isoCountry || '').toUpperCase();
+            const limit = Math.min(Math.max(Number(body.limit) || 20, 1), 50);
+
+            if (!subAccountSid) {
+                return NextResponse.json({ success: false, error: 'Missing subAccountSid' }, { status: 400 });
+            }
+            if (!isoCountry) {
+                return NextResponse.json({ success: false, error: 'Missing isoCountry' }, { status: 400 });
+            }
+
+            const bundle = await getApprovedBundle(subAccountSid, isoCountry);
+            const available = await mainClient.availablePhoneNumbers(isoCountry).local.list({
+                limit
+            });
+
+            return NextResponse.json({
+                success: true,
+                bundle: {
+                    sid: bundle.sid,
+                    friendlyName: bundle.friendlyName,
+                    status: bundle.status
+                },
+                numbers: available.map((n: any) => ({
+                    phoneNumber: n.phoneNumber,
+                    friendlyName: n.friendlyName || n.phoneNumber,
+                    locality: n.locality || '',
+                    region: n.region || ''
+                }))
+            });
+        }
+
+        // CREATE NUMBER IN SUBACCOUNT
+        if (action === 'create-number') {
+            const subAccountSid = body.subAccountSid;
+            const isoCountry = (body.isoCountry || '').toUpperCase();
+            const requestedPhoneNumber = body.phoneNumber;
+
+            if (!subAccountSid) {
+                return NextResponse.json({ success: false, error: 'Missing subAccountSid' }, { status: 400 });
+            }
+            if (!isoCountry) {
+                return NextResponse.json({ success: false, error: 'Missing isoCountry' }, { status: 400 });
+            }
+            if (!requestedPhoneNumber) {
+                return NextResponse.json({ success: false, error: 'Missing phoneNumber' }, { status: 400 });
+            }
+
+            const subAccount = await getValidatedSubAccount(subAccountSid);
+            const approvedBundle = await getApprovedBundle(subAccountSid, isoCountry);
+            const subClient = twilio(subAccountSid, subAccount.authToken);
+
+            const created = await subClient.incomingPhoneNumbers.create({
+                phoneNumber: requestedPhoneNumber,
+                bundleSid: approvedBundle.sid
+            });
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    sid: created.sid,
+                    phoneNumber: created.phoneNumber,
+                    friendlyName: created.friendlyName,
+                    accountSid: created.accountSid
+                }
+            });
+        }
+
         // LIST NUMBERS
         if (action === 'list') {
             if (!sourceAccountSid) return NextResponse.json({ success: false, error: 'Missing sourceAccountSid' }, { status: 400 });
@@ -42,8 +199,26 @@ export async function POST(request: Request) {
                 numbers: numbers.map(n => ({
                     sid: n.sid,
                     phoneNumber: n.phoneNumber,
-                    friendlyName: n.friendlyName
+                    friendlyName: n.friendlyName,
+                    customer: getNumberCustomer(n.sid)
                 }))
+            });
+        }
+
+        // UPDATE NUMBER CUSTOMER LABEL
+        if (action === 'update-customer') {
+            if (!phoneNumberSid) {
+                return NextResponse.json({ success: false, error: 'Missing phoneNumberSid' }, { status: 400 });
+            }
+
+            saveNumberCustomer(phoneNumberSid, typeof body.customer === 'string' ? body.customer : '');
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    sid: phoneNumberSid,
+                    customer: getNumberCustomer(phoneNumberSid)
+                }
             });
         }
 

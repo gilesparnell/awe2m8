@@ -13,6 +13,7 @@ import { ModuleSelector } from '@/components/admin/ModuleSelector';
 import { ContentEditor } from '@/components/admin/ContentEditor';
 import { SuccessScreen } from '@/components/admin/SuccessScreen';
 import { ErrorAlert } from '@/components/admin/ErrorAlert';
+import { Code } from 'lucide-react';
 
 export default function AdminPage() {
     const {
@@ -82,12 +83,36 @@ export default function AdminPage() {
 
                 {/* Create Mode: URL Input */}
                 {mode === 'create' && step === 'input' && (
-                    <URLInput
-                        url={url}
-                        loading={loading}
-                        onUrlChange={setUrl}
-                        onAnalyze={handleAnalyze}
-                    />
+                    <>
+                        <URLInput
+                            url={url}
+                            loading={loading}
+                            onUrlChange={setUrl}
+                            onAnalyze={handleAnalyze}
+                        />
+
+                        {/* Separator */}
+                        <div className="my-8 border-t border-gray-800/50"></div>
+
+                        {/* GHL Workflow Triggers Link */}
+                        <div className="bg-gray-900/50 border border-gray-800 rounded-3xl p-10 max-w-2xl mx-auto backdrop-blur-sm shadow-2xl">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-white mb-2">GHL Workflow Triggers</h3>
+                                    <p className="text-gray-400 text-sm">
+                                        Create custom webhook pages for GoHighLevel automation workflows.
+                                    </p>
+                                </div>
+                                <Link
+                                    href="/admin/ghl-workflow-triggers"
+                                    className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-900/20 flex-shrink-0"
+                                >
+                                    <Code className="w-5 h-5" />
+                                    Manage
+                                </Link>
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 {/* Step 2: Module Selection */}

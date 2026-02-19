@@ -30,11 +30,19 @@ export interface MockAddress {
     validated?: boolean;
 }
 
+export interface MockAvailableNumber {
+    phoneNumber: string;
+    friendlyName?: string;
+    locality?: string;
+    region?: string;
+}
+
 // In-memory state for testing
 let mockNumbers: Map<string, MockNumber[]> = new Map();
 let mockBundles: Map<string, MockBundle[]> = new Map();
 let mockAddresses: Map<string, MockAddress[]> = new Map();
 let mockAccounts: Map<string, { sid: string; authToken: string; friendlyName: string }> = new Map();
+let mockAvailableNumbers: Map<string, MockAvailableNumber[]> = new Map();
 
 // Error simulation flags
 let simulateError: { code?: number; message?: string } | null = null;
@@ -44,6 +52,7 @@ export const resetMockState = () => {
     mockBundles = new Map();
     mockAddresses = new Map();
     mockAccounts = new Map();
+    mockAvailableNumbers = new Map();
     simulateError = null;
 };
 
@@ -80,6 +89,9 @@ export const addMockAddress = (accountSid: string, address: MockAddress) => {
 export const getMockNumbers = (accountSid: string) => mockNumbers.get(accountSid) || [];
 export const getMockBundles = (accountSid: string) => mockBundles.get(accountSid) || [];
 export const getMockAddresses = (accountSid: string) => mockAddresses.get(accountSid) || [];
+export const setMockAvailableNumbers = (isoCountry: string, numbers: MockAvailableNumber[]) => {
+    mockAvailableNumbers.set(isoCountry.toUpperCase(), numbers);
+};
 
 // Move a number between accounts (simulates successful port)
 export const moveNumber = (numberSid: string, fromAccount: string, toAccount: string) => {
@@ -201,6 +213,28 @@ export const createMockTwilioClient = (accountSid: string, authToken: string, op
                 ),
             },
         },
+        incomingPhoneNumbers: {
+            create: async (params: { phoneNumber: string; bundleSid?: string }) => {
+                const created: MockNumber = {
+                    sid: `PN_NEW_${Date.now()}`,
+                    phoneNumber: params.phoneNumber,
+                    friendlyName: params.phoneNumber,
+                    accountSid: targetAccountSid,
+                    bundleSid: params.bundleSid,
+                    capabilities: { sms: true, mms: true, voice: true }
+                };
+                addMockNumber(targetAccountSid, created);
+                return created;
+            }
+        },
+        availablePhoneNumbers: (isoCountry: string) => ({
+            local: {
+                list: async (opts?: { limit?: number }) => {
+                    const list = mockAvailableNumbers.get(isoCountry.toUpperCase()) || [];
+                    return list.slice(0, opts?.limit || 20);
+                }
+            }
+        }),
         numbers: {
             v2: {
                 regulatoryCompliance: {

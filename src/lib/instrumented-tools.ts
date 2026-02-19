@@ -1,0 +1,189 @@
+'use client';
+
+/**
+ * Instrumented Tool Wrappers
+ * 
+ * These wrappers add activity logging to common operations.
+ * Import these instead of raw tool calls to get automatic activity tracking.
+ */
+
+import { 
+  logFileRead, 
+  logFileWrite, 
+  logFileEdit, 
+  logWebSearch, 
+  logWebFetch,
+  logCommandExecution,
+  logAgentSpawn,
+  ActivityActor 
+} from '@/lib/activity-logger';
+
+// ============================================================================
+// FILE OPERATIONS
+// ============================================================================
+
+/**
+ * Read a file and log the activity
+ */
+export async function instrumentedRead(
+  readFn: () => Promise<string>,
+  filePath: string,
+  actor: ActivityActor = 'garion'
+): Promise<string> {
+  const content = await readFn();
+  await logFileRead(filePath, actor, { size: content.length });
+  return content;
+}
+
+/**
+ * Write a file and log the activity
+ */
+export async function instrumentedWrite(
+  writeFn: () => Promise<void>,
+  filePath: string,
+  content: string,
+  actor: ActivityActor = 'garion'
+): Promise<void> {
+  await writeFn();
+  await logFileWrite(filePath, actor, { size: content.length });
+}
+
+/**
+ * Edit a file and log the activity
+ */
+export async function instrumentedEdit(
+  editFn: () => Promise<void>,
+  filePath: string,
+  actor: ActivityActor = 'garion'
+): Promise<void> {
+  await editFn();
+  await logFileEdit(filePath, actor);
+}
+
+// ============================================================================
+// WEB OPERATIONS
+// ============================================================================
+
+/**
+ * Search the web and log the activity
+ */
+export async function instrumentedWebSearch<T>(
+  searchFn: () => Promise<T>,
+  query: string,
+  actor: ActivityActor = 'garion'
+): Promise<T> {
+  const results = await searchFn();
+  const resultCount = Array.isArray(results) ? results.length : 1;
+  await logWebSearch(query, resultCount, actor);
+  return results;
+}
+
+/**
+ * Fetch a URL and log the activity
+ */
+export async function instrumentedWebFetch<T>(
+  fetchFn: () => Promise<T>,
+  url: string,
+  actor: ActivityActor = 'garion'
+): Promise<T> {
+  const result = await fetchFn();
+  await logWebFetch(url, actor);
+  return result;
+}
+
+// ============================================================================
+// COMMAND EXECUTION
+// ============================================================================
+
+interface CommandResult {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+}
+
+/**
+ * Execute a command and log the activity
+ */
+export async function instrumentedExec(
+  execFn: () => Promise<CommandResult>,
+  command: string,
+  actor: ActivityActor = 'garion'
+): Promise<CommandResult> {
+  const result = await execFn();
+  await logCommandExecution(command, result.exitCode, actor, {
+    stdout: result.stdout.substring(0, 200), // Truncate for metadata
+    stderr: result.stderr ? result.stderr.substring(0, 200) : undefined,
+  });
+  return result;
+}
+
+// ============================================================================
+// AGENT OPERATIONS
+// ============================================================================
+
+/**
+ * Spawn an agent and log the activity
+ */
+export async function instrumentedAgentSpawn<T>(
+  spawnFn: () => Promise<T>,
+  targetAgent: ActivityActor,
+  task: string,
+  actor: ActivityActor = 'garion'
+): Promise<T> {
+  const result = await spawnFn();
+  await logAgentSpawn(targetAgent, task, actor);
+  return result;
+}
+
+// ============================================================================
+// REACT HOOK: useInstrumentedFileOperations
+// ============================================================================
+
+import { useCallback } from 'react';
+
+interface UseInstrumentedOperationsOptions {
+  actor?: ActivityActor;
+  sessionId?: string;
+}
+
+export function useInstrumentedOperations(options: UseInstrumentedOperationsOptions = {}) {
+  const { actor = 'garion' } = options;
+
+  const readFile = useCallback(async (filePath: string, readFn: () => Promise<string>) => {
+    return instrumentedRead(readFn, filePath, actor);
+  }, [actor]);
+
+  const writeFile = useCallback(async (filePath: string, content: string, writeFn: () => Promise<void>) => {
+    return instrumentedWrite(writeFn, filePath, content, actor);
+  }, [actor]);
+
+  const editFile = useCallback(async (filePath: string, editFn: () => Promise<void>) => {
+    return instrumentedEdit(editFn, filePath, actor);
+  }, [actor]);
+
+  const webSearch = useCallback(async (query: string, searchFn: () => Promise<any>) => {
+    return instrumentedWebSearch(searchFn, query, actor);
+  }, [actor]);
+
+  const webFetch = useCallback(async (url: string, fetchFn: () => Promise<any>) => {
+    return instrumentedWebFetch(fetchFn, url, actor);
+  }, [actor]);
+
+  const runCommand = useCallback(async (command: string, execFn: () => Promise<CommandResult>) => {
+    return instrumentedExec(execFn, command, actor);
+  }, [actor]);
+
+  const spawnAgent = useCallback(async (targetAgent: ActivityActor, task: string, spawnFn: () => Promise<any>) => {
+    return instrumentedAgentSpawn(spawnFn, targetAgent, task, actor);
+  }, [actor]);
+
+  return {
+    readFile,
+    writeFile,
+    editFile,
+    webSearch,
+    webFetch,
+    runCommand,
+    spawnAgent,
+  };
+}

@@ -525,7 +525,7 @@ export function CalendarView({
             {/* Actor filters */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm text-gray-500">Actors:</span>
-              {(['garion', 'fury', 'friday', 'loki'] as ActivityActor[]).map((actor) => (
+              {(['garion', 'barak', 'silk', 'polgara'] as ActivityActor[]).map((actor) => (
                 <button
                   key={actor}
                   onClick={() => toggleActorFilter(actor)}

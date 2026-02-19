@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // GHL Triggers (existing)
+    // ==========================================
+    match /ghl_triggers/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Agents
+    // ==========================================
+    match /agents/{agentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Agent Tasks
+    // ==========================================
+    match /agent_tasks/{taskId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Areas of Investigation
+    // ==========================================
+    match /areas_of_investigation/{areaId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - User Stories
+    // ==========================================
+    match /user_stories/{storyId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Tasks (atomic work units)
+    // ==========================================
+    match /tasks/{taskId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Considerations
+    // ==========================================
+    match /considerations/{considerationId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Agent Activities (real-time)
+    // ==========================================
+    match /agent_activities/{activityId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Activities
+    // ==========================================
+    match /activities/{activityId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Clients
+    // ==========================================
+    match /clients/{clientId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Admin Users
+    // ==========================================
+    match /admin_users/{email} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Default deny (optional safety net)
+    // ==========================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

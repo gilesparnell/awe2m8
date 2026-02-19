@@ -9,8 +9,12 @@ import {
   onSnapshot,
   doc,
   Timestamp,
-  where
+  where,
+  addDoc,
+  updateDoc,
+  getDoc
 } from 'firebase/firestore';
+import { logTaskCreated } from '@/lib/activity-logger';
 
 // ============================================================================
 // TYPES - Enhanced Schema
@@ -23,7 +27,7 @@ export interface Agent {
   status: 'idle' | 'active' | 'completed' | 'blocked';
   currentTask: string;
   lastActivity: string;
-  color: 'green' | 'blue' | 'amber';
+  color: 'green' | 'blue' | 'amber' | 'purple';
   icon: string;
   updatedAt?: Timestamp;
   lastHeartbeat?: Timestamp;
@@ -129,12 +133,29 @@ export interface ClientContext {
 // HOOK - Enhanced useAgents
 // ============================================================================
 
+const ONLINE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes
+
 export function useAgents() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Send heartbeat for current agent
+  const sendHeartbeat = async (agentId: string, status?: string) => {
+    try {
+      const response = await fetch('/api/agents/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, status }),
+      });
+      return response.ok;
+    } catch (err) {
+      console.warn('Failed to send heartbeat:', err);
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Set up real-time listeners for agents
@@ -147,7 +168,7 @@ export function useAgents() {
         snapshot.forEach((doc) => {
           const data = doc.data();
           const lastHeartbeat = data.lastHeartbeat?.toDate();
-          const isOnline = lastHeartbeat ? (Date.now() - lastHeartbeat.getTime()) < 60000 : false;
+          const isOnline = lastHeartbeat ? (Date.now() - lastHeartbeat.getTime()) < ONLINE_THRESHOLD_MS : false;
           
           agentsData.push({
             id: doc.id,
@@ -246,7 +267,7 @@ export function useAgents() {
     };
   }, []);
 
-  return { agents, tasks, activities, loading, error };
+  return { agents, tasks, activities, loading, error, sendHeartbeat };
 }
 
 // ============================================================================
@@ -439,6 +460,90 @@ export function useTaskDetail(taskId: string | null) {
 }
 
 // ============================================================================
+// HOOK - useCreateTask
+// ============================================================================
+
+export interface CreateTaskInput {
+  title: string;
+  description?: string;
+  agentId: string;
+  priority: 'P0' | 'P1' | 'P2' | 'P3';
+  estimatedHours?: number;
+  clientId?: string;
+  clientName?: string;
+}
+
+export function useCreateTask() {
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createTask = async (input: CreateTaskInput, agentName: string): Promise<string | null> => {
+    setCreating(true);
+    setError(null);
+
+    try {
+      const now = Timestamp.now();
+      
+      // Create the task
+      const taskData = {
+        title: input.title,
+        description: input.description || '',
+        agentId: input.agentId,
+        status: 'inbox',
+        priority: input.priority,
+        createdAt: now,
+        updatedAt: now,
+        estimatedHours: input.estimatedHours || 0,
+        elapsedMinutes: 0,
+        progressPercent: 0,
+        currentPhase: 'research',
+        clientId: input.clientId || null,
+        clientName: input.clientName || 'Internal',
+        blockers: [],
+        nextActions: []
+      };
+
+      const taskRef = await addDoc(collection(db, 'tasks'), taskData);
+
+      // Add initial log entry
+      await addDoc(collection(db, 'tasks', taskRef.id, 'logs'), {
+        agentId: input.agentId,
+        agentName: agentName,
+        timestamp: now,
+        type: 'milestone',
+        message: `Task created: ${input.title}`,
+        details: { priority: input.priority }
+      });
+
+      // Log activity using logger
+      await logTaskCreated(
+        input.title,
+        taskRef.id,
+        input.agentId as any,
+        { priority: input.priority, clientName: input.clientName }
+      );
+
+      // Update agent workload
+      const agentRef = doc(db, 'agents', input.agentId);
+      await updateDoc(agentRef, {
+        workload: (await getDoc(agentRef)).data()?.workload || 0 + 1,
+        updatedAt: now
+      });
+
+      setCreating(false);
+      return taskRef.id;
+    } catch (err) {
+      console.error('Error creating task:', err);
+      setError('Failed to create task');
+      setCreating(false);
+      return null;
+    }
+  };
+
+  return { createTask, creating, error };
+}
+
+// ============================================================================
 // UTILS
 // ============================================================================
 
@@ -470,9 +575,9 @@ export function formatDuration(minutes: number): string {
 
 export const DEFAULT_AGENTS: Agent[] = [
   {
-    id: 'fury',
-    name: 'Fury',
-    role: 'Lead Qualification Analyst',
+    id: 'barak',
+    name: 'Barak (The Bear)',
+    role: 'Research Analyst',
     status: 'active',
     currentTask: 'Researching AI receptionist competitors',
     lastActivity: '2 mins ago',
@@ -482,9 +587,9 @@ export const DEFAULT_AGENTS: Agent[] = [
     workload: 2
   },
   {
-    id: 'friday',
-    name: 'Friday',
-    role: 'Voice/SMS Workflow Architect',
+    id: 'silk',
+    name: 'Silk (Prince Kheldar)',
+    role: 'Code Architect',
     status: 'active',
     currentTask: 'Designing tradie workflow',
     lastActivity: '5 mins ago',
@@ -494,9 +599,9 @@ export const DEFAULT_AGENTS: Agent[] = [
     workload: 1
   },
   {
-    id: 'loki',
-    name: 'Loki',
-    role: 'Content & SEO Strategist',
+    id: 'polgara',
+    name: 'Polgara (The Sorceress)',
+    role: 'Content Strategist',
     status: 'active',
     currentTask: 'Writing blog post',
     lastActivity: '3 mins ago',
@@ -511,7 +616,7 @@ export const DEFAULT_TASKS: Task[] = [
   {
     id: '1',
     title: 'Competitive Analysis: AI Receptionist Market',
-    agentId: 'fury',
+    agentId: 'barak',
     status: 'in_progress',
     priority: 'P1',
     createdAt: new Date().toISOString(),
@@ -526,7 +631,7 @@ export const DEFAULT_TASKS: Task[] = [
   {
     id: '2',
     title: 'Go High Level Workflow for Tradies',
-    agentId: 'friday',
+    agentId: 'silk',
     status: 'in_progress',
     priority: 'P0',
     createdAt: new Date().toISOString(),
@@ -541,7 +646,7 @@ export const DEFAULT_TASKS: Task[] = [
   {
     id: '3',
     title: 'Blog Post: Tradies Missed Calls',
-    agentId: 'loki',
+    agentId: 'polgara',
     status: 'review',
     priority: 'P2',
     createdAt: new Date().toISOString(),
@@ -559,31 +664,31 @@ export const DEFAULT_ACTIVITIES: ActivityItem[] = [
   {
     id: '1',
     type: 'task_started',
-    agentName: 'Fury',
+    agentName: 'Barak (The Bear)',
     message: 'Started competitive analysis research',
     timestamp: '2 mins ago'
   },
   {
     id: '2',
     type: 'task_started',
-    agentName: 'Friday',
+    agentName: 'Silk (Prince Kheldar)',
     message: 'Designing Go High Level workflow',
     timestamp: '5 mins ago'
   },
   {
     id: '3',
     type: 'file_created',
-    agentName: 'Loki',
+    agentName: 'Polgara (The Sorceress)',
     message: 'Published blog post: "Why Tradies Lose $50K/Year to Missed Calls"',
     timestamp: '10 mins ago'
   }
 ];
 
 export const DEFAULT_INVESTIGATIONS: InvestigationArea[] = [
-  { id: '1', taskId: '1', agentId: 'fury', label: 'Competitor pricing analysis', status: 'completed', order: 1 },
-  { id: '2', taskId: '1', agentId: 'fury', label: 'ICP definition & firmographics', status: 'in_progress', order: 2 },
-  { id: '3', taskId: '1', agentId: 'fury', label: 'Lead source performance benchmarking', status: 'pending', order: 3 },
-  { id: '4', taskId: '1', agentId: 'fury', label: 'Market size & TAM calculation', status: 'pending', order: 4 }
+  { id: '1', taskId: '1', agentId: 'barak', label: 'Competitor pricing analysis', status: 'completed', order: 1 },
+  { id: '2', taskId: '1', agentId: 'barak', label: 'ICP definition & firmographics', status: 'in_progress', order: 2 },
+  { id: '3', taskId: '1', agentId: 'barak', label: 'Lead source performance benchmarking', status: 'pending', order: 3 },
+  { id: '4', taskId: '1', agentId: 'barak', label: 'Market size & TAM calculation', status: 'pending', order: 4 }
 ];
 
 export const DEFAULT_CONSIDERATIONS: Consideration[] = [
@@ -611,7 +716,7 @@ export const DEFAULT_DELIVERABLES: Deliverable[] = [
   {
     id: '1',
     taskId: '1',
-    agentId: 'fury',
+    agentId: 'barak',
     title: 'Competitive Analysis Matrix',
     type: 'analysis',
     format: 'markdown',

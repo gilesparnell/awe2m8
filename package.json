@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest --verbose",
-    "test:unit": "NODE_ENV=test jest --selectProjects unit-api unit-components --verbose",
+    "test:unit": "NODE_ENV=test jest --selectProjects unit-api unit-components unit-hooks --verbose",
     "test:integration": "NODE_ENV=test INTEGRATION_TEST=true jest --selectProjects integration --verbose",
     "test:watch": "jest --watch --verbose",
     "test:coverage": "jest --coverage",
-    "prebuild": "npm run test:unit",
+    "test:regression": "./scripts/regression-tests.sh",
+    "prebuild": "npm run test:regression",
     "db:seed": "node scripts/seed-firebase.js"
   },
   "dependencies": {
