@@ -66,6 +66,26 @@ const config: Config = {
             },
         },
         {
+            displayName: 'unit-hooks',
+            testEnvironment: 'jsdom',
+            testMatch: [
+                '<rootDir>/__tests__/unit/hooks/**/*.test.ts',
+                '<rootDir>/__tests__/unit/app/**/*.test.tsx'
+            ],
+            setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+            transform: {
+                '^.+\\.tsx?$': ['ts-jest', {
+                    useESM: true,
+                    tsconfig: {
+                        jsx: 'react-jsx'
+                    }
+                }],
+            },
+            moduleNameMapper: {
+                '^@/(.*)$': '<rootDir>/src/$1',
+            },
+        },
+        {
             displayName: 'integration',
             testEnvironment: 'node',
             testMatch: ['<rootDir>/__tests__/integration/**/*.test.ts'],

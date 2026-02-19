@@ -26,11 +26,15 @@ import {
   Wrench,
   MoreHorizontal,
   CheckSquare,
-  PlayCircle
+  PlayCircle,
+  LayoutDashboard,
+  Plus
 } from 'lucide-react';
 import { 
   useAgents, 
   useTaskDetail,
+  useCreateTask,
+  CreateTaskInput,
   Agent, 
   Task, 
   ActivityItem,
@@ -42,6 +46,11 @@ import {
   DEFAULT_CONSIDERATIONS,
   DEFAULT_DELIVERABLES
 } from '@/hooks/useAgents';
+import { NavigationTabs } from '@/components/NavigationTabs';
+import { CreateTaskModal } from '@/components/CreateTaskModal';
+import { useHeartbeat } from '@/hooks/useHeartbeat';
+import { AgentWorkCalendar } from '@/components/AgentWorkCalendar';
+import { InvestigationBoard } from '@/components/InvestigationBoard';
 
 // Icon mapping
 const iconMap: Record<string, React.ReactNode> = {
@@ -332,7 +341,8 @@ function AgentCard({ agent }: { agent: Agent }) {
   const colorStyles = {
     green: { border: 'border-green-500/50', bg: 'bg-green-900/20', text: 'text-green-400', glow: 'bg-green-500/10' },
     blue: { border: 'border-blue-500/50', bg: 'bg-blue-900/20', text: 'text-blue-400', glow: 'bg-blue-500/10' },
-    amber: { border: 'border-amber-500/50', bg: 'bg-amber-900/20', text: 'text-amber-400', glow: 'bg-amber-500/10' }
+    amber: { border: 'border-amber-500/50', bg: 'bg-amber-900/20', text: 'text-amber-400', glow: 'bg-amber-500/10' },
+    purple: { border: 'border-purple-500/50', bg: 'bg-purple-900/20', text: 'text-purple-400', glow: 'bg-purple-500/10' }
   };
   const style = colorStyles[agent.color];
   const icon = iconMap[agent.icon] || <Bot className="w-6 h-6" />;
@@ -429,7 +439,7 @@ function TaskBoard({ tasks, agents, onTaskClick }: { tasks: Task[]; agents: Agen
 // ACTIVITY FEED
 // ============================================================================
 
-function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
+function ActivityFeedPreview({ activities }: { activities: ActivityItem[] }) {
   return (
     <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -461,9 +471,15 @@ function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
 // ============================================================================
 
 export default function MissionControl() {
-  const { agents, tasks, activities, loading, error } = useAgents();
+  const { agents, tasks, activities, loading, error: agentsError } = useAgents();
+  const { createTask, creating, error: createTaskError } = useCreateTask();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  // Note: Heartbeat is disabled for now - would need 'garion' agent in DB
+  // or use a different identification method
+  // useHeartbeat('garion');
 
   const displayAgents = agents.length > 0 ? agents : DEFAULT_AGENTS;
   const displayTasks = tasks.length > 0 ? tasks : DEFAULT_TASKS;
@@ -474,13 +490,29 @@ export default function MissionControl() {
     window.location.reload();
   };
 
+  const handleCreateTask = async (input: CreateTaskInput) => {
+    const agent = displayAgents.find(a => a.id === input.agentId);
+    const agentName = agent?.name || 'Unknown';
+    await createTask(input, agentName);
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8">
-      {/* Modal */}
-      <TaskDetailModal 
-        taskId={selectedTaskId} 
-        onClose={() => setSelectedTaskId(null)} 
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        taskId={selectedTaskId}
+        onClose={() => setSelectedTaskId(null)}
         agents={displayAgents}
+      />
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreate={handleCreateTask}
+        agents={displayAgents.map(a => ({ id: a.id, name: a.name, color: a.color }))}
+        creating={creating}
+        error={createTaskError}
       />
 
       <div className="max-w-7xl mx-auto">
@@ -493,17 +525,27 @@ export default function MissionControl() {
         </div>
 
         {/* Header */}
-        <header className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-4">
-            <Bot className="w-3 h-3" />AI Agent Squad
+        <header className="mb-8">
+          {/* Top row: Title + Navigation */}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-4">
+                <Bot className="w-3 h-3" />AI Agent Squad
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">AWE2M8</span>{' '}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">Mission Control</span>
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl">
+                Your AI agent squad working together. Track progress, assign tasks, and manage deliverables.
+              </p>
+            </div>
+            
+            {/* Navigation Tabs */}
+            <div className="lg:pt-8">
+              <NavigationTabs />
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">AWE2M8</span>{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">Mission Control</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Your AI agent squad working together. Track progress, assign tasks, and manage deliverables.
-          </p>
         </header>
 
         {/* Stats */}
@@ -544,35 +586,50 @@ export default function MissionControl() {
           )}
         </section>
 
-        {/* Task Board */}
+        {/* Investigation Board */}
         <section className="mb-12">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-blue-400" />Task Board
-          </h2>
-          <TaskBoard 
-            tasks={displayTasks} 
-            agents={displayAgents}
-            onTaskClick={setSelectedTaskId}
-          />
+          <InvestigationBoard onStoryClick={setSelectedTaskId} />
         </section>
 
-        {/* Activity Feed */}
+        {/* Agent Work Calendar */}
         <section className="mb-12">
+          <AgentWorkCalendar />
+        </section>
+
+        {/* Activity Feed Preview */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-green-400" />Recent Activity
+            </h2>
+            <Link 
+              href="/admin/mission-control/activity"
+              className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1"
+            >
+              View all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <ActivityFeed activities={displayActivities} />
+              <ActivityFeedPreview activities={displayActivities} />
             </div>
             <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
               <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-left">
-                  <span className="text-sm text-white">Assign New Task</span>
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full flex items-center justify-between p-3 bg-green-900/30 border border-green-800 rounded-lg hover:bg-green-900/50 transition-colors text-left"
+                >
+                  <span className="text-sm text-green-400 font-medium">+ Assign New Task</span>
+                  <ArrowRight className="w-4 h-4 text-green-400" />
                 </button>
-                <button className="w-full flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-left">
-                  <span className="text-sm text-white">View All Deliverables</span>
+                <Link 
+                  href="/admin/mission-control/activity"
+                  className="w-full flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-left"
+                >
+                  <span className="text-sm text-white">View All Activities</span>
                   <ArrowRight className="w-4 h-4 text-gray-400" />
-                </button>
+                </Link>
               </div>
               <div className="mt-6 pt-6 border-t border-gray-800">
                 <div className="flex items-center justify-between mb-2">

@@ -14,6 +14,7 @@ import {
     addMockNumber,
     addMockBundle,
     addMockAddress,
+    setMockAvailableNumbers,
     getMockNumbers,
     getMockAddresses,
     setMockError,
@@ -32,6 +33,19 @@ jest.mock('@/lib/auth', () => ({
     auth: jest.fn().mockResolvedValue({ user: { email: 'test@example.com' } })
 }));
 
+const mockNumberCustomers: Record<string, string> = {};
+jest.mock('@/lib/twilio-helpers', () => ({
+    getNumberCustomer: (sid: string) => mockNumberCustomers[sid] || '',
+    saveNumberCustomer: (sid: string, customer: string) => {
+        const cleaned = (customer || '').trim();
+        if (!cleaned) {
+            delete mockNumberCustomers[sid];
+            return;
+        }
+        mockNumberCustomers[sid] = cleaned;
+    }
+}));
+
 // Mock NextResponse
 jest.mock('next/server', () => ({
     NextResponse: {
@@ -47,6 +61,7 @@ describe('Port Number API', () => {
     beforeEach(() => {
         resetMockState();
         clearMockError();
+        Object.keys(mockNumberCustomers).forEach((key) => delete mockNumberCustomers[key]);
 
         // Setup default test accounts
         addMockAccount('AC_SOURCE', 'Source Account');
@@ -153,6 +168,33 @@ describe('Port Number API', () => {
             expect(data.numbers[0].phoneNumber).toBe('+61468170318');
         });
 
+        it('should include saved customer metadata in list response', async () => {
+            addMockNumber('AC_SOURCE', {
+                sid: 'PN_TEST_3',
+                phoneNumber: '+14155550000',
+                friendlyName: 'Number With Customer',
+                accountSid: 'AC_SOURCE',
+            });
+            mockNumberCustomers.PN_TEST_3 = 'Customer One';
+
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'list',
+                    sourceAccountSid: 'AC_SOURCE',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            const listed = data.numbers.find((n: any) => n.sid === 'PN_TEST_3');
+            expect(listed.customer).toBe('Customer One');
+        });
+
         it('should list all subaccounts', async () => {
             const { POST } = await import('@/app/api/twilio/port-number/route');
 
@@ -169,6 +211,203 @@ describe('Port Number API', () => {
             expect(data.success).toBe(true);
             expect(data.subAccounts).toHaveLength(3); // AC_SOURCE, AC_TARGET, AC_MASTER
             expect(data.subAccounts.find((a: any) => a.friendlyName === 'Source Account')).toBeTruthy();
+        });
+    });
+
+    describe('Create Number Actions', () => {
+        it('should list approved bundle countries for a subaccount', async () => {
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_COUNTRY_AU',
+                friendlyName: 'AU Bundle',
+                status: 'twilio-approved',
+                isoCountry: 'AU',
+                numberType: 'local'
+            });
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_COUNTRY_US',
+                friendlyName: 'US Bundle',
+                status: 'twilio-approved',
+                isoCountry: 'US',
+                numberType: 'local'
+            });
+            // Duplicate country should still return unique values only
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_COUNTRY_AU_2',
+                friendlyName: 'AU Bundle 2',
+                status: 'twilio-approved',
+                isoCountry: 'AU',
+                numberType: 'mobile'
+            });
+
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'list-approved-bundle-countries',
+                    subAccountSid: 'AC_TARGET',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.countries).toEqual(['AU', 'US']);
+        });
+
+        it('should derive countries from regulation_type for approved bundles', async () => {
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_COUNTRY_FALLBACK',
+                friendlyName: 'Fallback Bundle',
+                status: 'twilio-approved',
+                isoCountry: '',
+                numberType: 'mobile',
+                regulation_type: 'gb_mobile_business' as any
+            } as any);
+
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'list-approved-bundle-countries',
+                    subAccountSid: 'AC_TARGET',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.countries).toContain('GB');
+        });
+
+        it('should require approved regulatory bundle before searching available numbers', async () => {
+            setMockAvailableNumbers('AU', [
+                { phoneNumber: '+61280001111', locality: 'Sydney', region: 'NSW' }
+            ]);
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'search-available-numbers',
+                    subAccountSid: 'AC_TARGET',
+                    isoCountry: 'AU',
+                    limit: 5
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(false);
+            expect(data.error).toContain('Twilio-approved regulatory bundle');
+        });
+
+        it('should return available numbers when bundle exists', async () => {
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_CREATE_1',
+                friendlyName: 'Create Bundle',
+                status: 'twilio-approved',
+                isoCountry: 'AU',
+                numberType: 'local'
+            });
+            setMockAvailableNumbers('AU', [
+                { phoneNumber: '+61280001111', locality: 'Sydney', region: 'NSW' },
+                { phoneNumber: '+61280002222', locality: 'Sydney', region: 'NSW' }
+            ]);
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'search-available-numbers',
+                    subAccountSid: 'AC_TARGET',
+                    isoCountry: 'AU',
+                    limit: 10
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.bundle.sid).toBe('BU_TARGET_CREATE_1');
+            expect(data.numbers).toHaveLength(2);
+            expect(data.numbers[0].phoneNumber).toBe('+61280001111');
+        });
+
+        it('should create number in target subaccount when bundle exists', async () => {
+            addMockBundle('AC_TARGET', {
+                sid: 'BU_TARGET_CREATE_2',
+                friendlyName: 'Create Bundle',
+                status: 'twilio-approved',
+                isoCountry: 'AU',
+                numberType: 'local'
+            });
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'create-number',
+                    subAccountSid: 'AC_TARGET',
+                    isoCountry: 'AU',
+                    phoneNumber: '+61289990000'
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.data.phoneNumber).toBe('+61289990000');
+            expect(getMockNumbers('AC_TARGET').some((n: any) => n.phoneNumber === '+61289990000')).toBe(true);
+        });
+    });
+
+    describe('Customer Metadata Action', () => {
+        it('should save customer metadata for a number', async () => {
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'update-customer',
+                    phoneNumberSid: 'PN_TEST_99',
+                    customer: 'Example Customer',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.data.customer).toBe('Example Customer');
+            expect(mockNumberCustomers.PN_TEST_99).toBe('Example Customer');
+        });
+
+        it('should clear customer metadata when customer is empty', async () => {
+            mockNumberCustomers.PN_TEST_100 = 'Old Customer';
+            const { POST } = await import('@/app/api/twilio/port-number/route');
+
+            const request = new Request('http://localhost/api/twilio/port-number', {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'update-customer',
+                    phoneNumberSid: 'PN_TEST_100',
+                    customer: '   ',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(data.success).toBe(true);
+            expect(data.data.customer).toBe('');
+            expect(mockNumberCustomers.PN_TEST_100).toBeUndefined();
         });
     });
 

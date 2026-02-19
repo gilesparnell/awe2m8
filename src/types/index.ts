@@ -16,3 +16,13 @@ export interface ClientPageData {
     modules: ModuleData[];
     createdAt: number;
 }
+
+export interface GHLTriggerPage {
+    id: string;
+    name: string;
+    code: string;
+    description?: string;
+    createdAt: number;
+    updatedAt: number;
+    createdBy?: string;
+}

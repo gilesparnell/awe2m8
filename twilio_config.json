@@ -2,5 +2,9 @@
   "notificationNumbers": [
     "+61401027141",
     "+61404283605"
-  ]
+  ],
+  "numberCustomers": {
+    "PNe54912eb7a8c94cf9bd511c8e439ad2b": "Fitness Boxx",
+    "PNf5c2d825721cab8f4df2bd7f5d3d8c50": "Rob's Gardens"
+  }
 }
