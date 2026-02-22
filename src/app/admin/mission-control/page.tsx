@@ -19,20 +19,22 @@ import { AgentStrip } from '@/components/mission-control/AgentStrip';
 import { ActivityTimeline } from '@/components/mission-control/ActivityTimeline';
 import { QuickActions } from '@/components/mission-control/QuickActions';
 
+import { useCostTracking } from '@/hooks/useCostTracking';
+
 export default function MissionControlPage() {
-  const { agents, tasks, activities, loading } = useAgents();
+  const { agents, tasks, loading } = useAgents();
+  const { todayCost, weekCost, costByAgent, loading: costLoading } = useCostTracking();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Use defaults if data not loaded yet
   const displayAgents = agents.length > 0 ? agents : DEFAULT_AGENTS;
   const displayTasks = tasks.length > 0 ? tasks : DEFAULT_TASKS;
-  const displayActivities = activities.length > 0 ? activities : DEFAULT_ACTIVITIES;
+  const displayActivities = DEFAULT_ACTIVITIES; // TODO: wire real activities
 
   // Calculate stats
   const openTasks = displayTasks.filter(t => t.status !== 'done').length;
   const completedTasks = displayTasks.filter(t => t.status === 'done').length;
-  const todayCost = displayActivities.reduce((sum, a) => sum + (a.cost || 0), 0);
 
   const refreshData = () => {
     setLastUpdated(new Date());
