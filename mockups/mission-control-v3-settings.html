@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Control v2 - Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .file-editor {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f59e0b; }
+        .priority-low { border-left: 4px solid #10b981; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Settings Sidebar -->
+        <div class="w-64 bg-white border-r border-gray-200">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+                <p class="text-sm text-gray-500 mt-1">Configure your mission control</p>
+            </div>
+            
+            <nav class="px-4 pb-6">
+                <div class="space-y-1">
+                    <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
+                        <i class="fas fa-file-alt mr-3"></i>
+                        Files
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-robot mr-3"></i>
+                        Agents
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-dollar-sign mr-3"></i>
+                        Costs
+                    </a>
+                    <a href="#" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-cog mr-3"></i>
+                        General
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Header -->
+            <div class="bg-white border-b border-gray-200 px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">Configuration Files</h2>
+                        <p class="text-gray-600 mt-1">Manage your mission control configuration</p>
+                    </div>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        New File
+                    </button>
+                </div>
+            </div>
+
+            <!-- File List -->
+            <div class="p-8">
+                <!-- Priority Legend -->
+                <div class="mb-6 flex items-center space-x-6 text-sm">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                        <span class="text-gray-600">Critical</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                        <span class="text-gray-600">Important</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                        <span class="text-gray-600">Standard</span>
+                    </div>
+                </div>
+
+                <!-- High Priority Files -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                        Critical Configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-lg border border-gray-200 priority-high hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('identity')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">IDENTITY.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Your agent's core identity and personality definition</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 2 hours ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>You</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">Critical</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 priority-high hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('goals')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">GOALS.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Current objectives and success metrics</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 1 day ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>You</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">Critical</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medium Priority Files -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        Important Configuration
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-lg border border-gray-200 priority-medium hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('tools')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">TOOLS.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Tool configurations and API keys</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 3 days ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>You</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Important</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 priority-medium hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('memory')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">MEMORY.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Long-term memory and learnings</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 5 days ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>System</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Important</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 priority-medium hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('agents')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">AGENTS.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Agent definitions and capabilities</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 1 week ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>You</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Important</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Standard Priority Files -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-file text-green-500 mr-2"></i>
+                        Standard Files
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-lg border border-gray-200 priority-low hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('daily')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">Daily Notes</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Today's session logs and notes</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 1 hour ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>System</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Standard</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-gray-200 priority-low hover:shadow-md transition-shadow cursor-pointer" onclick="openEditor('quest')">
+                            <div class="p-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900">QUEST.md</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Current implementation plan and roadmap</p>
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            <span>Modified 30 minutes ago</span>
+                                            <i class="fas fa-user ml-4 mr-1"></i>
+                                            <span>You</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Standard</span>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Editor Modal -->
+    <div id="editorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden">
+                <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                    <h3 id="editorTitle" class="text-lg font-semibold text-gray-900">Edit File</h3>
+                    <button onclick="closeEditor()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="mb-4">
+                        <textarea id="editorContent" class="w-full h-96 p-4 border border-gray-300 rounded-lg file-editor text-sm" placeholder="File content..."></textarea>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span>Markdown supported. Changes auto-saved.</span>
+                        </div>
+                        <div class="space-x-3">
+                            <button onclick="closeEditor()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                Cancel
+                            </button>
+                            <button onclick="saveFile()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample file contents
+        const fileContents = {
+            identity: `# IDENTITY.md - Agent Identity
+
+This file defines who I am as an AI assistant.
+
+## Core Identity
+- Name: Garion (your AI assistant)
+- Role: Personal AI assistant and mission control orchestrator
+- Personality: Helpful, proactive, efficient
+
+## Capabilities
+- Web search and research
+- Code development and debugging
+- Content creation and editing
+- Data analysis and visualization
+- Task management and coordination
+
+## Constraints
+- Cannot access external systems without permission
+- Must ask before making significant changes
+- Respects privacy and security boundaries`,
+
+            goals: `# GOALS.md - Current Objectives
+
+## Primary Goal
+Build Mission Control v2 dashboard to rebuild trust and improve agent orchestration.
+
+## Success Metrics
+- Dashboard loads in <2 seconds
+- Zero agent hangs or failures
+- Daily cost tracking accuracy >95%
+- Mobile view usability score >8/10
+
+## Current Sprint (Week 1)
+- [ ] Foundation & Trust Building
+- [ ] Office dashboard with key metrics
+- [ ] Activity feed implementation
+- [ ] Mobile responsive design
+
+## Next Sprint (Week 2)
+- [ ] Task management system
+- [ ] Timeline view implementation
+- [ ] Task assignment capabilities`,
+
+            tools: `# TOOLS.md - Tool Configurations
+
+## API Keys
+- OpenRouter: Configured via environment
+- Firebase: Auto-configured
+- Telegram: Via gateway
+
+## Camera Locations
+- living-room: Main area, 180° wide angle
+- front-door: Entrance, motion-triggered
+
+## SSH Hosts
+- home-server: 192.168.1.100, user: admin
+
+## TTS Preferences
+- Voice: Nova (warm, slightly British)
+- Default speaker: Kitchen HomePod`,
+
+            memory: `# MEMORY.md - Long-term Memory
+
+## Key Learnings
+
+### 2026-02-20
+- Mobile design needs to be separate from desktop
+- Trust is low due to recent issues
+- Beautiful dashboard approach chosen over invisible system
+
+### 2026-02-19
+- Agent reliability issues identified
+- Memory loss incidents logged
+- Decision to rebuild with better architecture
+
+### 2026-02-18
+- Mission Control v1 completed
+- Feedback received on complexity
+- Plans for v2 started`,
+
+            agents: `# AGENTS.md - Agent Definitions
+
+## The Belgariad Squad
+
+### Garion (Orchestrator)
+- Model: or-sonnet default, escalate to or-opus
+- Role: Strategic decisions and coordination
+- Cost target: $2-5/day
+
+### Silk (Developer)
+- Model: or-sonnet default, fallback or-kimi
+- Role: Implementation and coding
+- Cost target: $2-5/day
+
+### Barak (Researcher)
+- Model: or-kimi default, optional or-sonnet
+- Role: Research and analysis
+- Cost target: $1-3/day
+
+### Polgara (Content)
+- Model: or-kimi default, fallback or-mini
+- Role: Writing and content creation
+- Cost target: $0.50-2/day`,
+
+            daily: `# Daily Notes - 2026-02-20
+
+## Session: 2026-02-20 10:58:17 UTC
+
+### Key Decisions
+1. Chose beautiful dashboard approach (Option A)
+2. Committed to 4-week implementation plan
+3. Decided on separate mobile design
+
+### Actions Taken
+- Created comprehensive implementation plan
+- Built dashboard mockups
+- Designed settings interface
+
+### Cost Tracking
+- Today's spend: $6.42
+- Tasks completed: 23
+- Active agents: 7/7`,
+
+            quest: `# QUEST.md - Implementation Plan
+*Current version - see full document in workspace*
+
+## Phase 1: Foundation (Week 1)
+- Office dashboard with metrics
+- Activity feed implementation
+- Mobile responsive design
+- Cost tracking system
+
+## Phase 2: Task Management (Week 2)
+- Task board with drag-drop
+- Timeline view implementation
+- Task assignment system
+- Dependency tracking`
+        };
+
+        function openEditor(fileType) {
+            const modal = document.getElementById('editorModal');
+            const title = document.getElementById('editorTitle');
+            const content = document.getElementById('editorContent');
+            
+            title.textContent = `Edit ${fileType.toUpperCase()}.md`;
+            content.value = fileContents[fileType] || '';
+            
+            modal.classList.remove('hidden');
+            content.focus();
+        }
+
+        function closeEditor() {
+            document.getElementById('editorModal').classList.add('hidden');
+        }
+
+        function saveFile() {
+            // Simulate save
+            const content = document.getElementById('editorContent').value;
+            console.log('Saving file...', content.substring(0, 100) + '...');
+            
+            // Show success message
+            alert('File saved successfully! (This is a mockup)');
+            closeEditor();
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditor();
+            }
+        });
+    </script>
+</body>
+</html>

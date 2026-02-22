@@ -14,7 +14,8 @@
     "test:coverage": "jest --coverage",
     "test:regression": "./scripts/regression-tests.sh",
     "prebuild": "npm run test:regression",
-    "db:seed": "node scripts/seed-firebase.js"
+    "db:seed": "node scripts/seed-firebase.js",
+    "debug:api": "node scripts/debug-api-call.js"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

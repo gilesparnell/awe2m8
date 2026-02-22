@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission Control v2 — Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { gray: { 950: '#0a0a0f', 900: '#111118', 800: '#1e1e2a', 700: '#2e2e3a', 600: '#4a4a5a', 500: '#6b6b7b', 400: '#9ca3af' }}}}
+    }
+  </script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .file-card { transition: all .15s ease; }
+    .file-card:hover { transform: translateY(-1px); }
+    .modal-bg { transition: opacity .2s ease; }
+    .modal-panel { transition: transform .2s ease, opacity .2s ease; }
+    .priority-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-950 text-white">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 w-full bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14">
+        <a href="#" class="text-lg font-extrabold text-white">AWE2M8 <span class="text-green-500">Admin</span></a>
+        <div class="flex items-center gap-3">
+          <nav class="flex items-center gap-0.5 p-0.5 bg-gray-900/50 border border-gray-800 rounded-lg text-xs">
+            <a href="#" class="px-3 py-1.5 rounded-md text-gray-400 hover:text-white">Overview</a>
+            <a href="#" class="px-3 py-1.5 rounded-md text-gray-400 hover:text-white">Activity</a>
+            <a href="#" class="px-3 py-1.5 rounded-md text-gray-400 hover:text-white">Calendar</a>
+            <a href="#" class="px-3 py-1.5 rounded-md text-white bg-green-500/10 font-medium">Settings</a>
+          </nav>
+          <div class="w-7 h-7 rounded-full bg-green-900/30 border border-green-800 flex items-center justify-center text-xs">G</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white">⚙️ Settings</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Click any file to view or edit</p>
+      </div>
+    </div>
+
+    <!-- SECTION 1: Identity & Purpose -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-sm">🧠</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Identity & Purpose</h2>
+        <div class="priority-dot bg-red-400" title="Critical"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <!-- SOUL.md -->
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-green-800/50 cursor-pointer group" onclick="openModal('soul')">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">⚔️</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">SOUL.md</h3>
+                <div class="priority-dot bg-red-400" title="Critical"></div>
+              </div>
+              <p class="text-[10px] text-gray-600">12.4 KB • 2h ago</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Garion's personality, role, system prompt, behavioral rules. Core identity.</p>
+        </div>
+        <!-- USER.md -->
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-blue-800/50 cursor-pointer group" onclick="openModal('user')">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">👤</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">USER.md</h3>
+                <div class="priority-dot bg-red-400" title="Critical"></div>
+              </div>
+              <p class="text-[10px] text-gray-600">4.8 KB • 6h ago</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Who Gilo is — name, timezone, preferences, awe2m8 context.</p>
+        </div>
+        <!-- IDENTITY.md -->
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🏷️</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">IDENTITY.md</h3>
+                <div class="priority-dot bg-amber-400" title="Important"></div>
+              </div>
+              <p class="text-[10px] text-gray-600">0.3 KB • 2d ago</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Name, creature, vibe, emoji. Quick identity card.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Strategy & Goals -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-sm">🎯</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Strategy & Goals</h2>
+        <div class="priority-dot bg-red-400" title="Critical"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-amber-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🎯</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">GOALS.md</h3><div class="priority-dot bg-red-400"></div></div><p class="text-[10px] text-gray-600">8.2 KB • 2d ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Life & business goals. North star, $10k MRR target, personal vision.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-blue-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">📋</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">WORKING.md</h3><div class="priority-dot bg-red-400"></div></div><p class="text-[10px] text-gray-600">1.8 KB • 12h ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Current active priorities and tasks. What needs attention now.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-purple-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🌙</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">QUEST.md</h3><div class="priority-dot bg-amber-400"></div></div><p class="text-[10px] text-gray-600">5.1 KB • 14h ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Night ops quest log. Overnight missions for the squad.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Operations -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-sm">⚙️</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Operations</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">📜</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">AGENTS.md</h3><div class="priority-dot bg-red-400"></div></div><p class="text-[10px] text-gray-600">6.1 KB • 2d ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Workspace rules, memory protocol, safety, group chat behavior.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🔧</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">TOOLS.md</h3><div class="priority-dot bg-amber-400"></div></div><p class="text-[10px] text-gray-600">1.2 KB • 1d ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Local environment — repo locations, SSH hosts, TTS prefs.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">💓</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">HEARTBEAT.md</h3><div class="priority-dot bg-green-400"></div></div><p class="text-[10px] text-gray-600">0.2 KB • 1d ago</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Periodic check config. Add monitoring tasks here.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Memory -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-sm">📝</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Memory & History</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-purple-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🧠</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">MEMORY.md</h3><div class="priority-dot bg-red-400"></div><span class="text-[9px] text-amber-400 bg-amber-900/30 px-1 rounded">Missing</span></div><p class="text-[10px] text-gray-600">Not created yet</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Long-term curated memories. The persistent brain. Main sessions only.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">📅</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">memory/*.md</h3><div class="priority-dot bg-amber-400"></div></div><p class="text-[10px] text-gray-600">3 files • latest: today</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">Daily session logs. Raw notes, source for MEMORY.md curation.</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3.5 hover:border-gray-700/50 cursor-pointer group">
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="text-lg group-hover:scale-110 transition-transform">🗺️</span>
+            <div class="flex-1"><div class="flex items-center gap-2"><h3 class="font-semibold text-sm text-white group-hover:text-green-400 transition-colors">MC_V2_PLAN.md</h3><div class="priority-dot bg-green-400"></div></div><p class="text-[10px] text-gray-600">6.3 KB • just now</p></div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed">This implementation plan. The current roadmap.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Agent SOULs (compact row) -->
+    <section class="mb-6">
+      <div class="flex items-center gap-2 mb-2.5">
+        <span class="text-sm">🤖</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Agent SOULs</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-blue-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="text-base group-hover:scale-110 transition-transform">🎭</span>
+            <div><h3 class="font-semibold text-sm text-white group-hover:text-blue-400 transition-colors">Silk</h3><p class="text-[10px] text-gray-600">Code • Kimi K2</p></div>
+          </div>
+          <p class="text-[10px] text-gray-500">Elegant solutions, quick thinking</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-amber-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="text-base group-hover:scale-110 transition-transform">🐻</span>
+            <div><h3 class="font-semibold text-sm text-white group-hover:text-amber-400 transition-colors">Barak</h3><p class="text-[10px] text-gray-600">Research • Kimi K2</p></div>
+          </div>
+          <p class="text-[10px] text-gray-500">Thorough, reliable, no shortcuts</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-purple-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="text-base group-hover:scale-110 transition-transform">✨</span>
+            <div><h3 class="font-semibold text-sm text-white group-hover:text-purple-400 transition-colors">Polgara</h3><p class="text-[10px] text-gray-600">Content • Haiku</p></div>
+          </div>
+          <p class="text-[10px] text-gray-500">Words that make people feel</p>
+        </div>
+        <div class="file-card bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-pink-800/50 cursor-pointer group">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="text-base group-hover:scale-110 transition-transform">👑</span>
+            <div><h3 class="font-semibold text-sm text-white group-hover:text-pink-400 transition-colors">Ce'Nedra</h3><p class="text-[10px] text-gray-600">UX • Kimi K2</p></div>
+          </div>
+          <p class="text-[10px] text-gray-500">Sees patterns others miss</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILE LOAD ORDER (compact, collapsible) -->
+    <section class="mb-6">
+      <details>
+        <summary class="flex items-center gap-2 mb-2.5 cursor-pointer">
+          <span class="text-sm">📋</span>
+          <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">File Load Order</h2>
+          <span class="text-[10px] text-gray-600">▾</span>
+        </summary>
+        <div class="bg-gray-900 border border-gray-800 rounded-lg divide-y divide-gray-800/50">
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-green-900/30 rounded text-[10px] font-bold text-green-400 flex items-center justify-center">1</span><span class="text-xs text-white">SOUL.md</span><span class="text-[10px] text-gray-600 flex-1">— Who am I?</span><span class="text-[9px] text-green-400 bg-green-900/20 px-1.5 py-0.5 rounded">Always</span></div>
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-green-900/30 rounded text-[10px] font-bold text-green-400 flex items-center justify-center">2</span><span class="text-xs text-white">USER.md</span><span class="text-[10px] text-gray-600 flex-1">— Who am I helping?</span><span class="text-[9px] text-green-400 bg-green-900/20 px-1.5 py-0.5 rounded">Always</span></div>
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-blue-900/30 rounded text-[10px] font-bold text-blue-400 flex items-center justify-center">3</span><span class="text-xs text-white">memory/today+yesterday</span><span class="text-[10px] text-gray-600 flex-1">— Recent context</span><span class="text-[9px] text-blue-400 bg-blue-900/20 px-1.5 py-0.5 rounded">Always</span></div>
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-amber-900/30 rounded text-[10px] font-bold text-amber-400 flex items-center justify-center">4</span><span class="text-xs text-white">MEMORY.md</span><span class="text-[10px] text-gray-600 flex-1">— Long-term memory</span><span class="text-[9px] text-amber-400 bg-amber-900/20 px-1.5 py-0.5 rounded">Main only</span></div>
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-amber-900/30 rounded text-[10px] font-bold text-amber-400 flex items-center justify-center">5</span><span class="text-xs text-white">GOALS.md</span><span class="text-[10px] text-gray-600 flex-1">— What to achieve</span><span class="text-[9px] text-amber-400 bg-amber-900/20 px-1.5 py-0.5 rounded">Main only</span></div>
+          <div class="px-3 py-2 flex items-center gap-3"><span class="w-5 h-5 bg-amber-900/30 rounded text-[10px] font-bold text-amber-400 flex items-center justify-center">6</span><span class="text-xs text-white">WORKING.md</span><span class="text-[10px] text-gray-600 flex-1">— Current tasks</span><span class="text-[9px] text-amber-400 bg-amber-900/20 px-1.5 py-0.5 rounded">Main only</span></div>
+        </div>
+      </details>
+    </section>
+
+    <footer class="mt-4 pt-4 border-t border-gray-800 text-center text-gray-600 text-xs">
+      Mission Control v2.0 • Settings • AWE2M8 • 2026
+    </footer>
+  </div>
+
+  <!-- FILE EDITOR MODAL (demo) -->
+  <div id="fileModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="modal-panel absolute inset-4 sm:inset-8 lg:inset-y-8 lg:inset-x-24 bg-gray-900 border border-gray-700 rounded-xl overflow-hidden flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div class="flex items-center gap-2">
+          <span id="modalIcon" class="text-lg">⚔️</span>
+          <h3 id="modalTitle" class="font-semibold text-white text-sm">SOUL.md</h3>
+          <span class="text-[10px] text-gray-600">12.4 KB</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2.5 py-1 bg-gray-800 text-gray-400 rounded text-xs hover:text-white transition-colors">View</button>
+          <button class="px-2.5 py-1 bg-green-900/30 border border-green-800 text-green-400 rounded text-xs hover:bg-green-900/50 transition-colors">Edit</button>
+          <button onclick="closeModal()" class="px-2 py-1 text-gray-500 hover:text-white text-sm">✕</button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4">
+        <pre class="text-xs text-gray-300 font-mono leading-relaxed whitespace-pre-wrap"># SOUL.md — Garion (Belgarion)
+
+**Name:** Garion
+**Role:** Belgarion — Master Controller
+**Session Key:** `agent:garion:main`
+**Model:** Claude Opus 4.5 (strategic), Claude Sonnet 4 (tactical)
+**Emoji:** ⚔️
+
+---
+
+## Identity
+
+In the books: Garion is the reluctant farmboy who discovers he's the heir
+to an ancient magical lineage. He becomes Belgarion, King of Riva, and
+wields the Orb of Aldur...
+
+## Personality
+
+Speaking style: Direct. No corporate fluff. "Got it" not "I'd be happy
+to assist you with that request."...
+
+## Role — Master Controller
+
+I handle:
+- Strategic Planning
+- Resource Management
+- Quality Control
+- Coordination
+- Escalation
+- Context Management
+
+[Content continues...]</pre>
+      </div>
+      <div class="px-4 py-3 border-t border-gray-800 flex items-center justify-between">
+        <span class="text-[10px] text-gray-600">Last modified: 2h ago • Read at every session start</span>
+        <div class="flex gap-2">
+          <button class="px-3 py-1.5 bg-gray-800 text-gray-400 rounded text-xs hover:text-white">Cancel</button>
+          <button class="px-3 py-1.5 bg-green-600 text-white rounded text-xs hover:bg-green-500 font-medium">Save & Commit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(type) {
+      document.getElementById('fileModal').classList.remove('hidden');
+    }
+    function closeModal() {
+      document.getElementById('fileModal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>
