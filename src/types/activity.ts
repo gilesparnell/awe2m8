@@ -15,7 +15,7 @@ import { Timestamp } from 'firebase/firestore';
 // ============================================================================
 
 /** Who performed the action */
-export type ActivityActor = 'garion' | 'silk' | 'barak' | 'polgara' | 'cenedra' | 'system';
+export type ActivityActor = 'garion' | 'silk' | 'barak' | 'polgara' | 'cenedra' | 'taiba' | 'beldin' | 'relg' | 'durnik' | 'errand' | 'mandorallen' | 'system';
 
 /** Type of actor */
 export type ActorType = 'main' | 'subagent' | 'system';
@@ -86,6 +86,9 @@ export interface ActivityLog {
   
   /** Optional: Related project */
   project?: string;
+  
+  /** Optional: Cost in USD for this activity */
+  cost?: number;
 }
 
 // ============================================================================
@@ -181,7 +184,7 @@ export type ActivityViewMode = 'feed' | 'compact' | 'table';
 
 export function isActivityActor(value: unknown): value is ActivityActor {
   return typeof value === 'string' && 
-    ['garion', 'silk', 'barak', 'polgara', 'cenedra', 'system'].includes(value);
+    ['garion', 'silk', 'barak', 'polgara', 'cenedra', 'taiba', 'beldin', 'relg', 'durnik', 'errand', 'mandorallen', 'system'].includes(value);
 }
 
 export function isActivityCategory(value: unknown): value is ActivityCategory {
@@ -227,6 +230,12 @@ export const ACTOR_COLORS: Record<ActivityActor, string> = {
   barak: 'green',
   polgara: 'amber',
   cenedra: 'rose',
+  taiba: 'indigo',
+  beldin: 'slate',
+  relg: 'orange',
+  durnik: 'brown',
+  errand: 'violet',
+  mandorallen: 'silver',
   system: 'gray',
 };
 
@@ -236,5 +245,11 @@ export const ACTOR_LABELS: Record<ActivityActor, string> = {
   barak: 'Barak (The Bear)',
   polgara: 'Polgara (The Sorceress)',
   cenedra: "Ce'Nedra (The Queen)",
+  taiba: 'Taiba (The Seer)',
+  beldin: 'Beldin (The Cynic)',
+  relg: 'Relg (The Zealot)',
+  durnik: 'Durnik (The Smith)',
+  errand: 'Errand (The Child)',
+  mandorallen: 'Mandorallen (The Knight)',
   system: 'System',
 };

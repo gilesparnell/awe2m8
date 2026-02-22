@@ -240,6 +240,16 @@ function ActivityDetailModal({ activity, onClose }: ActivityDetailModalProps) {
             </span>
           </div>
 
+          {/* Cost */}
+          {activity.cost !== undefined && activity.cost > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-gray-500">Cost:</span>
+              <span className="font-semibold text-green-400">
+                ${activity.cost.toFixed(3)}
+              </span>
+            </div>
+          )}
+
           {/* Session ID */}
           <div className="flex items-center gap-3">
             <span className="text-gray-500">Session:</span>

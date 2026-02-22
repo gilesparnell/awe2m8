@@ -184,6 +184,13 @@ function ActivityItem({ activity, onClick }: ActivityItemProps) {
             {formatTimeAgo(timestamp)}
           </span>
           
+          {activity.cost !== undefined && activity.cost > 0 && (
+            <span className="flex items-center gap-1 text-green-400">
+              <span className="w-3 h-3">$</span>
+              {activity.cost.toFixed(3)}
+            </span>
+          )}
+          
           {activity.metadata.filePath && (
             <button
               onClick={(e) => {

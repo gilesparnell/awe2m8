@@ -46,7 +46,9 @@ export default function BoardPage() {
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={() => setIsCreateModalOpen(false)}
+        onCreate={async () => {
+          setIsCreateModalOpen(false);
+        }}
         agents={displayAgents.map(a => ({ id: a.id, name: a.name, color: a.color }))}
         creating={false}
       />

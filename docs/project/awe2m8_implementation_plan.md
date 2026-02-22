@@ -2,27 +2,40 @@
 
 ## Executive Summary
 
-**Goal:** Build an autonomous AI agent squad (7 agents) to automate awe2m8 operations, reduce manual work, and scale to $10k MRR by May.
+**Goal:** Build an autonomous AI agent squad (10 agents) to automate awe2m8 operations, reduce manual work, and scale to $10k MRR by May.
 
 **Key Priorities:**
 1. Automate customer onboarding (reduce Gilo's time from 4hrs to 30 mins per customer)
 2. Build custom workflow engine to replace Go High Level (save $250/customer/month)
+3. **CRITICAL FIX:** Cost tracking shows $0.00 - must fix before any development
 
 ---
 
-## The Squad: 7 Agents
+## 🚨 CRITICAL ISSUE - Phase 0 Required
+**Status:** BLOCKED - Cost tracking broken in Mission Control
+**Problem:** All activities show $0.00, no actual costs being captured
+**Impact:** Cannot manage API budget without accurate cost tracking
+**Solution:** See `COST_TRACKING_FIX_PLAN.md` - must complete before any other work
 
-| # | Agent | Role | Model | When to Spawn |
-|---|-------|------|-------|---------------|
-| 1 | **Garion** | Master Controller | Claude 4.5 Sonnet | Always on |
-| 2 | **Barak** 🐻 | Research | Claude Haiku | Discovery phase |
-| 3 | **Ce'Nedra** 👑 | UX/Product | Claude Haiku | Design phase |
-| 4 | **Beldin** 🧪 | QA/Testing | Claude Haiku | Pre-launch |
-| 5 | **Silk** 🎭 | Code/Build | Codex/Claude | Implementation |
-| 6 | **Polgara** 🔮 | Content | Claude Haiku | Delivery phase |
-| 7 | **Taiba** 📊 | Analytics | Claude Haiku | Continuous |
+---
 
-### Agent Personalities (Belgariad Theme)
+## The Squad: 10 Agents (Updated)
+
+| # | Agent | Role | Model | When to Spawn | Status |
+|---|-------|------|-------|---------------|--------|
+| 1 | **Garion** | Master Controller | Claude 4.5 Sonnet | Always on | ✅ Active |
+| 2 | **Barak** 🐻 | Research | Claude Haiku | Discovery phase | ✅ Active |
+| 3 | **Silk** 🎭 | Code/Build | Codex/Claude | Implementation | ✅ Active |
+| 4 | **Polgara** 🔮 | Content | Claude Haiku | Delivery phase | ✅ Active |
+| 5 | **Ce'Nedra** 👑 | UX/Product | Claude Haiku | Design phase | ✅ Added |
+| 6 | **Beldin** 🧪 | QA/Testing | Claude Haiku | Pre-launch | ✅ Added |
+| 7 | **Taiba** 📊 | Analytics | Claude Haiku | Continuous | ✅ Added |
+| 8 | **Relg** 📈 | Growth/Marketing | Claude Haiku | Growth phase | ➕ NEW |
+| 9 | **Durnik** 🔧 | DevOps | Claude Haiku | Infrastructure | ➕ NEW |
+| 10 | **Errand** ✨ | Innovation | Claude Haiku | R&D phase | ➕ NEW |
+| 11 | **Mandorallen** 🛡️ | Security | Claude Haiku | Security audit | ➕ NEW |
+
+### Agent Personalities (Belgariad Theme - Complete Squad)
 
 **Barak (The Bear)** 🐻
 - Role: Deep Research
@@ -60,6 +73,30 @@
 - Style: Sees connections others miss
 - Deliverable: Growth reports, metrics dashboards
 
+**Relg (The Zealot)** 📈
+- Role: Growth Marketer
+- Specialty: Lead generation, conversion optimization
+- Style: Data-driven, experimental, persistent
+- Deliverable: Campaign strategies, growth experiments
+
+**Durnik (The Smith)** 🔧
+- Role: DevOps Engineer
+- Specialty: Infrastructure, deployment, automation
+- Style: Reliable, methodical, always prepared
+- Deliverable: CI/CD pipelines, infrastructure as code
+
+**Errand (The Child)** ✨
+- Role: Innovation Scout
+- Specialty: Emerging tech, R&D, training systems
+- Style: Curious, experimental, quick learner
+- Deliverable: Tech evaluations, training materials
+
+**Mandorallen (The Knight)** 🛡️
+- Role: Security Specialist
+- Specialty: Security audits, compliance, risk assessment
+- Style: Honorable, protective, thorough
+- Deliverable: Security reports, compliance documentation
+
 ---
 
 ## Deterministic Workflow
@@ -87,16 +124,37 @@ Agents verify each other's work:
 
 ---
 
+## Phase 0: CRITICAL FIX - Cost Tracking (BLOCKING ALL DEVELOPMENT)
+
+**🚨 STATUS:** BROKEN - All costs show $0.00 in Mission Control
+**IMPACT:** Cannot manage API budget or track real spend
+**DURATION:** 2-3 hours (must fix before any other work)
+
+**Fix Required:**
+- Update activity logger to accept cost parameters
+- Modify agent spawner to log actual costs
+- Update all tool usage to include costs
+- Test that real costs appear in UI
+
+**Success Criteria:**
+- [ ] Spawn agent → Activity shows real cost (not $0.00)
+- [ ] Web search → Cost logged in Firestore
+- [ ] Daily budget tracking enforced
+- [ ] Budget alerts trigger correctly
+
+**See:** `COST_TRACKING_FIX_PLAN.md` for detailed implementation
+
 ## Phase 1: Foundation (Weeks 1-2)
 
 **Goal:** Mission Control dashboard working with real data
 
 **Deliverables:**
 - React Mission Control UI with hierarchical sidebar
-- Agent status bar showing all 7 agents
+- Agent status bar showing all 10 agents
 - Task detail panel (replaces modal)
 - SQLite state tracking
-- Cost tracker in header ($ today, % budget used)
+- Cost tracker in header (REAL costs, not $0.00)
+- **NEW:** Squad Showcase page in settings with agent avatars
 
 **Agents Active:**
 - Garion (always)

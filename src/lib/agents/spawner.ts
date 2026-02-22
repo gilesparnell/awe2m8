@@ -14,6 +14,7 @@ import {
   AgentCapability 
 } from './config';
 import { logAgentSpawn, logTaskCreated } from '@/lib/activity-logger';
+import { ActivityActor } from '@/types/activity';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 
@@ -140,16 +141,17 @@ export async function spawnAgent(
     
     const taskRef = await addDoc(collection(db, 'agent_tasks'), taskData);
     
-    // Log activity
+    // Log activity with actual cost
     await logAgentSpawn(
-      input.agentId,
+      input.agentId as ActivityActor,
       input.task,
       'garion',
       { 
         taskId: taskRef.id,
         estimatedCost,
         deliverables: input.deliverables,
-      }
+      },
+      estimatedCost // Pass the actual cost
     );
     
     // Build the prompt for the sub-agent

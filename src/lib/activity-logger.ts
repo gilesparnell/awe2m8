@@ -16,7 +16,7 @@ import { collection, addDoc, Timestamp } from 'firebase/firestore';
 // TYPES
 // ============================================================================
 
-export type ActivityActor = 'garion' | 'silk' | 'barak' | 'polgara' | 'cenedra' | 'system';
+import { ActivityActor } from '@/types/activity';
 
 export type ActivityCategory =
   | 'file'      // File operations
@@ -53,6 +53,7 @@ export interface ActivityData {
   sessionId?: string;
   taskId?: string;
   project?: string;
+  cost?: number; // Cost in USD (e.g., 0.05 for 5 cents)
 }
 
 // ============================================================================
@@ -75,7 +76,7 @@ export async function logActivity(data: ActivityData): Promise<string | null> {
 
     const docRef = await addDoc(collection(db, 'activities'), activity);
     
-    console.log(`[Activity] Logged: ${data.description}`);
+    console.log(`[Activity] Logged: ${data.description}${data.cost ? ` (Cost: $${data.cost.toFixed(3)})` : ''}`);
     
     return docRef.id;
   } catch (error) {
@@ -150,7 +151,8 @@ export async function logWebSearch(
   query: string,
   resultCount: number,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -159,6 +161,7 @@ export async function logWebSearch(
     action: 'search',
     description: `Searched web: "${query}" (${resultCount} results)`,
     metadata: { query, resultCount, ...metadata },
+    cost,
   });
 }
 
@@ -168,7 +171,8 @@ export async function logWebSearch(
 export async function logWebFetch(
   url: string,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -177,6 +181,7 @@ export async function logWebFetch(
     action: 'fetch',
     description: `Fetched URL: ${url}`,
     metadata: { url, ...metadata },
+    cost,
   });
 }
 
@@ -187,7 +192,8 @@ export async function logCommandExecution(
   command: string,
   exitCode: number,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -196,6 +202,7 @@ export async function logCommandExecution(
     action: 'run',
     description: `Executed: ${command.split(' ')[0]}`,
     metadata: { command, exitCode, success: exitCode === 0, ...metadata },
+    cost,
   });
 }
 
@@ -206,7 +213,8 @@ export async function logAgentSpawn(
   targetAgent: ActivityActor,
   task: string,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -215,6 +223,7 @@ export async function logAgentSpawn(
     action: 'spawn',
     description: `Spawned ${targetAgent} for: ${task}`,
     metadata: { targetAgent, task, ...metadata },
+    cost,
   });
 }
 

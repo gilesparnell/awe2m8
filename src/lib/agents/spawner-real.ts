@@ -6,6 +6,7 @@
 
 import { AgentId, getAgentConfig } from './config';
 import { logAgentSpawn } from '@/lib/activity-logger';
+import { ActivityActor } from '@/types/activity';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 
@@ -65,7 +66,7 @@ export async function spawnRealAgent(
     
     // Log activity
     await logAgentSpawn(
-      input.agentId,
+      input.agentId as ActivityActor,
       input.task,
       'garion',
       { 
