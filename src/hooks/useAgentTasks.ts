@@ -13,10 +13,11 @@ import {
   onSnapshot,
   Timestamp 
 } from 'firebase/firestore';
+import { AgentId } from '@/lib/agents/config';
 
 export interface AgentTask {
   id: string;
-  agentId: string;
+  agentId: AgentId;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'escalated';
   task: string;
   context?: string;

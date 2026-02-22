@@ -7,7 +7,7 @@ import { CreateTaskInput } from '@/hooks/useAgents';
 interface Agent {
   id: string;
   name: string;
-  color: 'green' | 'blue' | 'amber';
+  color: 'green' | 'blue' | 'amber' | 'purple';
 }
 
 interface CreateTaskModalProps {
@@ -23,6 +23,7 @@ const agentColors = {
   green: 'bg-green-900/30 text-green-400 border-green-700',
   blue: 'bg-blue-900/30 text-blue-400 border-blue-700',
   amber: 'bg-amber-900/30 text-amber-400 border-amber-700',
+  purple: 'bg-purple-900/30 text-purple-400 border-purple-700',
 };
 
 const priorityColors = {

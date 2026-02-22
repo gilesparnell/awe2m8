@@ -107,7 +107,7 @@ describe('useActivityFeed', () => {
   it('should load activities on mount', async () => {
     const mockActivities = [
       createMockActivity('1', 'garion', 'file'),
-      createMockActivity('2', 'fury', 'web'),
+      createMockActivity('2', 'barak', 'web'),
     ];
 
     mockOnSnapshot.mockImplementation((q, onSuccess) => {
@@ -147,7 +147,7 @@ describe('useActivityFeed', () => {
   it('should group activities by date', async () => {
     const mockActivities = [
       createMockActivity('1', 'garion', 'file'),
-      createMockActivity('2', 'fury', 'web'),
+      createMockActivity('2', 'barak', 'web'),
     ];
 
     mockOnSnapshot.mockImplementation((q, onSuccess) => {
@@ -197,13 +197,13 @@ describe('useActivityFeed', () => {
   });
 
   it('should apply actor filter with multiple actors', async () => {
-    const filter: ActivityFilter = { actors: ['garion', 'fury'] };
+    const filter: ActivityFilter = { actors: ['garion', 'barak'] };
     
     renderHook(() => useActivityFeed({ initialFilter: filter }));
 
     await waitFor(() => {
       // Multiple actors should use 'in'
-      expect(mockWhere).toHaveBeenCalledWith('actor', 'in', ['garion', 'fury']);
+      expect(mockWhere).toHaveBeenCalledWith('actor', 'in', ['garion', 'barak']);
     });
   });
 
@@ -342,7 +342,7 @@ describe('useActivityStats', () => {
     const mockDocs = [
       { actor: 'garion', category: 'file' },
       { actor: 'garion', category: 'web' },
-      { actor: 'fury', category: 'file' },
+      { actor: 'barak', category: 'file' },
     ];
 
     mockGetDocs.mockResolvedValue({
@@ -362,7 +362,7 @@ describe('useActivityStats', () => {
 
     expect(result.current.total).toBe(3);
     expect(result.current.byActor.garion).toBe(2);
-    expect(result.current.byActor.fury).toBe(1);
+    expect(result.current.byActor.barak).toBe(1);
     expect(result.current.byCategory.file).toBe(2);
     expect(result.current.byCategory.web).toBe(1);
   });

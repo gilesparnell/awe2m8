@@ -23,6 +23,14 @@ import { AgentId, getAgentConfig } from './config';
 // TYPES
 // ============================================================================
 
+interface AgentStats {
+  completed: number; 
+  failed: number; 
+  cost: number;
+  lastActivity: Timestamp;
+  currentTask?: string;
+}
+
 export interface AgentStatus {
   agentId: AgentId;
   name: string;
@@ -64,13 +72,7 @@ export function useAgentMonitor() {
       tasksQuery,
       (snapshot) => {
         const tasks: AgentTask[] = [];
-        const agentStats: Map<AgentId, { 
-          completed: number; 
-          failed: number; 
-          cost: number;
-          lastActivity: Timestamp;
-          currentTask?: string;
-        }> = new Map();
+        const agentStats: Map<AgentId, AgentStats> = new Map();
 
         snapshot.forEach((doc) => {
           const data = doc.data() as DocumentData;
@@ -110,7 +112,7 @@ export function useAgentMonitor() {
 
           // Track current running task
           if (data.status === 'running') {
-            stats.currentTask = data.task;
+            (stats as AgentStats).currentTask = data.task;
           }
 
           // Update last activity
@@ -125,12 +127,13 @@ export function useAgentMonitor() {
         const agentConfigs = ['silk', 'barak', 'polgara'] as AgentId[];
         const statusArray: AgentStatus[] = agentConfigs.map((agentId) => {
           const config = getAgentConfig(agentId);
-          const stats = agentStats.get(agentId) || {
+          const defaultStats: AgentStats = {
             completed: 0,
             failed: 0,
             cost: 0,
             lastActivity: Timestamp.now(),
           };
+          const stats = agentStats.get(agentId) || defaultStats;
 
           const isOnline = tasks.some(
             (t) => t.agentId === agentId && t.status === 'running'
@@ -140,7 +143,7 @@ export function useAgentMonitor() {
             agentId,
             name: config.name,
             isOnline,
-            currentTask: stats.currentTask,
+            currentTask: (stats as AgentStats).currentTask,
             tasksCompleted: stats.completed,
             tasksFailed: stats.failed,
             costToday: stats.cost,

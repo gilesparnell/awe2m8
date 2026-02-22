@@ -609,6 +609,90 @@ export const DEFAULT_AGENTS: Agent[] = [
     icon: 'FileText',
     isOnline: true,
     workload: 3
+  },
+  {
+    id: 'cenedra',
+    name: "Ce'Nedra (The Queen)",
+    role: 'UX Strategist',
+    status: 'active',
+    currentTask: 'Designing user journey maps',
+    lastActivity: '1 min ago',
+    color: 'purple',
+    icon: 'Layout',
+    isOnline: true,
+    workload: 2
+  },
+  {
+    id: 'taiba',
+    name: 'Taiba (The Seer)',
+    role: 'Analytics Expert',
+    status: 'active',
+    currentTask: 'Analyzing conversion funnels',
+    lastActivity: '4 mins ago',
+    color: 'blue',
+    icon: 'TrendingUp',
+    isOnline: true,
+    workload: 1
+  },
+  {
+    id: 'beldin',
+    name: 'Beldin (The Cynic)',
+    role: 'QA & Review',
+    status: 'active',
+    currentTask: 'Reviewing code quality',
+    lastActivity: '6 mins ago',
+    color: 'amber',
+    icon: 'ShieldCheck',
+    isOnline: true,
+    workload: 4
+  },
+  {
+    id: 'relg',
+    name: 'Relg (The Zealot)',
+    role: 'Growth Marketer',
+    status: 'active',
+    currentTask: 'Optimizing lead generation',
+    lastActivity: '8 mins ago',
+    color: 'green',
+    icon: 'Rocket',
+    isOnline: true,
+    workload: 2
+  },
+  {
+    id: 'durnik',
+    name: 'Durnik (The Smith)',
+    role: 'DevOps Engineer',
+    status: 'active',
+    currentTask: 'Deploying infrastructure updates',
+    lastActivity: '10 mins ago',
+    color: 'blue',
+    icon: 'Wrench',
+    isOnline: true,
+    workload: 1
+  },
+  {
+    id: 'errand',
+    name: 'Errand (The Child)',
+    role: 'Innovation Scout',
+    status: 'active',
+    currentTask: 'Exploring new AI capabilities',
+    lastActivity: '12 mins ago',
+    color: 'purple',
+    icon: 'Sparkles',
+    isOnline: true,
+    workload: 1
+  },
+  {
+    id: 'mandorallen',
+    name: 'Mandorallen (The Knight)',
+    role: 'Security Specialist',
+    status: 'active',
+    currentTask: 'Implementing security protocols',
+    lastActivity: '7 mins ago',
+    color: 'green',
+    icon: 'Sword',
+    isOnline: true,
+    workload: 2
   }
 ];
 
@@ -657,6 +741,111 @@ export const DEFAULT_TASKS: Task[] = [
     elapsedMinutes: 180,
     clientName: 'Internal - Marketing',
     nextActions: ['Final proofread', 'Publish and distribute']
+  },
+  {
+    id: '4',
+    title: 'User Experience Journey Mapping',
+    agentId: 'cenedra',
+    status: 'in_progress',
+    priority: 'P1',
+    createdAt: new Date().toISOString(),
+    description: 'Map customer touchpoints for tradie onboarding',
+    progressPercent: 45,
+    currentPhase: 'design',
+    estimatedHours: 5,
+    elapsedMinutes: 120,
+    clientName: 'Plumbing Pros',
+    nextActions: ['Interview 5 recent customers', 'Create empathy maps']
+  },
+  {
+    id: '5',
+    title: 'Conversion Rate Optimization Analysis',
+    agentId: 'taiba',
+    status: 'in_progress',
+    priority: 'P0',
+    createdAt: new Date().toISOString(),
+    description: 'Analyze funnel performance and identify drop-off points',
+    progressPercent: 70,
+    currentPhase: 'research',
+    estimatedHours: 3,
+    elapsedMinutes: 95,
+    clientName: 'Roofing Solutions',
+    nextActions: ['Create A/B test plan', 'Recommend UI improvements']
+  },
+  {
+    id: '6',
+    title: 'Code Quality Review & Testing',
+    agentId: 'beldin',
+    status: 'in_progress',
+    priority: 'P1',
+    createdAt: new Date().toISOString(),
+    description: 'Review recent commits and implement automated testing',
+    progressPercent: 60,
+    currentPhase: 'testing',
+    estimatedHours: 4,
+    elapsedMinutes: 140,
+    clientName: 'Internal - Dev Team',
+    nextActions: ['Fix identified bugs', 'Update documentation']
+  },
+  {
+    id: '7',
+    title: 'Lead Generation Campaign Optimization',
+    agentId: 'relg',
+    status: 'in_progress',
+    priority: 'P1',
+    createdAt: new Date().toISOString(),
+    description: 'Optimize Google Ads and Facebook campaigns for tradies',
+    progressPercent: 55,
+    currentPhase: 'implementation',
+    estimatedHours: 8,
+    elapsedMinutes: 200,
+    clientName: 'Electrical Experts',
+    nextActions: ['A/B test ad creatives', 'Refine targeting parameters']
+  },
+  {
+    id: '8',
+    title: 'Infrastructure Deployment Pipeline',
+    agentId: 'durnik',
+    status: 'in_progress',
+    priority: 'P0',
+    createdAt: new Date().toISOString(),
+    description: 'Set up CI/CD pipeline for automated deployments',
+    progressPercent: 80,
+    currentPhase: 'implementation',
+    estimatedHours: 6,
+    elapsedMinutes: 280,
+    clientName: 'Internal - DevOps',
+    nextActions: ['Configure monitoring alerts', 'Test rollback procedures']
+  },
+  {
+    id: '9',
+    title: 'AI Voice Technology Research',
+    agentId: 'errand',
+    status: 'in_progress',
+    priority: 'P2',
+    createdAt: new Date().toISOString(),
+    description: 'Explore latest AI voice synthesis and recognition technologies',
+    progressPercent: 30,
+    currentPhase: 'research',
+    estimatedHours: 5,
+    elapsedMinutes: 75,
+    clientName: 'Internal - R&D',
+    nextActions: ['Test new voice APIs', 'Evaluate cost-benefit analysis']
+  },
+  {
+    id: '10',
+    title: 'Security Audit & Compliance Review',
+    agentId: 'mandorallen',
+    status: 'in_progress',
+    priority: 'P0',
+    createdAt: new Date().toISOString(),
+    description: 'Conduct comprehensive security audit and update protocols',
+    progressPercent: 75,
+    currentPhase: 'review',
+    estimatedHours: 7,
+    elapsedMinutes: 315,
+    clientName: 'Internal - Security',
+    nextActions: ['Implement recommended fixes', 'Update security documentation']
   }
 ];
 
@@ -681,6 +870,55 @@ export const DEFAULT_ACTIVITIES: ActivityItem[] = [
     agentName: 'Polgara (The Sorceress)',
     message: 'Published blog post: "Why Tradies Lose $50K/Year to Missed Calls"',
     timestamp: '10 mins ago'
+  },
+  {
+    id: '4',
+    type: 'task_started',
+    agentName: "Ce'Nedra (The Queen)",
+    message: 'Created user journey map for tradie onboarding',
+    timestamp: '1 min ago'
+  },
+  {
+    id: '5',
+    type: 'message',
+    agentName: 'Taiba (The Seer)',
+    message: 'Identified 23% conversion rate improvement opportunity',
+    timestamp: '4 mins ago'
+  },
+  {
+    id: '6',
+    type: 'task_completed',
+    agentName: 'Beldin (The Cynic)',
+    message: 'Completed code review with 15 recommendations',
+    timestamp: '6 mins ago'
+  },
+  {
+    id: '7',
+    type: 'task_started',
+    agentName: 'Relg (The Zealot)',
+    message: 'Launched new Google Ads campaign for electricians',
+    timestamp: '8 mins ago'
+  },
+  {
+    id: '8',
+    type: 'file_created',
+    agentName: 'Durnik (The Smith)',
+    message: 'Deployed automated backup system',
+    timestamp: '10 mins ago'
+  },
+  {
+    id: '9',
+    type: 'message',
+    agentName: 'Errand (The Child)',
+    message: 'Discovered new AI voice synthesis breakthrough',
+    timestamp: '12 mins ago'
+  },
+  {
+    id: '10',
+    type: 'message',
+    agentName: 'Mandorallen (The Knight)',
+    message: 'Passed security audit with flying colors',
+    timestamp: '7 mins ago'
   }
 ];
 

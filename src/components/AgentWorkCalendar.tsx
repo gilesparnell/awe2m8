@@ -17,8 +17,7 @@ import {
   User,
   ArrowRight
 } from 'lucide-react';
-import { useAgentTasks } from '@/hooks/useAgentTasks';
-import { AgentTask } from '@/lib/agents/spawner';
+import { useAgentTasks, AgentTask } from '@/hooks/useAgentTasks';
 import { ACTOR_LABELS, ACTOR_COLORS } from '@/types/activity';
 
 // ============================================================================

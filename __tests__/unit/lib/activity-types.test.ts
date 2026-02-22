@@ -23,9 +23,9 @@ describe('Activity Types', () => {
     describe('isActivityActor', () => {
       it('should return true for valid actors', () => {
         expect(isActivityActor('garion')).toBe(true);
-        expect(isActivityActor('fury')).toBe(true);
-        expect(isActivityActor('friday')).toBe(true);
-        expect(isActivityActor('loki')).toBe(true);
+        expect(isActivityActor('barak')).toBe(true);
+        expect(isActivityActor('silk')).toBe(true);
+        expect(isActivityActor('polgara')).toBe(true);
         expect(isActivityActor('system')).toBe(true);
       });
 
@@ -116,7 +116,7 @@ describe('Activity Types', () => {
 
     describe('ACTOR_COLORS', () => {
       it('should have colors for all actors', () => {
-        const actors: ActivityActor[] = ['garion', 'fury', 'friday', 'loki', 'system'];
+        const actors: ActivityActor[] = ['garion', 'barak', 'silk', 'polgara', 'system'];
         actors.forEach((actor) => {
           expect(ACTOR_COLORS[actor]).toBeDefined();
           expect(typeof ACTOR_COLORS[actor]).toBe('string');
@@ -125,16 +125,16 @@ describe('Activity Types', () => {
 
       it('should have correct color assignments', () => {
         expect(ACTOR_COLORS.garion).toBe('purple');
-        expect(ACTOR_COLORS.fury).toBe('green');
-        expect(ACTOR_COLORS.friday).toBe('blue');
-        expect(ACTOR_COLORS.loki).toBe('amber');
+        expect(ACTOR_COLORS.barak).toBe('green');
+        expect(ACTOR_COLORS.silk).toBe('blue');
+        expect(ACTOR_COLORS.polgara).toBe('amber');
         expect(ACTOR_COLORS.system).toBe('gray');
       });
     });
 
     describe('ACTOR_LABELS', () => {
       it('should have labels for all actors', () => {
-        const actors: ActivityActor[] = ['garion', 'fury', 'friday', 'loki', 'system'];
+        const actors: ActivityActor[] = ['garion', 'barak', 'silk', 'polgara', 'system'];
         actors.forEach((actor) => {
           expect(ACTOR_LABELS[actor]).toBeDefined();
           expect(typeof ACTOR_LABELS[actor]).toBe('string');
@@ -143,9 +143,9 @@ describe('Activity Types', () => {
 
       it('should have correct label assignments', () => {
         expect(ACTOR_LABELS.garion).toBe('Garion');
-        expect(ACTOR_LABELS.fury).toBe('Fury');
-        expect(ACTOR_LABELS.friday).toBe('Friday');
-        expect(ACTOR_LABELS.loki).toBe('Loki');
+        expect(ACTOR_LABELS.barak).toBe('Barak (The Bear)');
+        expect(ACTOR_LABELS.silk).toBe('Silk (Prince Kheldar)');
+        expect(ACTOR_LABELS.polgara).toBe('Polgara (The Sorceress)');
         expect(ACTOR_LABELS.system).toBe('System');
       });
     });
@@ -183,7 +183,7 @@ describe('Activity Types', () => {
       const log: ActivityLog = {
         id: 'activity-456',
         timestamp: mockTimestamp,
-        actor: 'fury',
+        actor: 'barak',
         actorType: 'subagent',
         category: 'web',
         action: 'search',
@@ -207,7 +207,7 @@ describe('Activity Types', () => {
         toolName: 'web_search',
         command: 'npm test',
         exitCode: 0,
-        targetAgent: 'friday',
+        targetAgent: 'silk',
         taskTitle: 'Build workflow',
         recipient: 'user@example.com',
         channel: 'email',

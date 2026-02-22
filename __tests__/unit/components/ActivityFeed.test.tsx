@@ -102,7 +102,7 @@ describe('ActivityFeed', () => {
   it('should render grouped activities', () => {
     const mockActivities = [
       createMockActivity('1', 'garion', 'file', 'Created file'),
-      createMockActivity('2', 'fury', 'web', 'Searched web'),
+      createMockActivity('2', 'barak', 'web', 'Searched web'),
     ];
 
     mockUseActivityFeed.mockReturnValue({

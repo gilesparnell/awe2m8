@@ -57,7 +57,7 @@ describe('Activity Logger', () => {
 
     it('should include custom sessionId when provided', async () => {
       await logActivity({
-        actor: 'fury',
+        actor: 'barak',
         actorType: 'subagent',
         category: 'web',
         action: 'search',
@@ -93,7 +93,7 @@ describe('Activity Logger', () => {
 
     it('should include taskId when provided', async () => {
       await logActivity({
-        actor: 'friday',
+        actor: 'silk',
         actorType: 'subagent',
         category: 'task',
         action: 'create',
@@ -181,12 +181,12 @@ describe('Activity Logger', () => {
 
   describe('logFileWrite', () => {
     it('should log file write with correct category and action', async () => {
-      await logFileWrite('/path/to/file.ts', 'fury');
+      await logFileWrite('/path/to/file.ts', 'barak');
 
       expect(mockAddDoc).toHaveBeenCalledWith(
         {},
         expect.objectContaining({
-          actor: 'fury',
+          actor: 'barak',
           actorType: 'subagent',
           category: 'file',
           action: 'write',
@@ -198,12 +198,12 @@ describe('Activity Logger', () => {
 
   describe('logFileEdit', () => {
     it('should log file edit with correct category and action', async () => {
-      await logFileEdit('/path/to/file.ts', 'friday');
+      await logFileEdit('/path/to/file.ts', 'silk');
 
       expect(mockAddDoc).toHaveBeenCalledWith(
         {},
         expect.objectContaining({
-          actor: 'friday',
+          actor: 'silk',
           actorType: 'subagent',
           category: 'file',
           action: 'edit',
@@ -231,12 +231,12 @@ describe('Activity Logger', () => {
 
   describe('logWebFetch', () => {
     it('should log web fetch with URL', async () => {
-      await logWebFetch('https://example.com', 'loki');
+      await logWebFetch('https://example.com', 'polgara');
 
       expect(mockAddDoc).toHaveBeenCalledWith(
         {},
         expect.objectContaining({
-          actor: 'loki',
+          actor: 'polgara',
           actorType: 'subagent',
           category: 'web',
           action: 'fetch',
@@ -283,7 +283,7 @@ describe('Activity Logger', () => {
 
   describe('logAgentSpawn', () => {
     it('should log agent spawn with target and task', async () => {
-      await logAgentSpawn('fury', 'Research competitors', 'garion');
+      await logAgentSpawn('barak', 'Research competitors', 'garion');
 
       expect(mockAddDoc).toHaveBeenCalledWith(
         {},
@@ -292,8 +292,8 @@ describe('Activity Logger', () => {
           actorType: 'main',
           category: 'agent',
           action: 'spawn',
-          description: 'Spawned fury for: Research competitors',
-          metadata: expect.objectContaining({ targetAgent: 'fury', task: 'Research competitors' }),
+          description: 'Spawned barak for: Research competitors',
+          metadata: expect.objectContaining({ targetAgent: 'barak', task: 'Research competitors' }),
         })
       );
     });
@@ -317,12 +317,12 @@ describe('Activity Logger', () => {
 
   describe('logTaskCreated', () => {
     it('should log task creation with title and ID', async () => {
-      await logTaskCreated('Build feature', 'task-123', 'friday');
+      await logTaskCreated('Build feature', 'task-123', 'silk');
 
       expect(mockAddDoc).toHaveBeenCalledWith(
         {},
         expect.objectContaining({
-          actor: 'friday',
+          actor: 'silk',
           actorType: 'subagent',
           category: 'task',
           action: 'create',

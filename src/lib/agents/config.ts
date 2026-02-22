@@ -4,13 +4,13 @@
  * Defines the Belgariad AI Squad - each agent's personality, model, and capabilities.
  */
 
-import { ActivityActor } from '@/lib/activity-logger';
+import { ActivityActor } from '@/types/activity';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export type AgentId = 'garion' | 'silk' | 'barak' | 'polgara' | 'cenedra';
+export type AgentId = 'garion' | 'silk' | 'barak' | 'polgara' | 'cenedra' | 'taiba' | 'beldin' | 'relg' | 'durnik' | 'errand' | 'mandorallen';
 
 export type ModelProvider = 'anthropic' | 'openai' | 'moonshot' | 'xai';
 
@@ -238,6 +238,199 @@ export const AGENT_CONFIGS: Record<AgentId, AgentConfig> = {
     },
     escalationTriggers: [
       'unclear_task',
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // TAIBA (The Seer) - Analytics Expert
+  // ============================================================================
+  taiba: {
+    id: 'taiba',
+    name: 'Taiba',
+    belgariadName: 'Taiba, Seer of the Marags',
+    role: 'Analytics Expert',
+    description: 'Data-driven analyst who sees patterns others miss. Transforms raw data into actionable insights for conversion optimization and performance tracking.',
+    personality: 'Quiet, observant, visionary. Sees the future in numbers and trends. Patient and methodical, but with flashes of insight that change everything.',
+    model: {
+      provider: 'moonshot',
+      model: 'kimi-k2-turbo', // Cost-effective for data analysis
+      temperature: 0.3, // Low temperature for analytical consistency
+      maxTokens: 2048,
+    },
+    capabilities: [
+      'read_files',
+      'web_search',
+      'web_fetch',
+      'database_read',
+      'database_write',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 0.1,
+      dailyBudget: 3.0,
+    },
+    escalationTriggers: [
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // BELDIN (The Cynic) - QA & Review Specialist
+  // ============================================================================
+  beldin: {
+    id: 'beldin',
+    name: 'Beldin',
+    belgariadName: 'Beldin, the Cynical Sorcerer',
+    role: 'QA & Review Specialist',
+    description: 'Gruff but thorough quality assurance expert. Finds every bug, security hole, and performance issue. The ultimate code reviewer who takes no prisoners.',
+    personality: 'Cynical, brutally honest, perfectionist. Never satisfied with "good enough." Values security, performance, and maintainability above all else.',
+    model: {
+      provider: 'anthropic',
+      model: 'claude-sonnet-4', // High quality for critical reviews
+      temperature: 0.2, // Very low for consistent quality standards
+      maxTokens: 4096,
+    },
+    capabilities: [
+      'read_files',
+      'write_files',
+      'edit_files',
+      'exec_command',
+      'browser_automation',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 3.0,
+      dailyBudget: 8.0,
+    },
+    escalationTriggers: [
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // RELG (The Zealot) - Growth Marketer
+  // ============================================================================
+  relg: {
+    id: 'relg',
+    name: 'Relg',
+    belgariadName: 'Relg, Zealot of the Ulgos',
+    role: 'Growth Marketer',
+    description: 'Passionate growth hacker with unwavering focus on lead generation and conversion optimization. Religious about A/B testing and campaign performance.',
+    personality: 'Intense, passionate, single-minded. Approaches marketing with religious fervor. Values measurable results and continuous optimization.',
+    model: {
+      provider: 'openai',
+      model: 'gpt-4o-mini', // Good for marketing content and analysis
+      temperature: 0.6, // Balanced for creative marketing
+      maxTokens: 2048,
+    },
+    capabilities: [
+      'web_search',
+      'web_fetch',
+      'send_messages',
+      'database_read',
+      'database_write',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 0.6,
+      dailyBudget: 5.0,
+    },
+    escalationTriggers: [
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // DURNIK (The Smith) - DevOps Engineer
+  // ============================================================================
+  durnik: {
+    id: 'durnik',
+    name: 'Durnik',
+    belgariadName: 'Durnik, the Good Smith',
+    role: 'DevOps Engineer',
+    description: 'Steady, reliable infrastructure expert. Builds and maintains deployment pipelines, monitoring systems, and automation tools. The foundation everything else depends on.',
+    personality: 'Steady, practical, dependable. Prefers simple, robust solutions over complex ones. Values reliability and maintainability above cleverness.',
+    model: {
+      provider: 'openai',
+      model: 'codex', // Good for infrastructure as code
+      temperature: 0.3, // Low for consistent infrastructure
+      maxTokens: 2048,
+    },
+    capabilities: [
+      'read_files',
+      'write_files',
+      'edit_files',
+      'exec_command',
+      'database_read',
+      'database_write',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 2.0,
+      dailyBudget: 6.0,
+    },
+    escalationTriggers: [
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // ERRAND (The Child) - Innovation Scout
+  // ============================================================================
+  errand: {
+    id: 'errand',
+    name: 'Errand',
+    belgariadName: 'Errand, the Child of Light',
+    role: 'Innovation Scout',
+    description: 'Curious explorer of new technologies and possibilities. Always discovering new tools, APIs, and capabilities before anyone else sees their potential.',
+    personality: 'Curious, innocent, insightful. Sees possibilities others miss. Values exploration and discovery over immediate practical application.',
+    model: {
+      provider: 'xai',
+      model: 'grok', // Good for discovering new tech
+      temperature: 0.8, // High for creative exploration
+      maxTokens: 2048,
+    },
+    capabilities: [
+      'web_search',
+      'web_fetch',
+      'read_files',
+      'write_files',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 0.5,
+      dailyBudget: 4.0,
+    },
+    escalationTriggers: [
+      'external_action_required',
+    ],
+  },
+
+  // ============================================================================
+  // MANDORALLEN (The Knight) - Security Specialist
+  // ============================================================================
+  mandorallen: {
+    id: 'mandorallen',
+    name: 'Mandorallen',
+    belgariadName: 'Mandorallen, Baron of Vo Mandor',
+    role: 'Security Specialist',
+    description: 'Chivalrous defender of systems and data. Conducts security audits, implements protections, and stands guard against threats. Noble and fearless in protecting the realm.',
+    personality: 'Noble, brave, honorable. Takes security as a sacred duty. Values protection and defense above convenience or speed.',
+    model: {
+      provider: 'anthropic',
+      model: 'claude-sonnet-4', // High quality for security analysis
+      temperature: 0.2, // Very low for thorough security analysis
+      maxTokens: 4096,
+    },
+    capabilities: [
+      'read_files',
+      'write_files',
+      'edit_files',
+      'exec_command',
+      'web_search',
+      'web_fetch',
+    ],
+    costProfile: {
+      estimatedCostPer1KTokens: 3.0,
+      dailyBudget: 7.0,
+    },
+    escalationTriggers: [
       'external_action_required',
     ],
   },

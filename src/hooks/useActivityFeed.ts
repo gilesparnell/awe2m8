@@ -19,6 +19,7 @@ import {
   Timestamp,
   DocumentData,
   QueryDocumentSnapshot,
+  limit as queryLimit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { 
@@ -141,6 +142,7 @@ function groupActivitiesByDate(activities: ActivityLog[]): ActivityGroup[] {
  */
 function buildQueryConstraints(
   filter: ActivityFilter,
+  limit: number,
   lastDoc?: QueryDocumentSnapshot<DocumentData>
 ): QueryConstraint[] {
   // Start with just orderBy - this doesn't require any indexes
@@ -164,7 +166,7 @@ function buildQueryConstraints(
   }
   
   // Pagination
-  constraints.push(limit((filter.limit || DEFAULT_LIMIT) * 3)); // Fetch more for client-side filtering
+  constraints.push(queryLimit((limit || DEFAULT_LIMIT) * 3)); // Fetch more for client-side filtering
   
   if (lastDoc) {
     constraints.push(startAfter(lastDoc));
@@ -257,10 +259,8 @@ export function useActivityFeed(
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilterState] = useState<ActivityFilter>({
-    ...initialFilter,
-    limit: initialLimit,
-  });
+  const [filter, setFilterState] = useState<ActivityFilter>(initialFilter);
+  const [limitState, setLimitState] = useState(initialLimit);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(true);
   
@@ -281,7 +281,8 @@ export function useActivityFeed(
     setActivities([]);
     setLastDoc(null);
     setHasMore(true);
-    setFilterState({ ...newFilter, limit: initialLimit });
+    setFilterState(newFilter);
+    setLimitState(initialLimit);
   }, [initialLimit]);
   
   // Main data fetching effect
@@ -290,7 +291,7 @@ export function useActivityFeed(
     setError(null);
     
     const activitiesRef = collection(db, 'activities');
-    const constraints = buildQueryConstraints(filter, undefined);
+    const constraints = buildQueryConstraints(filter, limitState, undefined);
     const q = query(activitiesRef, ...constraints);
     
     if (realTime) {
@@ -309,7 +310,7 @@ export function useActivityFeed(
           setActivities(newActivities);
           setLastDoc(last);
           // We fetch more items for client-side filtering, so hasMore is less reliable
-          setHasMore(snapshot.docs.length >= (filter.limit || DEFAULT_LIMIT));
+          setHasMore(snapshot.docs.length >= (limitState || DEFAULT_LIMIT));
           setLoading(false);
         },
         (err) => {
@@ -337,7 +338,7 @@ export function useActivityFeed(
           
           setActivities(newActivities);
           setLastDoc(last);
-          setHasMore(snapshot.docs.length >= (filter.limit || DEFAULT_LIMIT));
+          setHasMore(snapshot.docs.length >= initialLimit);
           setLoading(false);
         } catch (err) {
           console.error('Error fetching activities:', err);
@@ -358,7 +359,7 @@ export function useActivityFeed(
     
     try {
       const activitiesRef = collection(db, 'activities');
-      const constraints = buildQueryConstraints(filter, lastDoc);
+      const constraints = buildQueryConstraints(filter, limitState, lastDoc);
       const q = query(activitiesRef, ...constraints);
       
       const { getDocs } = await import('firebase/firestore');
@@ -374,7 +375,7 @@ export function useActivityFeed(
       
       setActivities((prev) => [...prev, ...newActivities]);
       setLastDoc(last);
-      setHasMore(snapshot.docs.length === (filter.limit || DEFAULT_LIMIT));
+      setHasMore(snapshot.docs.length === initialLimit);
     } catch (err) {
       console.error('Error loading more activities:', err);
       setError('Failed to load more activities');
@@ -397,7 +398,7 @@ export function useActivityFeed(
     loading,
     error,
     pagination: {
-      limit: filter.limit || DEFAULT_LIMIT,
+      limit: initialLimit,
       cursor: lastDoc?.id,
       hasMore,
     },

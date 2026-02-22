@@ -68,9 +68,9 @@ describe('Instrumented Tools', () => {
     it('should pass custom actor to logger', async () => {
       const readFn = jest.fn().mockResolvedValue('content');
       
-      await instrumentedRead(readFn, '/path/file.ts', 'fury');
+      await instrumentedRead(readFn, '/path/file.ts', 'barak');
       
-      expect(mockLogFileRead).toHaveBeenCalledWith('/path/file.ts', 'fury', { size: 7 });
+      expect(mockLogFileRead).toHaveBeenCalledWith('/path/file.ts', 'barak', { size: 7 });
     });
   });
 
@@ -126,10 +126,10 @@ describe('Instrumented Tools', () => {
     it('should fetch and log activity', async () => {
       const fetchFn = jest.fn().mockResolvedValue({ html: '<html></html>' });
       
-      const result = await instrumentedWebFetch(fetchFn, 'https://example.com', 'loki');
+      const result = await instrumentedWebFetch(fetchFn, 'https://example.com', 'polgara');
       
       expect(result.html).toBe('<html></html>');
-      expect(mockLogWebFetch).toHaveBeenCalledWith('https://example.com', 'loki');
+      expect(mockLogWebFetch).toHaveBeenCalledWith('https://example.com', 'polgara');
     });
   });
 
@@ -178,10 +178,10 @@ describe('Instrumented Tools', () => {
     it('should spawn agent and log activity', async () => {
       const spawnFn = jest.fn().mockResolvedValue({ id: 'subagent-123' });
       
-      const result = await instrumentedAgentSpawn(spawnFn, 'fury', 'Research task', 'garion');
+      const result = await instrumentedAgentSpawn(spawnFn, 'barak', 'Research task', 'garion');
       
       expect(result.id).toBe('subagent-123');
-      expect(mockLogAgentSpawn).toHaveBeenCalledWith('fury', 'Research task', 'garion');
+      expect(mockLogAgentSpawn).toHaveBeenCalledWith('barak', 'Research task', 'garion');
     });
   });
 
@@ -200,13 +200,13 @@ describe('Instrumented Tools', () => {
 
     it('should use custom actor when provided', async () => {
       const { result } = renderHook(() =>
-        useInstrumentedOperations({ actor: 'friday' })
+        useInstrumentedOperations({ actor: 'silk' })
       );
 
       const readFn = jest.fn().mockResolvedValue('content');
       await result.current.readFile('/path/file.ts', readFn);
 
-      expect(mockLogFileRead).toHaveBeenCalledWith('/path/file.ts', 'friday', { size: 7 });
+      expect(mockLogFileRead).toHaveBeenCalledWith('/path/file.ts', 'silk', { size: 7 });
     });
   });
 });
