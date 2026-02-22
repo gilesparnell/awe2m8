@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MonitorPlay, ShieldCheck, ArrowRight, LayoutDashboard, Settings, Bot, Code } from 'lucide-react';
+import { MonitorPlay, ShieldCheck, ArrowRight, Bot, Code, Wrench } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
@@ -113,6 +113,23 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all"></div>
+                    </Link>
+
+                    {/* Tool 6: GHL / Assistable Debugging */}
+                    <Link href="/admin/ghl-assistable-debug" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-cyan-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 transition-colors">
+                                <Wrench className="w-6 h-6 text-cyan-400 group-hover:text-cyan-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">GHL / Assistable Debugging</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Test GHL and Assistable API calls, inspect request payloads, and view response logs in one place.
+                            </p>
+                            <div className="flex items-center text-cyan-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
                     </Link>
 
                 </div>
