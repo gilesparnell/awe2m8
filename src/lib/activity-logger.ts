@@ -53,6 +53,7 @@ export interface ActivityData {
   sessionId?: string;
   taskId?: string;
   project?: string;
+  cost?: number; // Cost in USD for this activity
 }
 
 // ============================================================================
@@ -61,7 +62,7 @@ export interface ActivityData {
 
 /**
  * Log an activity to Firestore
- * 
+ *
  * @param data Activity data to log
  * @returns Promise that resolves when activity is logged
  */
@@ -74,9 +75,10 @@ export async function logActivity(data: ActivityData): Promise<string | null> {
     };
 
     const docRef = await addDoc(collection(db, 'activities'), activity);
-    
-    console.log(`[Activity] Logged: ${data.description}`);
-    
+
+    const costStr = data.cost ? ` ($${data.cost.toFixed(4)})` : '';
+    console.log(`[Activity] Logged: ${data.description}${costStr}`);
+
     return docRef.id;
   } catch (error) {
     console.error('[Activity] Failed to log:', error);
@@ -274,5 +276,109 @@ export async function logTaskCompleted(
     description: `Completed task: ${taskTitle}`,
     taskId,
     metadata: { taskTitle, ...metadata },
+  });
+}
+
+// ============================================================================
+// COST-AWARE LOGGING FUNCTIONS
+// ============================================================================
+
+/**
+ * Model pricing per 1K tokens (USD)
+ * Based on current OpenRouter pricing
+ */
+export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  // Anthropic
+  'anthropic/claude-sonnet-4': { input: 3.0, output: 15.0 },
+  'claude-sonnet-4': { input: 3.0, output: 15.0 },
+  // OpenAI
+  'openai/codex': { input: 0.5, output: 2.0 },
+  'codex': { input: 0.5, output: 2.0 },
+  // Moonshot
+  'moonshotai/kimi-k2.5': { input: 0.5, output: 2.0 },
+  'kimi-k2.5': { input: 0.5, output: 2.0 },
+  'kimi-k2-turbo': { input: 0.25, output: 1.0 },
+  // xAI
+  'xai/grok': { input: 2.0, output: 10.0 },
+  'grok': { input: 2.0, output: 10.0 },
+  // Default fallback
+  'default': { input: 1.0, output: 3.0 },
+};
+
+/**
+ * Calculate cost based on token usage and model
+ */
+export function calculateCost(
+  inputTokens: number,
+  outputTokens: number,
+  model: string
+): number {
+  const pricing = MODEL_PRICING[model] || MODEL_PRICING['default'];
+  const inputCost = (inputTokens / 1000) * pricing.input;
+  const outputCost = (outputTokens / 1000) * pricing.output;
+  return inputCost + outputCost;
+}
+
+/**
+ * Log an agent spawn with cost information
+ */
+export async function logAgentSpawnWithCost(
+  targetAgent: ActivityActor,
+  task: string,
+  estimatedCost: number,
+  actor: ActivityActor = 'garion',
+  metadata?: Record<string, unknown>
+): Promise<string | null> {
+  return logActivity({
+    actor,
+    actorType: 'main',
+    category: 'agent',
+    action: 'spawn',
+    description: `Spawned ${targetAgent} for: ${task}`,
+    cost: estimatedCost,
+    metadata: { targetAgent, task, estimatedCost, ...metadata },
+  });
+}
+
+/**
+ * Log task completion with actual cost
+ */
+export async function logTaskCompletedWithCost(
+  taskTitle: string,
+  taskId: string,
+  actualCost: number,
+  actor: ActivityActor = 'garion',
+  metadata?: Record<string, unknown>
+): Promise<string | null> {
+  return logActivity({
+    actor,
+    actorType: actor === 'garion' ? 'main' : 'subagent',
+    category: 'task',
+    action: 'complete',
+    description: `Completed task: ${taskTitle}`,
+    taskId,
+    cost: actualCost,
+    metadata: { taskTitle, actualCost, ...metadata },
+  });
+}
+
+/**
+ * Log a web search with cost (for APIs that charge per search)
+ */
+export async function logWebSearchWithCost(
+  query: string,
+  resultCount: number,
+  cost: number,
+  actor: ActivityActor = 'garion',
+  metadata?: Record<string, unknown>
+): Promise<string | null> {
+  return logActivity({
+    actor,
+    actorType: actor === 'garion' ? 'main' : 'subagent',
+    category: 'web',
+    action: 'search',
+    description: `Searched web: "${query}" (${resultCount} results)`,
+    cost,
+    metadata: { query, resultCount, ...metadata },
   });
 }
