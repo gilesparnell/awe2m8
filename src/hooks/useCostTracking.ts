@@ -22,7 +22,8 @@ interface Activity {
   id: string;
   cost?: number;
   timestamp: Timestamp | string;
-  agentId: string;
+  actor?: string;  // Actor field from activity-logger (e.g., 'garion', 'silk')
+  agentId?: string; // Alternative field name
   areaId?: string;
 }
 
@@ -132,9 +133,10 @@ export function useCostTracking(): CostTrackingState {
         monthCost += cost;
       }
 
-      // Aggregate by agent
-      if (activity.agentId) {
-        costByAgent[activity.agentId] = (costByAgent[activity.agentId] || 0) + cost;
+      // Aggregate by agent (use actor or agentId field)
+      const agentIdentifier = activity.agentId || activity.actor;
+      if (agentIdentifier) {
+        costByAgent[agentIdentifier] = (costByAgent[agentIdentifier] || 0) + cost;
       }
 
       // Aggregate by area
