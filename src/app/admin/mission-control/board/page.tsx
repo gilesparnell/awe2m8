@@ -1,127 +1,242 @@
-/**
- * Mission Control Board Page
- * 
- * Kanban-style task board view
- */
-
 'use client';
 
-import { useState } from 'react';
-import { useAgents, DEFAULT_AGENTS, DEFAULT_TASKS } from '@/hooks/useAgents';
-import { CreateTaskModal } from '@/components/CreateTaskModal';
-import { Loader2, CheckSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, addDoc, updateDoc, doc, query, orderBy, Timestamp } from 'firebase/firestore';
+import { PlusCircle, Target, Clock, CheckCircle2, ArrowRight, X } from 'lucide-react';
 
-const columns = ['inbox', 'in_progress', 'review', 'done'] as const;
-const columnNames = { 
-  inbox: 'Inbox', 
-  in_progress: 'In Progress', 
-  review: 'Review', 
-  done: 'Done' 
+interface Task {
+  id: string;
+  title: string;
+  assignedAgent: string;
+  status: 'todo' | 'in_progress' | 'done';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  createdAt: Timestamp | string;
+}
+
+const priorityStyles: Record<string, { bg: string; text: string; label: string }> = {
+  critical: { bg: 'bg-red-900/30', text: 'text-red-400', label: 'Critical' },
+  high: { bg: 'bg-amber-900/30', text: 'text-amber-400', label: 'High' },
+  medium: { bg: 'bg-blue-900/30', text: 'text-blue-400', label: 'Medium' },
+  low: { bg: 'bg-gray-800', text: 'text-gray-400', label: 'Low' },
 };
 
-const priorityColors = {
-  P0: 'bg-red-500/20 text-red-400 border-red-500/50',
-  P1: 'bg-orange-500/20 text-orange-400 border-orange-500/50',
-  P2: 'bg-blue-500/20 text-blue-400 border-blue-500/50',
-  P3: 'bg-gray-500/20 text-gray-400 border-gray-500/50'
-};
+const columnConfig = [
+  { key: 'todo', label: 'To Do', icon: <Target className="w-4 h-4 text-gray-400" />, dot: 'bg-gray-400' },
+  { key: 'in_progress', label: 'In Progress', icon: <Clock className="w-4 h-4 text-blue-400" />, dot: 'bg-blue-400 animate-pulse' },
+  { key: 'done', label: 'Done', icon: <CheckCircle2 className="w-4 h-4 text-green-400" />, dot: 'bg-green-400' },
+];
 
-export default function BoardPage() {
-  const { agents, tasks, loading } = useAgents();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  const displayAgents = agents.length > 0 ? agents : DEFAULT_AGENTS;
-  const displayTasks = tasks.length > 0 ? tasks : DEFAULT_TASKS;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-green-400" />
-      </div>
-    );
-  }
+function TaskCard({ task, onMove }: { task: Task; onMove: (status: Task['status']) => void }) {
+  const priority = priorityStyles[task.priority] || priorityStyles.low;
+  const nextStatus: Record<string, Task['status']> = {
+    todo: 'in_progress',
+    in_progress: 'done',
+    done: 'todo',
+  };
 
   return (
-    <div>
-      <CreateTaskModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreate={async () => {
-          setIsCreateModalOpen(false);
-        }}
-        agents={displayAgents.map(a => ({ id: a.id, name: a.name, color: a.color }))}
-        creating={false}
-      />
-
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <CheckSquare className="w-6 h-6 text-green-400" />
-          Task Board
-        </h1>
-        <p className="text-gray-500 mt-1">Manage and track agent tasks</p>
+    <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600 transition-all group">
+      <div className="flex items-start justify-between gap-2">
+        <h4 className="text-sm font-medium text-white flex-1">{task.title}</h4>
+        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priority.bg} ${priority.text}`}>
+          {priority.label}
+        </span>
       </div>
+      <div className="flex items-center justify-between mt-3">
+        <span className="text-xs text-gray-500">{task.assignedAgent || 'Unassigned'}</span>
+        <button
+          onClick={() => onMove(nextStatus[task.status])}
+          className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-all px-2 py-1 rounded-lg hover:bg-gray-700"
+        >
+          <ArrowRight className="w-3 h-3" />
+          {task.status === 'done' ? 'Reopen' : 'Move'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {columns.map((column) => (
-          <div key={column} className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700">
-              <h3 className="font-semibold text-white">{columnNames[column]}</h3>
-              <span className="text-gray-500 text-sm">
-                {displayTasks.filter(t => t.status === column).length}
-              </span>
-            </div>
-            <div className="space-y-3">
-              {displayTasks.filter(t => t.status === column).map((task) => {
-                const agent = displayAgents.find(a => a.id === task.agentId);
-                const colorClass = agent?.color === 'green' ? 'text-green-400 bg-green-900/30' :
-                                  agent?.color === 'blue' ? 'text-blue-400 bg-blue-900/30' :
-                                  'text-amber-400 bg-amber-900/30';
+function AddTaskModal({ onClose, onAdd }: { onClose: () => void; onAdd: (task: Omit<Task, 'id' | 'createdAt'>) => void }) {
+  const [title, setTitle] = useState('');
+  const [assignedAgent, setAssignedAgent] = useState('');
+  const [priority, setPriority] = useState<Task['priority']>('medium');
+
+  const agents = ['Garion', 'Silk', 'Barak', 'Polgara', "Ce'Nedra", 'Relg', 'Taiba', 'Beldin', 'Durnik', 'Errand', 'Mandorallen'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    onAdd({ title: title.trim(), assignedAgent, status: 'todo', priority });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-gray-800 rounded-lg transition-colors">
+          <X className="w-5 h-5 text-gray-400" />
+        </button>
+
+        <h3 className="text-lg font-bold text-white mb-6">New Task</h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+              placeholder="What needs to be done?"
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Assign To</label>
+            <select
+              value={assignedAgent}
+              onChange={(e) => setAssignedAgent(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+            >
+              <option value="">Unassigned</option>
+              {agents.map((agent) => (
+                <option key={agent} value={agent}>{agent}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">Priority</label>
+            <div className="flex gap-2">
+              {(['low', 'medium', 'high', 'critical'] as const).map((p) => {
+                const style = priorityStyles[p];
                 return (
-                  <div 
-                    key={task.id} 
-                    className="bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition-all cursor-pointer group"
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPriority(p)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                      priority === p
+                        ? `${style.bg} ${style.text} border-current`
+                        : 'bg-gray-800 text-gray-500 border-gray-700 hover:border-gray-600'
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h4 className="text-sm font-medium text-white group-hover:text-green-400 transition-colors">
-                        {task.title}
-                      </h4>
-                      <span className={`text-xs px-1.5 py-0.5 rounded border ${priorityColors[task.priority]}`}>
-                        {task.priority}
-                      </span>
-                    </div>
-                    {task.progressPercent !== undefined && task.progressPercent > 0 && (
-                      <div className="mb-2">
-                        <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-green-400 rounded-full" 
-                            style={{ width: `${task.progressPercent}%` }} 
-                          />
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">{task.progressPercent}%</div>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-1 rounded-full ${colorClass}`}>
-                        {agent?.name || 'Unassigned'}
-                      </span>
-                    </div>
-                  </div>
+                    {style.label}
+                  </button>
                 );
               })}
-              {displayTasks.filter(t => t.status === column).length === 0 && (
-                <p className="text-gray-600 text-sm text-center py-4">No tasks</p>
-              )}
             </div>
           </div>
-        ))}
+
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 rounded-lg transition-colors"
+          >
+            Create Task
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function BoardPage() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const tasksRef = collection(db, 'tasks');
+    const tasksQuery = query(tasksRef, orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(tasksQuery, (snapshot) => {
+      const tasksData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      } as Task));
+      setTasks(tasksData);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAddTask = async (task: Omit<Task, 'id' | 'createdAt'>) => {
+    const tasksRef = collection(db, 'tasks');
+    await addDoc(tasksRef, {
+      ...task,
+      createdAt: Timestamp.now(),
+    });
+  };
+
+  const handleMoveTask = async (taskId: string, newStatus: Task['status']) => {
+    const taskRef = doc(db, 'tasks', taskId);
+    await updateDoc(taskRef, { status: newStatus });
+  };
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Task Board</h2>
+          <p className="text-sm text-gray-500 mt-1">{tasks.length} tasks total</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2.5 rounded-xl font-medium transition-colors"
+        >
+          <PlusCircle className="w-4 h-4" />
+          Add Task
+        </button>
       </div>
 
-      <button
-        onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center shadow-lg shadow-green-500/20 z-40"
-      >
-        <span className="text-2xl text-white">+</span>
-      </button>
+      {/* Kanban Columns */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {columnConfig.map((col) => {
+          const columnTasks = tasks.filter((t) => t.status === col.key);
+          return (
+            <div key={col.key} className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                {col.icon}
+                <h3 className="text-sm font-semibold text-white">{col.label}</h3>
+                <span className="ml-auto text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">
+                  {columnTasks.length}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="bg-gray-800/50 rounded-xl p-4 animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded w-3/4 mb-2" />
+                        <div className="h-3 bg-gray-700 rounded w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : columnTasks.length === 0 ? (
+                  <p className="text-xs text-gray-600 text-center py-6">No tasks</p>
+                ) : (
+                  columnTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onMove={(status) => handleMoveTask(task.id, status)}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add Task Modal */}
+      {showAddModal && (
+        <AddTaskModal onClose={() => setShowAddModal(false)} onAdd={handleAddTask} />
+      )}
     </div>
   );
 }

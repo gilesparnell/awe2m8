@@ -1,302 +1,262 @@
-/**
- * Activity Feed Page
- * 
- * Full-page view of all activities with comprehensive filtering
- */
-
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { 
-  Activity, 
-  ArrowLeft,
-  RefreshCw,
-  Download,
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Activity,
+  Search,
+  CheckCircle2,
+  Clock,
+  MessageSquare,
+  FileText,
+  Bot,
+  Target,
+  AlertTriangle,
+  ShieldCheck,
+  Database,
   Filter,
-  BarChart3,
-  FileText
 } from 'lucide-react';
-import { ActivityFeed } from '@/components/ActivityFeed';
-import { useActivityStats } from '@/hooks/useActivityFeed';
-import { ActivityLog, ActivityActor, ACTOR_COLORS, ACTOR_LABELS } from '@/types/activity';
 
-// ============================================================================
-// STATS CARD COMPONENT
-// ============================================================================
-
-interface StatCardProps {
-  label: string;
-  value: number;
-  color: string;
+interface ActivityItem {
+  id: string;
+  type: string;
+  agentName: string;
+  message: string;
+  timestamp: string;
+  cost?: number;
+  metadata?: Record<string, unknown>;
 }
 
-function StatCard({ label, value, color }: StatCardProps) {
-  const colorClasses: Record<string, string> = {
-    green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  };
+const activityIcons: Record<string, React.ReactNode> = {
+  task_started: <Clock className="w-4 h-4 text-blue-400" />,
+  task_completed: <CheckCircle2 className="w-4 h-4 text-green-400" />,
+  message: <MessageSquare className="w-4 h-4 text-gray-400" />,
+  file_created: <FileText className="w-4 h-4 text-amber-400" />,
+  agent_spawned: <Bot className="w-4 h-4 text-purple-400" />,
+  oversight_report: <ShieldCheck className="w-4 h-4 text-amber-400" />,
+  backup_complete: <Database className="w-4 h-4 text-blue-400" />,
+  research_complete: <Target className="w-4 h-4 text-green-400" />,
+  status_change: <Activity className="w-4 h-4 text-gray-400" />,
+  blocker: <AlertTriangle className="w-4 h-4 text-red-400" />,
+};
 
-  return (
-    <div className={`p-4 rounded-xl border ${colorClasses[color] || colorClasses.gray}`}>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-80">{label}</div>
-    </div>
-  );
+const filterOptions = [
+  { key: 'all', label: 'All' },
+  { key: 'task', label: 'Tasks', types: ['task_started', 'task_completed'] },
+  { key: 'research', label: 'Research', types: ['research_complete'] },
+  { key: 'oversight', label: 'Oversight', types: ['oversight_report'] },
+  { key: 'backup', label: 'Backups', types: ['backup_complete'] },
+  { key: 'agent', label: 'Agents', types: ['agent_spawned', 'status_change'] },
+  { key: 'file', label: 'Files', types: ['file_created'] },
+];
+
+function formatTime(timestamp: string): string {
+  const d = new Date(timestamp);
+  return d.toLocaleString('en-AU', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
-// ============================================================================
-// MAIN PAGE COMPONENT
-// ============================================================================
+function formatTimeAgo(timestamp: string): string {
+  const now = new Date();
+  const then = new Date(timestamp);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${Math.floor(diffHours / 24)}d ago`;
+}
 
 export default function ActivityPage() {
-  const [selectedActivity, setSelectedActivity] = useState<ActivityLog | null>(null);
-  const { total, byActor, byCategory, loading: statsLoading } = useActivityStats(7);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  const handleActivityClick = (activity: ActivityLog) => {
-    setSelectedActivity(activity);
-  };
+  useEffect(() => {
+    async function fetchActivities() {
+      try {
+        const res = await fetch('/api/activities');
+        const data = await res.json();
+        if (data.success) setActivities(data.activities);
+      } catch (err) {
+        console.error('Failed to fetch activities:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchActivities();
+  }, []);
 
-  const handleExport = () => {
-    // TODO: Implement CSV export
-    console.log('Export activities');
-  };
+  const filtered = useMemo(() => {
+    let result = activities;
+
+    // Apply type filter
+    if (activeFilter !== 'all') {
+      const filter = filterOptions.find((f) => f.key === activeFilter);
+      if (filter?.types) {
+        result = result.filter((a) => filter.types!.includes(a.type));
+      }
+    }
+
+    // Apply search
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.agentName.toLowerCase().includes(q) ||
+          a.message.toLowerCase().includes(q) ||
+          a.type.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }, [activities, activeFilter, search]);
+
+  // Stats
+  const totalCost = activities.reduce((sum, a) => sum + (a.cost || 0), 0);
+  const agentCounts: Record<string, number> = {};
+  activities.forEach((a) => {
+    agentCounts[a.agentName] = (agentCounts[a.agentName] || 0) + 1;
+  });
+  const mostActive = Object.entries(agentCounts).sort((a, b) => b[1] - a[1])[0];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Back Link */}
-          <div className="mb-4">
-            <Link 
-              href="/admin/mission-control" 
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Mission Control
-            </Link>
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-green-900/30 border border-green-800 rounded-xl flex items-center justify-center">
+            <Activity className="w-5 h-5 text-green-400" />
           </div>
-
-          {/* Title Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-900/30 border border-green-800 rounded-full text-green-400 text-xs font-bold uppercase tracking-wider mb-2">
-                <Activity className="w-3 h-3" />
-                Activity Feed
-              </div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                  All Activities
-                </span>
-              </h1>
-              <p className="text-gray-400 mt-1">
-                Complete history of everything Garion and your agents are working on.
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors text-sm"
-              >
-                <Download className="w-4 h-4" />
-                Export
-              </button>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Activity Feed</h1>
+            <p className="text-sm text-gray-400">Complete history of agent actions</p>
           </div>
         </div>
-      </header>
-
-      {/* Stats Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <StatCard 
-            label="Total (7 days)" 
-            value={statsLoading ? 0 : total} 
-            color="green" 
-          />
-          <StatCard 
-            label={ACTOR_LABELS.garion} 
-            value={statsLoading ? 0 : (byActor.garion || 0)} 
-            color={ACTOR_COLORS.garion} 
-          />
-          <StatCard 
-            label={ACTOR_LABELS.barak} 
-            value={statsLoading ? 0 : (byActor.barak || 0)} 
-            color={ACTOR_COLORS.barak} 
-          />
-          <StatCard 
-            label={ACTOR_LABELS.silk} 
-            value={statsLoading ? 0 : (byActor.silk || 0)} 
-            color={ACTOR_COLORS.silk} 
-          />
-          <StatCard 
-            label={ACTOR_LABELS.polgara} 
-            value={statsLoading ? 0 : (byActor.polgara || 0)} 
-            color={ACTOR_COLORS.polgara} 
-          />
-          <StatCard 
-            label="System" 
-            value={statsLoading ? 0 : (byActor.system || 0)} 
-            color={ACTOR_COLORS.system} 
-          />
-        </div>
-
-        {/* Activity Feed */}
-        <ActivityFeed 
-          showFilters={true}
-          maxHeight="800px"
-          onActivityClick={handleActivityClick}
-        />
       </div>
 
-      {/* Activity Detail Modal */}
-      {selectedActivity && (
-        <ActivityDetailModal 
-          activity={selectedActivity} 
-          onClose={() => setSelectedActivity(null)} 
-        />
-      )}
-    </div>
-  );
-}
-
-// ============================================================================
-// ACTIVITY DETAIL MODAL
-// ============================================================================
-
-interface ActivityDetailModalProps {
-  activity: ActivityLog;
-  onClose: () => void;
-}
-
-function ActivityDetailModal({ activity, onClose }: ActivityDetailModalProps) {
-  const timestamp = activity.timestamp instanceof Date 
-    ? activity.timestamp 
-    : activity.timestamp.toDate();
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
-          <h2 className="text-xl font-bold text-white">Activity Details</h2>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <span className="sr-only">Close</span>
-            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-gray-900 rounded-2xl p-4 border border-gray-800">
+          <p className="text-2xl font-bold text-white">{activities.length}</p>
+          <p className="text-xs text-gray-400">Total Activities</p>
         </div>
+        <div className="bg-gray-900 rounded-2xl p-4 border border-gray-800">
+          <p className="text-2xl font-bold text-green-400">${totalCost.toFixed(3)}</p>
+          <p className="text-xs text-gray-400">Total Cost</p>
+        </div>
+        <div className="bg-gray-900 rounded-2xl p-4 border border-gray-800">
+          <p className="text-2xl font-bold text-blue-400">{Object.keys(agentCounts).length}</p>
+          <p className="text-xs text-gray-400">Active Agents</p>
+        </div>
+        <div className="bg-gray-900 rounded-2xl p-4 border border-gray-800">
+          <p className="text-2xl font-bold text-amber-400 truncate">{mostActive ? mostActive[0] : '—'}</p>
+          <p className="text-xs text-gray-400">Most Active ({mostActive ? mostActive[1] : 0})</p>
+        </div>
+      </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          {/* Actor */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500">Actor:</span>
-            <span className="font-semibold text-white">{ACTOR_LABELS[activity.actor]}</span>
-            <span className="text-xs text-gray-500">({activity.actorType})</span>
+      {/* Search + Filters */}
+      <div className="bg-gray-900 rounded-2xl p-4 border border-gray-800 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search activities..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+            />
           </div>
 
-          {/* Action */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500">Action:</span>
-            <span className="font-semibold text-white capitalize">{activity.action}</span>
-          </div>
-
-          {/* Category */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500">Category:</span>
-            <span className="font-semibold text-white capitalize">{activity.category}</span>
-          </div>
-
-          {/* Description */}
-          <div>
-            <span className="text-gray-500 block mb-1">Description:</span>
-            <p className="text-white">{activity.description}</p>
-          </div>
-
-          {/* Timestamp */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500">Time:</span>
-            <span className="text-white">
-              {timestamp.toLocaleString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-              })}
-            </span>
-          </div>
-
-          {/* Cost */}
-          {activity.cost !== undefined && activity.cost > 0 && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-500">Cost:</span>
-              <span className="font-semibold text-green-400">
-                ${activity.cost.toFixed(3)}
-              </span>
-            </div>
-          )}
-
-          {/* Session ID */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-500">Session:</span>
-            <code className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-400">
-              {activity.sessionId}
-            </code>
-          </div>
-
-          {/* File Path */}
-          {activity.metadata.filePath && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-500 flex items-center gap-1">
-                <FileText className="w-4 h-4" />
-                File:
-              </span>
+          {/* Filter buttons */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <Filter className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            {filterOptions.map((f) => (
               <button
-                onClick={() => {
-                  const fullPath = `/Users/gilesparnell/Documents/VSStudio/awe2m8-local/${activity.metadata.filePath}`;
-                  window.open(`vscode://file${fullPath}`, '_blank');
-                }}
-                className="text-blue-400 hover:text-blue-300 hover:underline cursor-pointer font-mono text-sm"
-                title="Open in VS Code"
+                key={f.key}
+                onClick={() => setActiveFilter(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  activeFilter === f.key
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
               >
-                {activity.metadata.filePath}
+                {f.label}
               </button>
-            </div>
-          )}
-
-          {/* Metadata */}
-          {Object.keys(activity.metadata).length > 0 && (
-            <div className="border-t border-gray-800 pt-4 mt-4">
-              <span className="text-gray-500 block mb-2">Metadata:</span>
-              <pre className="bg-gray-800 p-3 rounded-lg text-xs text-gray-300 overflow-x-auto">
-                {JSON.stringify(activity.metadata, null, 2)}
-              </pre>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
+      </div>
+
+      {/* Activity List */}
+      <div className="bg-gray-900 rounded-2xl border border-gray-800">
+        {loading ? (
+          <div className="p-8 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex gap-3 animate-pulse">
+                <div className="w-10 h-10 rounded-lg bg-gray-800" />
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-800 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-gray-800 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center">
+            <Activity className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-500">No activities found</p>
+            {(search || activeFilter !== 'all') && (
+              <button
+                onClick={() => { setSearch(''); setActiveFilter('all'); }}
+                className="text-xs text-green-400 hover:text-green-300 mt-2"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-800/50">
+            {filtered.map((activity) => {
+              const icon = activityIcons[activity.type] || <Activity className="w-4 h-4 text-gray-400" />;
+              return (
+                <div key={activity.id} className="flex items-start gap-4 p-4 hover:bg-gray-800/30 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    {icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white">
+                      <span className="font-medium">{activity.agentName}</span>{' '}
+                      <span className="text-gray-300">{activity.message}</span>
+                    </p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-gray-500">{formatTimeAgo(activity.timestamp)}</span>
+                      <span className="text-xs text-gray-600">{formatTime(activity.timestamp)}</span>
+                      <span className="text-xs text-gray-700 bg-gray-800 px-2 py-0.5 rounded">{activity.type.replace(/_/g, ' ')}</span>
+                    </div>
+                  </div>
+                  {activity.cost !== undefined && activity.cost > 0 && (
+                    <span className="text-sm font-medium text-green-400 flex-shrink-0">
+                      ${activity.cost.toFixed(3)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-800 bg-gray-800/30">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-          >
-            Close
-          </button>
+        <div className="p-4 border-t border-gray-800 text-xs text-gray-500 flex justify-between">
+          <span>Showing {filtered.length} of {activities.length} activities</span>
+          <span>Polling every 30s</span>
         </div>
       </div>
     </div>

@@ -6,7 +6,9 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { Bot, Target, FileText, Activity, Users, CheckCircle2, Clock, MessageSquare, X } from 'lucide-react';
 
 interface Agent {
@@ -128,8 +130,18 @@ function AgentDetailModal({ agent, onClose }: { agent: Agent; onClose: () => voi
   );
 }
 
-export function AgentStrip({ agents }: AgentStripProps) {
+export function AgentStrip() {
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+
+  useEffect(() => {
+    const agentsRef = collection(db, 'agents');
+    const unsubscribe = onSnapshot(agentsRef, (snapshot) => {
+      const agentsData = snapshot.docs.map(doc => doc.data() as Agent);
+      setAgents(agentsData);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (!agents || agents.length === 0) {
     return (

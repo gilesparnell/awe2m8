@@ -1,12 +1,6 @@
-/**
- * ActivityTimeline - Mission Control v3
- * 
- * Timeline grouped by time: Today, Yesterday, Earlier
- */
-
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Activity, 
   CheckCircle2, 
@@ -16,21 +10,16 @@ import {
   AlertCircle,
   Bot,
   Target,
-  Wrench,
   AlertTriangle
 } from 'lucide-react';
 
 interface ActivityItem {
   id: string;
-  type: 'task_started' | 'task_completed' | 'message' | 'file_created' | 'agent_online' | 'agent_offline' | 'milestone' | 'blocker';
+  type: string;
   agentName: string;
   message: string;
   timestamp: string;
   cost?: number;
-}
-
-interface ActivityTimelineProps {
-  activities: ActivityItem[];
 }
 
 const activityIcons: Record<string, React.ReactNode> = {
@@ -40,8 +29,13 @@ const activityIcons: Record<string, React.ReactNode> = {
   file_created: <FileText className="w-4 h-4 text-amber-400" />,
   agent_online: <Activity className="w-4 h-4 text-green-400" />,
   agent_offline: <AlertCircle className="w-4 h-4 text-red-400" />,
+  agent_spawned: <Bot className="w-4 h-4 text-purple-400" />,
   milestone: <Target className="w-4 h-4 text-purple-400" />,
   blocker: <AlertTriangle className="w-4 h-4 text-red-400" />,
+  oversight_report: <Target className="w-4 h-4 text-amber-400" />,
+  backup_complete: <CheckCircle2 className="w-4 h-4 text-blue-400" />,
+  research_complete: <FileText className="w-4 h-4 text-green-400" />,
+  status_change: <Activity className="w-4 h-4 text-gray-400" />,
 };
 
 function formatTimeAgo(timestamp: string): string {
@@ -73,7 +67,6 @@ function groupActivitiesByTime(activities: ActivityItem[]) {
 
   activities.forEach(activity => {
     const activityDate = new Date(activity.timestamp);
-    
     if (activityDate >= todayStart) {
       groups.today.push(activity);
     } else if (activityDate >= yesterdayStart) {
@@ -103,7 +96,7 @@ function TimelineItem({ activity }: { activity: ActivityItem }) {
         <div className="flex items-center gap-3 mt-1">
           <span className="text-xs text-gray-500">{timeAgo}</span>
           {activity.cost !== undefined && activity.cost > 0 && (
-            <span className="text-xs text-green-400">${activity.cost.toFixed(2)}</span>
+            <span className="text-xs text-green-400">${activity.cost.toFixed(3)}</span>
           )}
         </div>
       </div>
@@ -129,7 +122,53 @@ function TimeGroup({ title, activities }: { title: string; activities: ActivityI
   );
 }
 
-export function ActivityTimeline({ activities }: ActivityTimelineProps) {
+export function ActivityTimeline() {
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchActivities() {
+      try {
+        const res = await fetch('/api/activities');
+        const data = await res.json();
+        if (data.success) {
+          setActivities(data.activities);
+        }
+      } catch (err) {
+        console.error('Failed to fetch activities:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchActivities();
+    // Poll every 30 seconds for updates
+    const interval = setInterval(fetchActivities, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-green-400" />
+          Activity Feed
+        </h3>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-3 animate-pulse">
+              <div className="w-8 h-8 rounded-lg bg-gray-800" />
+              <div className="flex-1">
+                <div className="h-4 bg-gray-800 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-800 rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!activities || activities.length === 0) {
     return (
       <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">

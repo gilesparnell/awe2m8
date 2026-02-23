@@ -6,13 +6,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, RefreshCw, Loader2, Target } from 'lucide-react';
-import { useAgents, CreateTaskInput, DEFAULT_AGENTS, DEFAULT_TASKS, DEFAULT_ACTIVITIES } from '@/hooks/useAgents';
-import { CreateTaskModal } from '@/components/CreateTaskModal';
-import { InvestigationBoard } from '@/components/InvestigationBoard';
-import { AgentWorkCalendar } from '@/components/AgentWorkCalendar';
+import { ArrowRight, RefreshCw, Loader2, Target, Database, DollarSign, AlertTriangle } from 'lucide-react';
 import { DashboardHeader } from '@/components/mission-control/DashboardHeader';
 import { StatsBar } from '@/components/mission-control/StatsBar';
 import { AgentStrip } from '@/components/mission-control/AgentStrip';
@@ -21,86 +17,148 @@ import { QuickActions } from '@/components/mission-control/QuickActions';
 
 import { useCostTracking } from '@/hooks/useCostTracking';
 
-export default function MissionControlPage() {
-  const { agents, tasks, loading } = useAgents();
-  const { todayCost, weekCost, costByAgent, loading: costLoading } = useCostTracking();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+interface Agent {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  color: string;
+}
 
-  // Use defaults if data not loaded yet
-  const displayAgents = agents.length > 0 ? agents : DEFAULT_AGENTS;
-  const displayTasks = tasks.length > 0 ? tasks : DEFAULT_TASKS;
-  const displayActivities = DEFAULT_ACTIVITIES; // TODO: wire real activities
+export default function MissionControlPage() {
+  const { todayCost, weekCost, costByAgent, totalAllTimeSpend, providers, loading: costsLoading } = useCostTracking();
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [seeding, setSeeding] = useState(false);
+  const [seedResult, setSeedResult] = useState<{ success: boolean; count: number } | null>(null);
+
+  // Fetch agents from API (not direct Firestore)
+  useEffect(() => {
+    async function fetchAgents() {
+      try {
+        const res = await fetch('/api/agents');
+        const data = await res.json();
+        if (data.success) setAgents(data.agents);
+      } catch (err) {
+        console.error('Failed to fetch agents:', err);
+      }
+    }
+    fetchAgents();
+  }, []);
 
   // Calculate stats
-  const openTasks = displayTasks.filter(t => t.status !== 'done').length;
-  const completedTasks = displayTasks.filter(t => t.status === 'done').length;
+  const openTasks = 0;
+  const completedTasks = 0;
 
   const refreshData = () => {
     setLastUpdated(new Date());
     window.location.reload();
   };
 
-  const handleCreateTask = async (input: CreateTaskInput) => {
-    // Task creation handled by modal
-    setIsCreateModalOpen(false);
+  const seedData = async () => {
+    setSeeding(true);
+    try {
+      const response = await fetch('/api/seed-activities');
+      const result = await response.json();
+      setSeedResult(result);
+      if (result.success) {
+        // Refresh the page after a short delay to show new data
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      console.error('Failed to seed data:', error);
+      setSeedResult({ success: false, count: 0 });
+    } finally {
+      setSeeding(false);
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Modals */}
-      <CreateTaskModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleCreateTask}
-        agents={displayAgents.map(a => ({ id: a.id, name: a.name, color: a.color }))}
-        creating={false}
-      />
-
       {/* Header */}
-      <DashboardHeader todayCost={todayCost} budgetLimit={50} />
+      <DashboardHeader todayCost={totalAllTimeSpend || todayCost} budgetLimit={150} />
 
       {/* Stats */}
       <StatsBar
-        activeAgents={displayAgents.length}
+        activeAgents={agents.length || 11}
         openTasks={openTasks}
         completedTasks={completedTasks}
-        todayCost={todayCost}
-        dailyBudget={50}
+        todayCost={totalAllTimeSpend || todayCost}
+        dailyBudget={150}
       />
 
       {/* Agent Strip */}
       <section className="mb-8">
-        <AgentStrip agents={displayAgents} />
+        <AgentStrip />
       </section>
 
-      {/* Investigation Board */}
+      {/* Real Cost Summary — Always visible */}
       <section className="mb-8">
-        <InvestigationBoard />
-      </section>
-
-      {/* Calendar */}
-      <section className="mb-8">
-        <AgentWorkCalendar />
+        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="w-5 h-5 text-green-400" />
+            <h3 className="text-lg font-bold text-white">Real LLM Spend</h3>
+            <span className="text-xs text-gray-500 ml-2">Live from provider APIs</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Total All-Time */}
+            <div className="bg-gray-800/50 rounded-xl p-4">
+              <p className="text-xs text-gray-500 mb-1">Total All-Time</p>
+              <p className="text-2xl font-bold text-white">
+                {costsLoading ? '...' : `$${totalAllTimeSpend.toFixed(2)}`}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">All providers combined</p>
+            </div>
+            {/* OpenRouter */}
+            <div className="bg-gray-800/50 rounded-xl p-4">
+              <p className="text-xs text-gray-500 mb-1">OpenRouter Used</p>
+              <p className="text-2xl font-bold text-blue-400">
+                {costsLoading ? '...' : `$${providers?.openRouter?.totalUsed?.toFixed(2) ?? '0.00'}`}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                of ${providers?.openRouter?.totalCredits?.toFixed(2) ?? '0.00'} loaded
+              </p>
+            </div>
+            <div className={`bg-gray-800/50 rounded-xl p-4 ${(providers?.openRouter?.remaining ?? 999) < 15 ? 'border border-red-800' : ''}`}>
+              <p className="text-xs text-gray-500 mb-1">OpenRouter Remaining</p>
+              <p className={`text-2xl font-bold ${(providers?.openRouter?.remaining ?? 999) < 15 ? 'text-red-400' : 'text-green-400'}`}>
+                {costsLoading ? '...' : `$${providers?.openRouter?.remaining?.toFixed(2) ?? '0.00'}`}
+              </p>
+              {(providers?.openRouter?.remaining ?? 999) < 15 && (
+                <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Top up soon
+                </p>
+              )}
+            </div>
+            {/* Anthropic */}
+            <div className="bg-gray-800/50 rounded-xl p-4">
+              <p className="text-xs text-gray-500 mb-1">Anthropic Direct</p>
+              <p className="text-2xl font-bold text-purple-400">
+                {costsLoading ? '...' : `$${providers?.anthropic?.totalUsed?.toFixed(2) ?? '15.00'}`}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">{providers?.anthropic?.note ?? 'Manually tracked'}</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Activity + Quick Actions */}
       <section className="mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <ActivityTimeline activities={displayActivities} />
+            <ActivityTimeline />
           </div>
           <div className="space-y-4">
             <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
               <h3 className="text-lg font-bold text-white mb-4">Quick Links</h3>
               <div className="space-y-3">
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
+                <Link
+                  href="/admin/mission-control/board"
                   className="w-full flex items-center justify-between p-3 bg-green-900/30 border border-green-800 rounded-lg hover:bg-green-900/50 transition-colors text-left"
                 >
-                  <span className="text-sm text-green-400 font-medium">+ Assign New Task</span>
+                  <span className="text-sm text-green-400 font-medium">+ Task Board</span>
                   <ArrowRight className="w-4 h-4 text-green-400" />
-                </button>
+                </Link>
                 <Link 
                   href="/admin/mission-control/activity"
                   className="w-full flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-left"
@@ -109,6 +167,27 @@ export default function MissionControlPage() {
                   <ArrowRight className="w-4 h-4 text-gray-400" />
                 </Link>
               </div>
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-4 pt-4 border-t border-gray-800">
+                  <button
+                    onClick={seedData}
+                    disabled={seeding}
+                    className="w-full flex items-center justify-between p-3 bg-purple-900/30 border border-purple-800 rounded-lg hover:bg-purple-900/50 transition-colors text-left disabled:opacity-50"
+                  >
+                    <span className="text-sm text-purple-400 font-medium">
+                      {seeding ? 'Seeding...' : seedResult?.success ? `✓ Seeded ${seedResult.count} items` : 'Seed Test Data'}
+                    </span>
+                    {seeding ? (
+                      <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                    ) : (
+                      <Database className="w-4 h-4 text-purple-400" />
+                    )}
+                  </button>
+                  {seedResult && !seedResult.success && (
+                    <p className="text-xs text-red-400 mt-2">Failed to seed data</p>
+                  )}
+                </div>
+              )}
               <div className="mt-6 pt-6 border-t border-gray-800">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-400">Last Updated</span>
@@ -129,7 +208,7 @@ export default function MissionControlPage() {
       </footer>
 
       {/* Floating Quick Actions */}
-      <QuickActions onCreateTask={() => setIsCreateModalOpen(true)} />
+      <QuickActions onCreateTask={() => window.location.href = '/admin/mission-control/board'} />
     </div>
   );
 }

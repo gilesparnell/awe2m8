@@ -4,7 +4,7 @@
  * Server-side version of activity logging for API routes
  */
 
-import { db as adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 // Re-export types from client logger
@@ -28,7 +28,7 @@ export async function logActivityServer(data: import('./activity-logger').Activi
       sessionId: data.sessionId || 'unknown',
     };
 
-    const docRef = await adminDb.collection('activities').add(activity);
+    const docRef = await getAdminDb().collection('activities').add(activity);
     
     console.log(`[Activity Server] Logged: ${data.description}${data.cost ? ` (Cost: $${data.cost.toFixed(3)})` : ''}`);
     

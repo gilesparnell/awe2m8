@@ -11,10 +11,10 @@ service cloud.firestore {
     }
     
     // ==========================================
-    // Mission Control - Agents
+    // Mission Control - Agents (read open for dashboard)
     // ==========================================
     match /agents/{agentId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null;
       allow delete: if request.auth != null;
@@ -50,15 +50,7 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
     
-    // ==========================================
-    // Mission Control - Tasks (atomic work units)
-    // ==========================================
-    match /tasks/{taskId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
-    }
+    // (tasks rule moved below with open reads for board)
     
     // ==========================================
     // Mission Control - Considerations
@@ -81,10 +73,20 @@ service cloud.firestore {
     }
     
     // ==========================================
-    // Mission Control - Activities
+    // Mission Control - Activities (read open for dashboard)
     // ==========================================
     match /activities/{activityId} {
-      allow read: if request.auth != null;
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // ==========================================
+    // Mission Control - Tasks (read open for board)
+    // ==========================================
+    match /tasks/{taskId} {
+      allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null;
       allow delete: if request.auth != null;
