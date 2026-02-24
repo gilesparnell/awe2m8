@@ -7,15 +7,15 @@
  * Import these instead of raw tool calls to get automatic activity tracking.
  */
 
-import { 
-  logFileRead, 
-  logFileWrite, 
-  logFileEdit, 
-  logWebSearch, 
+import {
+  logFileRead,
+  logFileWrite,
+  logFileEdit,
+  logWebSearch,
   logWebFetch,
   logCommandExecution,
-  logAgentSpawn,
-  ActivityActor 
+  logAgentSpawnWithCost,
+  ActivityActor
 } from '@/lib/activity-logger';
 
 // ============================================================================
@@ -128,10 +128,11 @@ export async function instrumentedAgentSpawn<T>(
   spawnFn: () => Promise<T>,
   targetAgent: ActivityActor,
   task: string,
-  actor: ActivityActor = 'garion'
+  actor: ActivityActor = 'garion',
+  estimatedCost: number = 0
 ): Promise<T> {
   const result = await spawnFn();
-  await logAgentSpawn(targetAgent, task, actor);
+  await logAgentSpawnWithCost(targetAgent, task, estimatedCost, actor);
   return result;
 }
 
@@ -173,8 +174,8 @@ export function useInstrumentedOperations(options: UseInstrumentedOperationsOpti
     return instrumentedExec(execFn, command, actor);
   }, [actor]);
 
-  const spawnAgent = useCallback(async (targetAgent: ActivityActor, task: string, spawnFn: () => Promise<any>) => {
-    return instrumentedAgentSpawn(spawnFn, targetAgent, task, actor);
+  const spawnAgent = useCallback(async (targetAgent: ActivityActor, task: string, spawnFn: () => Promise<any>, estimatedCost?: number) => {
+    return instrumentedAgentSpawn(spawnFn, targetAgent, task, actor, estimatedCost);
   }, [actor]);
 
   return {

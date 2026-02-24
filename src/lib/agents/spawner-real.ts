@@ -5,7 +5,7 @@
  */
 
 import { AgentId, getAgentConfig } from './config';
-import { logAgentSpawn, logTaskCompletedWithCost, calculateCost, MODEL_PRICING } from '@/lib/activity-logger';
+import { logAgentSpawnWithCost, logTaskCompletedWithCost, calculateCost, MODEL_PRICING } from '@/lib/activity-logger';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 
@@ -63,12 +63,13 @@ export async function spawnRealAgent(
     
     const taskRef = await addDoc(collection(db, 'agent_tasks'), taskData);
     
-    // Log activity
-    await logAgentSpawn(
+    // Log activity with cost
+    await logAgentSpawnWithCost(
       input.agentId,
       input.task,
+      estimatedCost,
       'garion',
-      { 
+      {
         taskId: taskRef.id,
         estimatedCost,
         deliverables: input.deliverables,
