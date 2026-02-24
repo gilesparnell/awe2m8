@@ -97,7 +97,8 @@ export async function logActivity(data: ActivityData): Promise<string | null> {
 export async function logFileRead(
   filePath: string,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -106,6 +107,7 @@ export async function logFileRead(
     action: 'read',
     description: `Read file: ${filePath}`,
     metadata: { filePath, ...metadata },
+    cost,
   });
 }
 
@@ -152,7 +154,8 @@ export async function logWebSearch(
   query: string,
   resultCount: number,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -161,6 +164,7 @@ export async function logWebSearch(
     action: 'search',
     description: `Searched web: "${query}" (${resultCount} results)`,
     metadata: { query, resultCount, ...metadata },
+    cost,
   });
 }
 
@@ -170,7 +174,8 @@ export async function logWebSearch(
 export async function logWebFetch(
   url: string,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -179,6 +184,7 @@ export async function logWebFetch(
     action: 'fetch',
     description: `Fetched URL: ${url}`,
     metadata: { url, ...metadata },
+    cost,
   });
 }
 
@@ -189,7 +195,8 @@ export async function logCommandExecution(
   command: string,
   exitCode: number,
   actor: ActivityActor = 'garion',
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  cost?: number
 ): Promise<string | null> {
   return logActivity({
     actor,
@@ -198,6 +205,7 @@ export async function logCommandExecution(
     action: 'run',
     description: `Executed: ${command.split(' ')[0]}`,
     metadata: { command, exitCode, success: exitCode === 0, ...metadata },
+    cost,
   });
 }
 
