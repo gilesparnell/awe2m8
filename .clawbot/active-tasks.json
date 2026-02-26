@@ -1,0 +1,127 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "createdAt": "2026-02-24T10:44:00Z",
+    "description": "Elvis-style agent swarm task registry"
+  },
+  "tasks": {
+    "investigate-missing-silk": {
+      "id": "investigate-missing-silk",
+      "agent": "barak",
+      "description": "URGENT: Investigate why Silk session disappeared",
+      "workdir": "/Users/gilesparnell/Documents/VSStudio/awe2m8-local",
+      "branch": "main",
+      "status": "completed",
+      "priority": "CRITICAL",
+      "startedAt": "2026-02-24T16:37:00Z",
+      "completedAt": "2026-02-26T00:46:24Z",
+      "objective": "Forensic analysis of missing agent sessions",
+      "success_criteria": [
+        "✅ Determined agent sessions completed successfully",
+        "✅ Found mobile UX work delivered", 
+        "✅ Identified OpenClaw cleanup behavior",
+        "✅ Documented normal session lifecycle"
+      ]
+    },
+    "manual-cost-fix": {
+      "id": "manual-cost-fix",
+      "agent": "silk",
+      "description": "URGENT: Manual cost tracking fix",
+      "workdir": "/Users/gilesparnell/Documents/VSStudio/awe2m8-feat-cost-tracking-fix",
+      "branch": "feat/cost-tracking-fix",
+      "status": "completed",
+      "priority": "CRITICAL",
+      "startedAt": "2026-02-24T16:37:00Z",
+      "completedAt": "2026-02-26T00:45:17Z",
+      "objective": "Fix $0.00 cost display issue immediately",
+      "success_criteria": [
+        "✅ Added cost tracking to activities API",
+        "✅ Updated OpenClaw bridge integration",
+        "✅ Verified dashboard shows real costs",
+        "✅ Fixed Task Registry data synchronization"
+      ]
+    },
+    "fix-spawn-mechanism": {
+      "id": "fix-spawn-mechanism", 
+      "agent": "durnik",
+      "description": "URGENT: Fix agent spawn reliability issues",
+      "workdir": "/Users/gilesparnell/Documents/VSStudio/awe2m8-local",
+      "branch": "main", 
+      "status": "running",
+      "priority": "CRITICAL",
+      "startedAt": "2026-02-24T16:37:00Z",
+      "objective": "Prevent agents from disappearing mid-task",
+      "success_criteria": [
+        "Check OpenClaw agent configuration",
+        "Fix session timeout issues",
+        "Test spawn reliability", 
+        "Implement agent monitoring system"
+      ]
+    },
+    "feat-mission-control-adapter": {
+      "id": "feat-mission-control-adapter",
+      "agent": "durnik",
+      "description": "Adapt Mission Control UI to display Elvis-style agent swarm data",
+      "workdir": "/Users/gilesparnell/Documents/VSStudio/awe2m8-feat-mission-control-adapter",
+      "branch": "feat/mission-control-adapter",
+      "tmuxSession": "durnik-mission-control-adapter",
+      "status": "completed",
+      "startedAt": "2026-02-24T11:05:00Z",
+      "completedAt": "2026-02-24T13:23:00Z",
+      "notifyOnComplete": true,
+      "objective": "Transform Mission Control from Firebase theater to real agent swarm monitoring",
+      "deliverables": [
+        "✅ Task registry library (src/lib/task-registry.ts)",
+        "✅ Real-time API routes",
+        "✅ All UI pages adapted (Dashboard, Board, Team, Activity)",
+        "✅ Live polling from .clawbot/active-tasks.json"
+      ],
+      "success_criteria": [
+        "✅ Task Board displays git worktree tasks from active-tasks.json",
+        "✅ Activity Feed shows real agent progress (not Firebase theater)",
+        "✅ Dashboard shows live task registry summary",
+        "✅ Agent Status displays which agents working in which branches",
+        "✅ UI updates in real-time from task registry"
+      ]
+    },
+    "feat-legacy-cleanup": {
+      "id": "feat-legacy-cleanup", 
+      "agent": "barak",
+      "description": "Clean up legacy Mission Control theater code",
+      "workdir": "/Users/gilesparnell/Documents/VSStudio/awe2m8-feat-legacy-cleanup",
+      "branch": "feat/legacy-cleanup",
+      "tmuxSession": "barak-legacy-cleanup",
+      "status": "failed",
+      "startedAt": "2026-02-24T11:15:00Z",
+      "failedAt": "2026-02-24T13:30:00Z",
+      "notifyOnComplete": true,
+      "objective": "Remove old Firebase theater code and unused Mission Control components",
+      "failure_reason": "Agent failed after 275k tokens usage",
+      "success_criteria": [
+        "Remove unused Firebase collections (fake tasks, activities)",
+        "Clean up unused API routes and components",
+        "Remove seed data and mock activity generators",
+        "Keep only what Durnik's adapter will use",
+        "Update dependencies and remove unused packages"
+      ]
+    },
+    "mobile-ux-strategy": {
+      "id": "mobile-ux-strategy",
+      "agent": "cenedra", 
+      "description": "Design cutting-edge mobile UX for agent swarm monitoring",
+      "status": "running",
+      "startedAt": "2026-02-24T18:05:00Z",
+      "objective": "Mobile-first UX for agent monitoring on phone",
+      "priority": "HIGH"
+    },
+    "metrics-observability-strategy": {
+      "id": "metrics-observability-strategy",
+      "agent": "taiba",
+      "description": "Design comprehensive metrics framework for agent swarm observability", 
+      "status": "running",
+      "startedAt": "2026-02-24T18:10:00Z",
+      "objective": "Complete observability strategy for agent performance and business impact",
+      "priority": "HIGH"
+    }
+  }
+}
