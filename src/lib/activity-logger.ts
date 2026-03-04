@@ -285,3 +285,105 @@ export async function logTaskCompleted(
     metadata: { taskTitle, ...metadata },
   });
 }
+
+// ============================================================================
+// COST-ENABLED FUNCTIONS (Missing implementations)
+// ============================================================================
+
+/**
+ * Log an agent spawn with cost tracking
+ */
+export async function logAgentSpawnWithCost(
+  targetAgent: ActivityActor,
+  task: string,
+  estimatedCost: number,
+  actor: ActivityActor = 'garion',
+  metadata?: Record<string, unknown>
+): Promise<string | null> {
+  return logActivity({
+    actor,
+    actorType: 'main',
+    category: 'agent',
+    action: 'spawn',
+    description: `Spawned ${targetAgent} for: ${task}`,
+    cost: estimatedCost,
+    metadata: { targetAgent, task, estimatedCost, ...metadata },
+  });
+}
+
+/**
+ * Log task completion with actual cost
+ */
+export async function logTaskCompletedWithCost(
+  taskTitle: string,
+  taskId: string,
+  actualCost: number,
+  actor: ActivityActor = 'garion',
+  metadata?: Record<string, unknown>
+): Promise<string | null> {
+  return logActivity({
+    actor,
+    actorType: actor === 'garion' ? 'main' : 'subagent',
+    category: 'task',
+    action: 'complete',
+    description: `Completed task: ${taskTitle}`,
+    taskId,
+    cost: actualCost,
+    metadata: { taskTitle, actualCost, ...metadata },
+  });
+}
+
+// ============================================================================
+// COST CALCULATION UTILITIES
+// ============================================================================
+
+/**
+ * Model pricing per 1K tokens (input/output)
+ * Based on OpenRouter pricing (as of Feb 2026)
+ */
+export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  // Anthropic
+  'claude-sonnet-4': { input: 3.0, output: 15.0 },
+  'claude-4-opus': { input: 15.0, output: 75.0 },
+  'claude-3.5-sonnet': { input: 3.0, output: 15.0 },
+  // OpenAI
+  'codex': { input: 0.5, output: 2.0 },
+  'gpt-4o': { input: 2.5, output: 10.0 },
+  'gpt-4o-mini': { input: 0.15, output: 0.6 },
+  // Moonshot
+  'kimi-k2-turbo': { input: 0.1, output: 0.4 },
+  'kimi-k2.5': { input: 0.5, output: 2.0 },
+  // xAI
+  'grok': { input: 0.5, output: 2.0 },
+  'grok-2': { input: 2.0, output: 10.0 },
+  // Default fallback
+  'default': { input: 1.0, output: 3.0 },
+};
+
+/**
+ * Calculate cost based on token usage and model
+ */
+export function calculateCost(
+  inputTokens: number,
+  outputTokens: number,
+  model: string
+): number {
+  const pricing = MODEL_PRICING[model] || MODEL_PRICING['default'];
+  const inputCost = (inputTokens / 1000) * pricing.input;
+  const outputCost = (outputTokens / 1000) * pricing.output;
+  return inputCost + outputCost;
+}
+
+/**
+ * Estimate cost based on expected token count and model
+ */
+export function estimateCost(
+  estimatedTokens: number,
+  model: string,
+  inputRatio: number = 0.7
+): number {
+  const pricing = MODEL_PRICING[model] || MODEL_PRICING['default'];
+  const inputTokens = estimatedTokens * inputRatio;
+  const outputTokens = estimatedTokens * (1 - inputRatio);
+  return calculateCost(inputTokens, outputTokens, model);
+}

@@ -5,16 +5,15 @@
  * Integrates with OpenClaw's sessions_spawn for isolated execution.
  */
 
-import { 
-  AgentId, 
-  getAgentConfig, 
+import {
+  AgentId,
+  getAgentConfig,
   getAgentSystemPrompt,
   shouldEscalate,
   estimateTaskCost,
-  AgentCapability 
+  AgentCapability
 } from './config';
-import { logAgentSpawn, logTaskCreated } from '@/lib/activity-logger';
-import { ActivityActor } from '@/types/activity';
+import { logAgentSpawnWithCost, logTaskCreated, logTaskCompletedWithCost } from '@/lib/activity-logger';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 
@@ -141,17 +140,17 @@ export async function spawnAgent(
     
     const taskRef = await addDoc(collection(db, 'agent_tasks'), taskData);
     
-    // Log activity with actual cost
-    await logAgentSpawn(
-      input.agentId as ActivityActor,
+    // Log activity with cost
+    await logAgentSpawnWithCost(
+      input.agentId,
       input.task,
+      estimatedCost,
       'garion',
-      { 
+      {
         taskId: taskRef.id,
         estimatedCost,
         deliverables: input.deliverables,
-      },
-      estimatedCost // Pass the actual cost
+      }
     );
     
     // Build the prompt for the sub-agent
@@ -279,13 +278,54 @@ export async function escalateToGarion(
       escalationReason: reason,
       escalationContext: context,
     });
-    
+
     console.log(`[Spawner] Task ${taskId} escalated: ${reason}`);
-    
+
     // TODO: Notify Garion (send message, push notification, etc.)
   } catch (error) {
     console.error('[Spawner] Failed to escalate:', error);
   }
+}
+
+/**
+ * Complete a task with actual cost tracking
+ * This should be called when an agent finishes its work
+ */
+export async function completeTask(
+  taskId: string,
+  result: string,
+  actualCost: number,
+  agentId: AgentId
+): Promise<void> {
+  try {
+    // Update the task document
+    await updateDoc(doc(db, 'agent_tasks', taskId), {
+      status: 'completed',
+      result,
+      actualCost,
+      completedAt: Timestamp.now(),
+    });
+
+    // Track the cost
+    trackCost(agentId, actualCost);
+
+    // Log the completion with cost
+    const taskDoc = await getDoc(doc(db, 'agent_tasks', taskId));
+    const taskData = taskDoc.data() as { task?: string } | undefined;
+    const taskTitle = taskData?.task || 'Unknown task';
+
+    await logTaskCompletedWithCost(taskTitle, taskId, actualCost, agentId);
+
+    console.log(`[Spawner] Task ${taskId} completed with cost: $${actualCost.toFixed(4)}`);
+  } catch (error) {
+    console.error('[Spawner] Failed to complete task:', error);
+  }
+}
+
+// Helper function for getDoc
+async function getDoc(docRef: any) {
+  const { getDoc: firestoreGetDoc } = await import('firebase/firestore');
+  return firestoreGetDoc(docRef);
 }
 
 // ============================================================================
