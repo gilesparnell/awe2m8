@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { isAuthenticated } from '@/lib/api-auth';
-import { getNumberCustomer, saveNumberCustomer } from '@/lib/twilio-helpers';
+import { getNumberPurpose, saveNumberPurpose } from '@/lib/twilio-helpers';
 
 export async function POST(request: Request) {
     if (!await isAuthenticated(request)) {
@@ -198,7 +198,7 @@ export async function POST(request: Request) {
                     sid: n.sid,
                     phoneNumber: n.phoneNumber,
                     friendlyName: n.friendlyName,
-                    customer: await getNumberCustomer(n.sid)
+                    purpose: await getNumberPurpose(n.sid)
                 }))
             );
 
@@ -208,27 +208,27 @@ export async function POST(request: Request) {
             });
         }
 
-        // UPDATE NUMBER CUSTOMER LABEL
-        if (action === 'update-customer') {
+        // UPDATE NUMBER PURPOSE LABEL
+        if (action === 'update-purpose') {
             if (!phoneNumberSid) {
                 return NextResponse.json({ success: false, error: 'Missing phoneNumberSid' }, { status: 400 });
             }
 
             try {
-                await saveNumberCustomer(phoneNumberSid, typeof body.customer === 'string' ? body.customer : '');
-                const updatedCustomer = await getNumberCustomer(phoneNumberSid);
+                await saveNumberPurpose(phoneNumberSid, typeof body.purpose === 'string' ? body.purpose : '');
+                const updatedPurpose = await getNumberPurpose(phoneNumberSid);
 
                 return NextResponse.json({
                     success: true,
                     data: {
                         sid: phoneNumberSid,
-                        customer: updatedCustomer
+                        purpose: updatedPurpose
                     }
                 });
             } catch (err: any) {
                 return NextResponse.json({
                     success: false,
-                    error: err.message || 'Failed to save customer'
+                    error: err.message || 'Failed to save purpose'
                 }, { status: 500 });
             }
         }

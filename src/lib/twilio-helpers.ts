@@ -65,52 +65,52 @@ export function saveNotificationNumbers(numbers: string[]): void {
     }
 }
 
-export async function getNumberCustomers(): Promise<Record<string, string>> {
+export async function getNumberPurposes(): Promise<Record<string, string>> {
     try {
         const db = getAdminDb();
         const doc = await db.collection('twilio_config').doc('numbers').get();
         if (doc.exists) {
-            return doc.data()?.customers || {};
+            return doc.data()?.purposes || {};
         }
         return {};
     } catch (e) {
-        console.error('Error reading Twilio number customer metadata from Firestore:', e);
+        console.error('Error reading Twilio number purpose metadata from Firestore:', e);
         return {};
     }
 }
 
-export async function getNumberCustomer(phoneNumberSid: string): Promise<string> {
+export async function getNumberPurpose(phoneNumberSid: string): Promise<string> {
     try {
         const db = getAdminDb();
         const doc = await db.collection('twilio_config').doc('numbers').get();
         if (doc.exists) {
-            const customers = doc.data()?.customers || {};
-            return customers[phoneNumberSid] || '';
+            const purposes = doc.data()?.purposes || {};
+            return purposes[phoneNumberSid] || '';
         }
         return '';
     } catch (e) {
-        console.warn('Error reading customer for SID:', e);
+        console.warn('Error reading purpose for SID:', e);
         return '';
     }
 }
 
-export async function saveNumberCustomer(phoneNumberSid: string, customer: string): Promise<void> {
+export async function saveNumberPurpose(phoneNumberSid: string, purpose: string): Promise<void> {
     try {
         const db = getAdminDb();
         const configRef = db.collection('twilio_config').doc('numbers');
         const doc = await configRef.get();
-        const customers = (doc.data()?.customers || {}) as Record<string, string>;
+        const purposes = (doc.data()?.purposes || {}) as Record<string, string>;
 
-        const cleanedCustomer = customer.trim();
-        if (!cleanedCustomer) {
-            delete customers[phoneNumberSid];
+        const cleanedPurpose = purpose.trim();
+        if (!cleanedPurpose) {
+            delete purposes[phoneNumberSid];
         } else {
-            customers[phoneNumberSid] = cleanedCustomer;
+            purposes[phoneNumberSid] = cleanedPurpose;
         }
 
-        await configRef.set({ customers }, { merge: true });
+        await configRef.set({ purposes }, { merge: true });
     } catch (e) {
-        console.error('Error saving Twilio number customer metadata to Firestore:', e);
+        console.error('Error saving Twilio number purpose metadata to Firestore:', e);
         throw e;
     }
 }

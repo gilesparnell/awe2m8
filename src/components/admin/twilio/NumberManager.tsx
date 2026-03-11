@@ -35,7 +35,7 @@ interface TwilioNumber {
     friendlyName: string;
     accountSid: string;
     accountName?: string;
-    customer?: string;
+    purpose?: string;
 }
 
 interface SubAccount {
@@ -91,10 +91,10 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
     const [success, setSuccess] = useState<string | null>(null);
 
     const [subAccounts, setSubAccounts] = useState<SubAccount[]>([]);
-    const [editingCustomerSid, setEditingCustomerSid] = useState<string | null>(null);
-    const [customerDraft, setCustomerDraft] = useState('');
-    const [savingCustomerSid, setSavingCustomerSid] = useState<string | null>(null);
-    const [customerFilter, setCustomerFilter] = useState('');
+    const [editingPurposeSid, setEditingPurposeSid] = useState<string | null>(null);
+    const [purposeDraft, setPurposeDraft] = useState('');
+    const [savingPurposeSid, setSavingPurposeSid] = useState<string | null>(null);
+    const [purposeFilter, setPurposeFilter] = useState('');
     const [createSubAccountSid, setCreateSubAccountSid] = useState('');
     const [createCountry, setCreateCountry] = useState('');
     const [approvedBundleCountries, setApprovedBundleCountries] = useState<string[]>([]);
@@ -120,7 +120,7 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
 
         console.log("NumberManager: Starting fetchAllData...");
         setOpenMenuSid(null); // Close any open menus so overlay doesn't block UI
-        setEditingCustomerSid(null);
+        setEditingPurposeSid(null);
         setLoading(true);
         setError(null);
         setSubAccounts([]);
@@ -331,18 +331,18 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
         }
     };
 
-    const startEditCustomer = (number: TwilioNumber) => {
-        setEditingCustomerSid(number.sid);
-        setCustomerDraft(number.customer || '');
+    const startEditPurpose = (number: TwilioNumber) => {
+        setEditingPurposeSid(number.sid);
+        setPurposeDraft(number.purpose || '');
     };
 
-    const cancelEditCustomer = () => {
-        setEditingCustomerSid(null);
-        setCustomerDraft('');
+    const cancelEditPurpose = () => {
+        setEditingPurposeSid(null);
+        setPurposeDraft('');
     };
 
-    const saveCustomer = async (number: TwilioNumber) => {
-        setSavingCustomerSid(number.sid);
+    const savePurpose = async (number: TwilioNumber) => {
+        setSavingPurposeSid(number.sid);
         setError(null);
 
         try {
@@ -350,29 +350,29 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'update-customer',
+                    action: 'update-purpose',
                     accountSid: credentials.accountSid || '',
                     authToken: credentials.authToken || '',
                     phoneNumberSid: number.sid,
-                    customer: customerDraft
+                    purpose: purposeDraft
                 })
             });
 
             const data = await response.json();
             if (!response.ok || !data.success) {
-                throw new Error(data.error || 'Failed to save customer');
+                throw new Error(data.error || 'Failed to save purpose');
             }
 
             setSubAccounts(prev => prev.map(account => ({
                 ...account,
-                numbers: account.numbers.map(n => n.sid === number.sid ? { ...n, customer: data.data.customer } : n)
+                numbers: account.numbers.map(n => n.sid === number.sid ? { ...n, purpose: data.data.purpose } : n)
             })));
-            setEditingCustomerSid(null);
-            setCustomerDraft('');
+            setEditingPurposeSid(null);
+            setPurposeDraft('');
         } catch (err: any) {
-            setError(err.message || 'Failed to save customer');
+            setError(err.message || 'Failed to save purpose');
         } finally {
-            setSavingCustomerSid(null);
+            setSavingPurposeSid(null);
         }
     };
 
@@ -473,13 +473,13 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
     };
 
     const getAccountColor = (index: number) => ACCOUNT_COLORS[index % ACCOUNT_COLORS.length];
-    const normalizedCustomerFilter = customerFilter.trim().toLowerCase();
-    const hasActiveCustomerFilter = normalizedCustomerFilter.length > 0;
-    const visibleSubAccounts = hasActiveCustomerFilter
+    const normalizedPurposeFilter = purposeFilter.trim().toLowerCase();
+    const hasActivePurposeFilter = normalizedPurposeFilter.length > 0;
+    const visibleSubAccounts = hasActivePurposeFilter
         ? subAccounts
             .map((account) => ({
                 ...account,
-                numbers: account.numbers.filter((number) => (number.customer || '').toLowerCase().includes(normalizedCustomerFilter))
+                numbers: account.numbers.filter((number) => (number.purpose || '').toLowerCase().includes(normalizedPurposeFilter))
             }))
             .filter((account) => account.numbers.length > 0)
         : subAccounts;
@@ -525,7 +525,7 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                     onClick={() => {
                         setActiveTab('create');
                         setOpenMenuSid(null);
-                        setEditingCustomerSid(null);
+                        setEditingPurposeSid(null);
                     }}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${activeTab === 'create' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-300 hover:bg-gray-800'}`}
                 >
@@ -648,9 +648,9 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                     <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                         type="text"
-                        value={customerFilter}
-                        onChange={(e) => setCustomerFilter(e.target.value)}
-                        placeholder="Search numbers by customer"
+                        value={purposeFilter}
+                        onChange={(e) => setPurposeFilter(e.target.value)}
+                        placeholder="Search numbers by purpose"
                         className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-700 bg-gray-900 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
@@ -722,52 +722,52 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                                                     <span className="font-mono text-xs text-gray-200 font-medium">
                                                         {number.phoneNumber}
                                                     </span>
-                                                    {editingCustomerSid === number.sid ? (
+                                                    {editingPurposeSid === number.sid ? (
                                                         <div className="mt-1 flex items-center gap-1">
                                                             <input
                                                                 type="text"
-                                                                value={customerDraft}
-                                                                onChange={(e) => setCustomerDraft(e.target.value)}
-                                                                placeholder="Optional customer"
+                                                                value={purposeDraft}
+                                                                onChange={(e) => setPurposeDraft(e.target.value)}
+                                                                placeholder="Optional purpose"
                                                                 className="h-7 px-2 w-40 rounded-md border border-gray-700 bg-gray-800 text-[11px] text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                                                             />
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    saveCustomer(number);
+                                                                    savePurpose(number);
                                                                 }}
-                                                                disabled={savingCustomerSid === number.sid}
+                                                                disabled={savingPurposeSid === number.sid}
                                                                 className="p-1 rounded hover:bg-emerald-600/20 text-emerald-400 transition-colors disabled:opacity-50"
                                                                 title="Save Customer"
                                                             >
-                                                                {savingCustomerSid === number.sid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                                                                {savingPurposeSid === number.sid ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                                                             </button>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    cancelEditCustomer();
+                                                                    cancelEditPurpose();
                                                                 }}
                                                                 className="p-1 rounded hover:bg-gray-700 text-gray-400 transition-colors"
-                                                                title="Cancel Customer Edit"
+                                                                title="Cancel Purpose Edit"
                                                             >
                                                                 <X className="w-3.5 h-3.5" />
                                                             </button>
                                                         </div>
                                                     ) : (
                                                         <span className="text-[10px] text-gray-500">
-                                                            Customer: {number.customer?.trim() ? number.customer : 'Unassigned'}
+                                                            Purpose: {number.purpose?.trim() ? number.purpose : 'Unassigned'}
                                                         </span>
                                                     )}
                                                 </div>
 
-                                                {editingCustomerSid !== number.sid && (
+                                                {editingPurposeSid !== number.sid && (
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            startEditCustomer(number);
+                                                            startEditPurpose(number);
                                                         }}
                                                         className="p-1 rounded hover:bg-gray-700 transition-colors text-gray-500 hover:text-cyan-400"
-                                                        title="Edit Customer"
+                                                        title="Edit Purpose"
                                                     >
                                                         <Pencil className="w-3.5 h-3.5" />
                                                     </button>
@@ -832,11 +832,11 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
             )}
 
             {/* Filter Empty State */}
-            {activeTab === 'move' && !loading && subAccounts.length > 0 && hasActiveCustomerFilter && visibleSubAccounts.length === 0 && (
+            {activeTab === 'move' && !loading && subAccounts.length > 0 && hasActivePurposeFilter && visibleSubAccounts.length === 0 && (
                 <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 text-center">
-                    <h3 className="text-lg font-bold text-white mb-2">No matching customers</h3>
+                    <h3 className="text-lg font-bold text-white mb-2">No matching purposes</h3>
                     <p className="text-gray-400 text-sm">
-                        No numbers found for "{customerFilter.trim()}".
+                        No numbers found for "{purposeFilter.trim()}".
                     </p>
                 </div>
             )}
