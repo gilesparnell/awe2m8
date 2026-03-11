@@ -2,7 +2,7 @@
 
 /**
  * Instrumented Tool Wrappers
- *
+ * 
  * These wrappers add activity logging to common operations.
  * Import these instead of raw tool calls to get automatic activity tracking.
  */
@@ -14,7 +14,7 @@ import {
   logWebSearch,
   logWebFetch,
   logCommandExecution,
-  logAgentSpawn,
+  logAgentSpawnWithCost,
 } from '@/lib/activity-logger';
 import { ActivityActor } from '@/types/activity';
 
@@ -70,12 +70,11 @@ export async function instrumentedEdit(
 export async function instrumentedWebSearch<T>(
   searchFn: () => Promise<T>,
   query: string,
-  actor: ActivityActor = 'garion',
-  cost?: number
+  actor: ActivityActor = 'garion'
 ): Promise<T> {
   const results = await searchFn();
   const resultCount = Array.isArray(results) ? results.length : 1;
-  await logWebSearch(query, resultCount, actor, {}, cost);
+  await logWebSearch(query, resultCount, actor);
   return results;
 }
 
@@ -85,11 +84,10 @@ export async function instrumentedWebSearch<T>(
 export async function instrumentedWebFetch<T>(
   fetchFn: () => Promise<T>,
   url: string,
-  actor: ActivityActor = 'garion',
-  cost?: number
+  actor: ActivityActor = 'garion'
 ): Promise<T> {
   const result = await fetchFn();
-  await logWebFetch(url, actor, {}, cost);
+  await logWebFetch(url, actor);
   return result;
 }
 
@@ -109,14 +107,13 @@ interface CommandResult {
 export async function instrumentedExec(
   execFn: () => Promise<CommandResult>,
   command: string,
-  actor: ActivityActor = 'garion',
-  cost?: number
+  actor: ActivityActor = 'garion'
 ): Promise<CommandResult> {
   const result = await execFn();
   await logCommandExecution(command, result.exitCode, actor, {
     stdout: result.stdout.substring(0, 200), // Truncate for metadata
     stderr: result.stderr ? result.stderr.substring(0, 200) : undefined,
-  }, cost);
+  });
   return result;
 }
 
@@ -132,10 +129,10 @@ export async function instrumentedAgentSpawn<T>(
   targetAgent: ActivityActor,
   task: string,
   actor: ActivityActor = 'garion',
-  cost?: number
+  estimatedCost: number = 0
 ): Promise<T> {
   const result = await spawnFn();
-  await logAgentSpawn(targetAgent, task, actor, {}, cost);
+  await logAgentSpawnWithCost(targetAgent, task, estimatedCost, actor);
   return result;
 }
 
@@ -165,20 +162,20 @@ export function useInstrumentedOperations(options: UseInstrumentedOperationsOpti
     return instrumentedEdit(editFn, filePath, actor);
   }, [actor]);
 
-  const webSearch = useCallback(async (query: string, searchFn: () => Promise<any>, cost?: number) => {
-    return instrumentedWebSearch(searchFn, query, actor, cost);
+  const webSearch = useCallback(async (query: string, searchFn: () => Promise<any>) => {
+    return instrumentedWebSearch(searchFn, query, actor);
   }, [actor]);
 
-  const webFetch = useCallback(async (url: string, fetchFn: () => Promise<any>, cost?: number) => {
-    return instrumentedWebFetch(fetchFn, url, actor, cost);
+  const webFetch = useCallback(async (url: string, fetchFn: () => Promise<any>) => {
+    return instrumentedWebFetch(fetchFn, url, actor);
   }, [actor]);
 
-  const runCommand = useCallback(async (command: string, execFn: () => Promise<CommandResult>, cost?: number) => {
-    return instrumentedExec(execFn, command, actor, cost);
+  const runCommand = useCallback(async (command: string, execFn: () => Promise<CommandResult>) => {
+    return instrumentedExec(execFn, command, actor);
   }, [actor]);
 
-  const spawnAgent = useCallback(async (targetAgent: ActivityActor, task: string, spawnFn: () => Promise<any>, cost?: number) => {
-    return instrumentedAgentSpawn(spawnFn, targetAgent, task, actor, cost);
+  const spawnAgent = useCallback(async (targetAgent: ActivityActor, task: string, spawnFn: () => Promise<any>, estimatedCost?: number) => {
+    return instrumentedAgentSpawn(spawnFn, targetAgent, task, actor, estimatedCost);
   }, [actor]);
 
   return {

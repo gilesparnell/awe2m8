@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -15,6 +15,8 @@ export default function ViewTriggerPage() {
     const [trigger, setTrigger] = useState<GHLTriggerPage | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showTriggeredConfirmation, setShowTriggeredConfirmation] = useState(false);
+    const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
     useEffect(() => {
         const fetchTrigger = async () => {
@@ -35,6 +37,62 @@ export default function ViewTriggerPage() {
 
         fetchTrigger();
     }, [id]);
+
+    useEffect(() => {
+        const iframeEl = iframeRef.current;
+        if (!iframeEl) return;
+
+        let iframeDoc: Document | null = null;
+
+        const triggerConfirmation = () => {
+            setShowTriggeredConfirmation(true);
+        };
+
+        const handleSubmit = () => {
+            triggerConfirmation();
+        };
+
+        const handleClick = (event: Event) => {
+            const target = event.target as HTMLElement | null;
+            if (!target) return;
+
+            const submitControl = target.closest(
+                'button[type="submit"], input[type="submit"], input[type="button"], button'
+            ) as HTMLElement | null;
+            if (!submitControl) return;
+
+            const text = (submitControl.textContent || '').toLowerCase().trim();
+            const value = ((submitControl as HTMLInputElement).value || '').toLowerCase().trim();
+            const label = `${text} ${value}`;
+
+            if (label.includes('submit') || label.includes('trigger')) {
+                triggerConfirmation();
+            }
+        };
+
+        const attachListeners = () => {
+            try {
+                iframeDoc = iframeEl.contentDocument;
+                if (!iframeDoc) return;
+
+                iframeDoc.addEventListener('submit', handleSubmit, true);
+                iframeDoc.addEventListener('click', handleClick, true);
+            } catch {
+                // Ignore cross-origin/content access issues.
+            }
+        };
+
+        iframeEl.addEventListener('load', attachListeners);
+        attachListeners();
+
+        return () => {
+            iframeEl.removeEventListener('load', attachListeners);
+            if (iframeDoc) {
+                iframeDoc.removeEventListener('submit', handleSubmit, true);
+                iframeDoc.removeEventListener('click', handleClick, true);
+            }
+        };
+    }, [trigger]);
 
     if (loading) {
         return (
@@ -79,12 +137,37 @@ export default function ViewTriggerPage() {
             {/* Iframe - Takes up remaining space */}
             <div className="flex-1 overflow-hidden w-full">
                 <iframe
+                    ref={iframeRef}
                     srcDoc={trigger.code}
                     className="w-full h-full border-0"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
                     allow="microphone; camera; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write"
                 />
             </div>
+
+            {showTriggeredConfirmation && (
+                <div className="fixed bottom-6 right-6 z-50 w-[calc(100%-3rem)] max-w-md rounded-xl border border-green-500/40 bg-gray-900/95 p-4 shadow-2xl shadow-black/60">
+                    <p className="text-green-300 font-semibold text-sm">GHL workflow triggered successfully.</p>
+                    <p className="text-gray-300 text-xs mt-1">
+                        The submit action was detected. You can return to the trigger list now.
+                    </p>
+                    <div className="mt-3 flex items-center gap-2">
+                        <Link
+                            href="/admin/ghl-workflow-triggers"
+                            className="inline-flex items-center rounded-lg bg-green-500 px-3 py-1.5 text-xs font-semibold text-gray-950 hover:bg-green-400 transition-colors"
+                        >
+                            Back to Triggers
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => setShowTriggeredConfirmation(false)}
+                            className="inline-flex items-center rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:border-gray-500 transition-colors"
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
