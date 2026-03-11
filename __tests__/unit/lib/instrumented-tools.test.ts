@@ -125,10 +125,10 @@ describe('Instrumented Tools', () => {
   describe('instrumentedWebFetch', () => {
     it('should fetch and log activity', async () => {
       const fetchFn = jest.fn().mockResolvedValue({ html: '<html></html>' });
-      
+
       const result = await instrumentedWebFetch(fetchFn, 'https://example.com', 'polgara');
-      
-      expect(result.html).toBe('<html></html>');
+
+      expect((result as any).html).toBe('<html></html>');
       expect(mockLogWebFetch).toHaveBeenCalledWith('https://example.com', 'polgara');
     });
   });
@@ -177,17 +177,17 @@ describe('Instrumented Tools', () => {
   describe('instrumentedAgentSpawn', () => {
     it('should spawn agent and log activity', async () => {
       const spawnFn = jest.fn().mockResolvedValue({ id: 'subagent-123' });
-      
+
       const result = await instrumentedAgentSpawn(spawnFn, 'barak', 'Research task', 'garion');
-      
-      expect(result.id).toBe('subagent-123');
+
+      expect((result as any).id).toBe('subagent-123');
       expect(mockLogAgentSpawn).toHaveBeenCalledWith('barak', 'Research task', 'garion');
     });
   });
 
   describe('useInstrumentedOperations', () => {
     it('should return all instrumented functions', () => {
-      const { result } = renderHook(() => useInstrumentedOperations());
+      const { result } = renderHook(() => useInstrumentedOperations()) as any;
 
       expect(result.current.readFile).toBeDefined();
       expect(result.current.writeFile).toBeDefined();
@@ -201,7 +201,7 @@ describe('Instrumented Tools', () => {
     it('should use custom actor when provided', async () => {
       const { result } = renderHook(() =>
         useInstrumentedOperations({ actor: 'silk' })
-      );
+      ) as any;
 
       const readFn = jest.fn().mockResolvedValue('content');
       await result.current.readFile('/path/file.ts', readFn);

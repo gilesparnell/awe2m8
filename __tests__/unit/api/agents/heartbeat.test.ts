@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/agents/heartbeat/route';
 import { getAdminDb } from '@/lib/firebase-admin';
 
@@ -33,12 +34,12 @@ describe('/api/agents/heartbeat', () => {
   });
 
   it('should return 400 when agentId is missing', async () => {
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({}),
     });
 
-    const response = await POST(request);
+    const response = await POST(request as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -50,12 +51,12 @@ describe('/api/agents/heartbeat', () => {
       exists: false,
     });
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'nonexistent' }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request as any);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -71,12 +72,12 @@ describe('/api/agents/heartbeat', () => {
       }),
     });
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'fury' }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -98,12 +99,12 @@ describe('/api/agents/heartbeat', () => {
       }),
     });
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'fury', status: 'active' }),
     });
 
-    await POST(request);
+    await POST(request as any);
 
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -120,12 +121,12 @@ describe('/api/agents/heartbeat', () => {
       }),
     });
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'fury', status: 'active' }),
     });
 
-    await POST(request);
+    await POST(request as any);
 
     // Should not include status in update
     const updateCall = mockUpdate.mock.calls[0][0];
@@ -135,12 +136,12 @@ describe('/api/agents/heartbeat', () => {
   it('should handle server errors gracefully', async () => {
     mockGet.mockRejectedValue(new Error('Database error'));
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'fury' }),
     });
 
-    const response = await POST(request);
+    const response = await POST(request as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -148,12 +149,12 @@ describe('/api/agents/heartbeat', () => {
   });
 
   it('should handle invalid JSON in request body', async () => {
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: 'invalid json',
     });
 
-    const response = await POST(request);
+    const response = await POST(request as any);
     
     // Should return 500 due to JSON parse error
     expect(response.status).toBe(500);
@@ -166,17 +167,17 @@ describe('/api/agents/heartbeat', () => {
     });
 
     const mockDb = getAdminDb();
-    const mockCollection = mockDb.collection;
+    const mockCollection = mockDb.collection as jest.Mock;
     const mockDoc = jest.fn();
-    
+
     mockCollection.mockReturnValue({ doc: mockDoc });
 
-    const request = new Request('http://localhost:3005/api/agents/heartbeat', {
+    const request = new NextRequest('http://localhost:3005/api/agents/heartbeat', {
       method: 'POST',
       body: JSON.stringify({ agentId: 'friday' }),
     });
 
-    await POST(request);
+    await POST(request as any);
 
     expect(mockCollection).toHaveBeenCalledWith('agents');
     expect(mockDoc).toHaveBeenCalledWith('friday');

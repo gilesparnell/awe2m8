@@ -27,7 +27,7 @@ jest.mock('firebase-admin/app', () => ({
 
 jest.mock('firebase-admin/firestore', () => ({
     // Using a function to return the mock ensures it's available
-    getFirestore: (...args: any[]) => mockGetFirestore(...args)
+    getFirestore: () => mockGetFirestore()
 }));
 
 describe('Firebase Admin Store (Backend User Store)', () => {
