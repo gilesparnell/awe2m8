@@ -728,6 +728,14 @@ export const NumberManager: React.FC<NumberManagerProps> = ({ credentials }) => 
                                                                 type="text"
                                                                 value={purposeDraft}
                                                                 onChange={(e) => setPurposeDraft(e.target.value)}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        savePurpose(number);
+                                                                    } else if (e.key === 'Escape') {
+                                                                        cancelEditPurpose();
+                                                                    }
+                                                                }}
                                                                 placeholder="Optional purpose"
                                                                 className="h-7 px-2 w-40 rounded-md border border-gray-700 bg-gray-800 text-[11px] text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                                                             />
