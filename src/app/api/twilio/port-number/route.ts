@@ -193,15 +193,18 @@ export async function POST(request: Request) {
             if (!sourceAccountSid) return NextResponse.json({ success: false, error: 'Missing sourceAccountSid' }, { status: 400 });
 
             const numbers = await mainClient.api.v2010.accounts(sourceAccountSid).incomingPhoneNumbers.list({ limit: 100 });
-
-            return NextResponse.json({
-                success: true,
-                numbers: numbers.map(n => ({
+            const numbersList = await Promise.all(
+                numbers.map(async (n) => ({
                     sid: n.sid,
                     phoneNumber: n.phoneNumber,
                     friendlyName: n.friendlyName,
-                    customer: getNumberCustomer(n.sid)
+                    customer: await getNumberCustomer(n.sid)
                 }))
+            );
+
+            return NextResponse.json({
+                success: true,
+                numbers: numbersList
             });
         }
 
@@ -211,15 +214,23 @@ export async function POST(request: Request) {
                 return NextResponse.json({ success: false, error: 'Missing phoneNumberSid' }, { status: 400 });
             }
 
-            saveNumberCustomer(phoneNumberSid, typeof body.customer === 'string' ? body.customer : '');
+            try {
+                await saveNumberCustomer(phoneNumberSid, typeof body.customer === 'string' ? body.customer : '');
+                const updatedCustomer = await getNumberCustomer(phoneNumberSid);
 
-            return NextResponse.json({
-                success: true,
-                data: {
-                    sid: phoneNumberSid,
-                    customer: getNumberCustomer(phoneNumberSid)
-                }
-            });
+                return NextResponse.json({
+                    success: true,
+                    data: {
+                        sid: phoneNumberSid,
+                        customer: updatedCustomer
+                    }
+                });
+            } catch (err: any) {
+                return NextResponse.json({
+                    success: false,
+                    error: err.message || 'Failed to save customer'
+                }, { status: 500 });
+            }
         }
 
         // LIST SUBACCOUNTS (Automatic Discovery)

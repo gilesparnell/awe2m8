@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getAdminDb } from './firebase-admin';
 
 const CONFIG_FILE = path.join(process.cwd(), 'twilio_config.json');
 
@@ -14,25 +15,34 @@ function readConfig(): TwilioConfig {
         numberCustomers: {}
     };
 
-    if (!fs.existsSync(CONFIG_FILE)) {
+    try {
+        if (!fs.existsSync(CONFIG_FILE)) {
+            return defaultConfig;
+        }
+
+        const data = fs.readFileSync(CONFIG_FILE, 'utf-8');
+        const parsed = JSON.parse(data) as Partial<TwilioConfig>;
+
+        return {
+            notificationNumbers: Array.isArray(parsed.notificationNumbers) && parsed.notificationNumbers.length > 0
+                ? parsed.notificationNumbers
+                : defaultConfig.notificationNumbers,
+            numberCustomers: parsed.numberCustomers && typeof parsed.numberCustomers === 'object'
+                ? parsed.numberCustomers
+                : {}
+        };
+    } catch (e) {
+        console.warn('Could not read local config file, using defaults:', e);
         return defaultConfig;
     }
-
-    const data = fs.readFileSync(CONFIG_FILE, 'utf-8');
-    const parsed = JSON.parse(data) as Partial<TwilioConfig>;
-
-    return {
-        notificationNumbers: Array.isArray(parsed.notificationNumbers) && parsed.notificationNumbers.length > 0
-            ? parsed.notificationNumbers
-            : defaultConfig.notificationNumbers,
-        numberCustomers: parsed.numberCustomers && typeof parsed.numberCustomers === 'object'
-            ? parsed.numberCustomers
-            : {}
-    };
 }
 
 function writeConfig(config: TwilioConfig): void {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+    try {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+    } catch (e) {
+        console.warn('Could not write local config file (expected on Vercel):', e);
+    }
 }
 
 export function getNotificationNumbers(): string[] {
@@ -55,36 +65,52 @@ export function saveNotificationNumbers(numbers: string[]): void {
     }
 }
 
-export function getNumberCustomers(): Record<string, string> {
+export async function getNumberCustomers(): Promise<Record<string, string>> {
     try {
-        const config = readConfig();
-        return config.numberCustomers || {};
+        const db = getAdminDb();
+        const doc = await db.collection('twilio_config').doc('numbers').get();
+        if (doc.exists) {
+            return doc.data()?.customers || {};
+        }
+        return {};
     } catch (e) {
-        console.error('Error reading Twilio number customer metadata:', e);
+        console.error('Error reading Twilio number customer metadata from Firestore:', e);
         return {};
     }
 }
 
-export function getNumberCustomer(phoneNumberSid: string): string {
-    const customers = getNumberCustomers();
-    return customers[phoneNumberSid] || '';
+export async function getNumberCustomer(phoneNumberSid: string): Promise<string> {
+    try {
+        const db = getAdminDb();
+        const doc = await db.collection('twilio_config').doc('numbers').get();
+        if (doc.exists) {
+            const customers = doc.data()?.customers || {};
+            return customers[phoneNumberSid] || '';
+        }
+        return '';
+    } catch (e) {
+        console.warn('Error reading customer for SID:', e);
+        return '';
+    }
 }
 
-export function saveNumberCustomer(phoneNumberSid: string, customer: string): void {
+export async function saveNumberCustomer(phoneNumberSid: string, customer: string): Promise<void> {
     try {
-        const config = readConfig();
-        const cleanedCustomer = customer.trim();
-        const customers = config.numberCustomers || {};
+        const db = getAdminDb();
+        const configRef = db.collection('twilio_config').doc('numbers');
+        const doc = await configRef.get();
+        const customers = (doc.data()?.customers || {}) as Record<string, string>;
 
+        const cleanedCustomer = customer.trim();
         if (!cleanedCustomer) {
             delete customers[phoneNumberSid];
         } else {
             customers[phoneNumberSid] = cleanedCustomer;
         }
 
-        config.numberCustomers = customers;
-        writeConfig(config);
+        await configRef.set({ customers }, { merge: true });
     } catch (e) {
-        console.error('Error writing Twilio number customer metadata:', e);
+        console.error('Error saving Twilio number customer metadata to Firestore:', e);
+        throw e;
     }
 }

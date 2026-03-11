@@ -1,0 +1,191 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "createdAt": "2026-02-26T03:22:00Z",
+    "description": "Health & Monitoring TODO Tasks for Mission Control",
+    "taskCount": 9,
+    "materializedBy": "durnik"
+  },
+  "todos": {
+    "health-check-component": {
+      "id": "health-check-component",
+      "title": "Create Health Check Component",
+      "description": "Display real-time agent success rates, cost tracking, system status, and warning indicators",
+      "priority": "HIGH",
+      "owner": "durnik",
+      "status": "IN FLIGHT",
+      "category": "health-monitoring",
+      "tags": ["ui", "real-time", "monitoring"],
+      "acceptance_criteria": [
+        "Real-time agent success rates display",
+        "Live cost tracking indicators", 
+        "System status dashboard",
+        "Warning/alert indicators for failures",
+        "Auto-refresh every 5 seconds"
+      ],
+      "estimate": "3 hours",
+      "dependencies": ["task-registry-api"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "agent-performance-metrics": {
+      "id": "agent-performance-metrics", 
+      "title": "Agent Performance Monitoring Framework",
+      "description": "Comprehensive metrics collection for agent execution time, success rates, and resource usage",
+      "priority": "HIGH",
+      "owner": "taiba",
+      "status": "TODO",
+      "category": "metrics",
+      "tags": ["observability", "performance", "analytics"],
+      "acceptance_criteria": [
+        "Agent execution time tracking",
+        "Success/failure rate calculations",
+        "Token usage monitoring per agent",
+        "Cost per task completion metrics",
+        "Historical performance trending"
+      ],
+      "estimate": "5 hours",
+      "dependencies": ["active-tasks-json", "cost-tracking-fix"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "troubleshooting-actions": {
+      "id": "troubleshooting-actions",
+      "title": "Troubleshooting Quick Actions",
+      "description": "Quick actions for killing stuck agents, running diagnostics, and viewing logs",
+      "priority": "MEDIUM", 
+      "owner": "durnik",
+      "status": "TODO",
+      "category": "troubleshooting",
+      "tags": ["ui", "diagnostics", "maintenance"],
+      "acceptance_criteria": [
+        "Kill stuck agent functionality",
+        "Run system diagnostics",
+        "View agent logs interface",
+        "Clear task registry button",
+        "Emergency reset capabilities"
+      ],
+      "estimate": "4 hours",
+      "dependencies": ["health-check-component"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "cost-tracking-accuracy": {
+      "id": "cost-tracking-accuracy",
+      "title": "Cost Tracking Accuracy Monitoring",
+      "description": "Automated verification that cost tracking shows real costs, not $0.00",
+      "priority": "CRITICAL",
+      "owner": "durnik",
+      "status": "IN FLIGHT", 
+      "category": "cost-monitoring",
+      "tags": ["cost", "validation", "automated-checks"],
+      "acceptance_criteria": [
+        "Automated cost accuracy tests",
+        "Alert when costs show $0.00",
+        "Daily budget tracking validation",
+        "Cost per API call verification",
+        "Monthly spend reporting"
+      ],
+      "estimate": "3 hours",
+      "dependencies": ["cost-tracking-fix"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "system-health-alerts": {
+      "id": "system-health-alerts",
+      "title": "System Health Alerting System",
+      "description": "Real-time alerts for agent failures, system issues, and performance degradation",
+      "priority": "HIGH",
+      "owner": "taiba",
+      "status": "TODO",
+      "category": "alerting",
+      "tags": ["alerts", "real-time", "notifications"],
+      "acceptance_criteria": [
+        "Agent failure notifications",
+        "System performance alerts",
+        "Cost budget warnings", 
+        "Disk space monitoring",
+        "API rate limit notifications"
+      ],
+      "estimate": "4 hours",
+      "dependencies": ["agent-performance-metrics"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "task-lifecycle-monitoring": {
+      "id": "task-lifecycle-monitoring",
+      "title": "Task Lifecycle Monitoring",
+      "description": "Track task progression from TODO → IN FLIGHT → DONE with timing and bottleneck analysis",
+      "priority": "MEDIUM",
+      "owner": "cenedra",
+      "status": "TODO",
+      "category": "workflow-monitoring",
+      "tags": ["workflow", "analytics", "bottlenecks"],
+      "acceptance_criteria": [
+        "Task state transition tracking",
+        "Average time in each state",
+        "Bottleneck identification",
+        "Agent workload distribution",
+        "Task completion velocity metrics"
+      ],
+      "estimate": "4 hours",
+      "dependencies": ["task-registry-api", "agent-performance-metrics"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "git-worktree-health": {
+      "id": "git-worktree-health",
+      "title": "Git Worktree Health Monitoring",
+      "description": "Monitor git worktree status, disk usage, and cleanup stale branches",
+      "priority": "MEDIUM",
+      "owner": "durnik", 
+      "status": "TODO",
+      "category": "infrastructure-monitoring",
+      "tags": ["git", "infrastructure", "cleanup"],
+      "acceptance_criteria": [
+        "Worktree disk usage tracking",
+        "Stale branch identification",
+        "Automated cleanup scheduling",
+        "Branch merge status monitoring",
+        "Git repository health checks"
+      ],
+      "estimate": "3 hours",
+      "dependencies": ["system-health-alerts"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "business-impact-metrics": {
+      "id": "business-impact-metrics",
+      "title": "Business Impact Measurement Framework",
+      "description": "Measure business value delivered by agent tasks and ROI calculations",
+      "priority": "MEDIUM",
+      "owner": "taiba",
+      "status": "TODO",
+      "category": "business-metrics",
+      "tags": ["business", "roi", "value-tracking"],
+      "acceptance_criteria": [
+        "Task business value scoring",
+        "ROI calculation framework",
+        "Time saved measurements",
+        "Quality metrics tracking",
+        "Business outcome correlation"
+      ],
+      "estimate": "6 hours",
+      "dependencies": ["task-lifecycle-monitoring", "cost-tracking-accuracy"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    },
+    "monitoring-dashboard": {
+      "id": "monitoring-dashboard",
+      "title": "Comprehensive Monitoring Dashboard",
+      "description": "Single-pane-of-glass monitoring dashboard aggregating all health, performance, and business metrics",
+      "priority": "HIGH",
+      "owner": "cenedra",
+      "status": "TODO",
+      "category": "dashboard",
+      "tags": ["ui", "dashboard", "visualization"],
+      "acceptance_criteria": [
+        "Real-time metrics visualization",
+        "Historical trend analysis",
+        "Customizable widget layout",
+        "Mobile-responsive design",
+        "Export capabilities for reports"
+      ],
+      "estimate": "5 hours",
+      "dependencies": ["health-check-component", "agent-performance-metrics", "business-impact-metrics"],
+      "createdAt": "2026-02-26T03:22:00Z"
+    }
+  }
+}
