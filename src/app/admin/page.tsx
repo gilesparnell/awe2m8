@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { MonitorPlay, ShieldCheck, ArrowRight, Bot, Code, Wrench } from 'lucide-react';
+import { MonitorPlay, ShieldCheck, ArrowRight, Bot, Code, Wrench, Server } from 'lucide-react';
 
 export default function AdminDashboard() {
     return (
@@ -130,6 +130,23 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                         <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all"></div>
+                    </Link>
+
+                    {/* Tool 7: Dev Server Manager */}
+                    <Link href="/admin/dev-servers" className="group relative overflow-hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-rose-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-rose-900/20 hover:-translate-y-1">
+                        <div className="relative z-10">
+                            <div className="w-12 h-12 bg-rose-900/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-rose-500/20 transition-colors">
+                                <Server className="w-6 h-6 text-rose-400 group-hover:text-rose-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-rose-400 transition-colors">Dev Server Manager</h3>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Monitor & control your local development servers. See ports, start/stop processes.
+                            </p>
+                            <div className="flex items-center text-rose-400 text-sm font-bold group-hover:gap-2 transition-all">
+                                Launch Tool <ArrowRight className="w-4 h-4 ml-1" />
+                            </div>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl group-hover:bg-rose-500/20 transition-all"></div>
                     </Link>
 
                 </div>
