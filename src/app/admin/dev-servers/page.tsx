@@ -20,11 +20,13 @@ export default function DevServersPage() {
     servers,
     loading,
     error,
+    scannerConnected,
     stopServer,
     startServer,
     pausePolling,
     resumePolling,
     refresh,
+    isRemote,
   } = useDevServers();
 
   const [showForm, setShowForm] = useState(false);
@@ -140,6 +142,22 @@ export default function DevServersPage() {
             Auto-refreshes every 5s
           </div>
         </div>
+
+        {/* Scanner not connected banner */}
+        {isRemote && !scannerConnected && !loading && (
+          <div className="mb-6 bg-amber-900/20 border border-amber-800 rounded-2xl p-6">
+            <h3 className="text-lg font-bold text-amber-400 mb-2">Local Scanner Not Connected</h3>
+            <p className="text-gray-400 text-sm mb-3">
+              To see your local dev servers from this production page, start the scanner on your machine:
+            </p>
+            <code className="block bg-gray-950 rounded-lg px-4 py-3 text-sm text-green-400 font-mono">
+              npm run scanner
+            </code>
+            <p className="text-gray-500 text-xs mt-3">
+              This runs a lightweight local service on port 9111 that lets the dashboard detect your running servers.
+            </p>
+          </div>
+        )}
 
         {/* Add Server Form */}
         {showForm && (

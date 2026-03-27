@@ -3,10 +3,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { DevServer } from '@/types/dev-server';
 
+const LOCAL_SCANNER_URL = 'http://localhost:9111';
+
+function getBaseUrl() {
+  if (typeof window === 'undefined') return '';
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  // In production, talk to the local scanner; locally, use the Next.js API routes
+  return isLocal ? '' : LOCAL_SCANNER_URL;
+}
+
+function apiUrl(path: string) {
+  const base = getBaseUrl();
+  // Local: /api/admin/dev-servers, Production: http://localhost:9111/api/dev-servers
+  return base ? `${base}/api/dev-servers${path}` : `/api/admin/dev-servers${path}`;
+}
+
 interface DevServersState {
   servers: DevServer[];
   loading: boolean;
   error: string | null;
+  scannerConnected: boolean;
 }
 
 export function useDevServers(pollInterval = 5000) {
@@ -14,6 +30,7 @@ export function useDevServers(pollInterval = 5000) {
     servers: [],
     loading: true,
     error: null,
+    scannerConnected: true,
   });
   const pauseRef = useRef(false);
 
@@ -21,19 +38,31 @@ export function useDevServers(pollInterval = 5000) {
     if (pauseRef.current) return;
 
     try {
-      const res = await fetch('/api/admin/dev-servers');
+      const res = await fetch(apiUrl(''));
       const data = await res.json();
       if (data.success) {
-        setState({ servers: data.servers, loading: false, error: null });
+        setState({ servers: data.servers, loading: false, error: null, scannerConnected: true });
       } else {
-        setState((prev) => ({ ...prev, loading: false, error: data.error }));
+        setState((prev) => ({ ...prev, loading: false, error: data.error, scannerConnected: true }));
       }
     } catch (err) {
-      setState((prev) => ({
-        ...prev,
-        loading: false,
-        error: err instanceof Error ? err.message : 'Failed to fetch servers',
-      }));
+      const base = getBaseUrl();
+      if (base) {
+        // Production mode — scanner not running
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: null,
+          scannerConnected: false,
+        }));
+      } else {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          scannerConnected: true,
+          error: err instanceof Error ? err.message : 'Failed to fetch servers',
+        }));
+      }
     }
   }, []);
 
@@ -47,7 +76,7 @@ export function useDevServers(pollInterval = 5000) {
 
   const stopServer = useCallback(async (pid: number, port: number) => {
     try {
-      const res = await fetch('/api/admin/dev-servers/stop', {
+      const res = await fetch(apiUrl('/stop'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pid, port }),
@@ -64,7 +93,7 @@ export function useDevServers(pollInterval = 5000) {
 
   const startServer = useCallback(async (name: string, cwd: string, script: string, port: number) => {
     try {
-      const res = await fetch('/api/admin/dev-servers/start', {
+      const res = await fetch(apiUrl('/start'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, cwd, script, port }),
@@ -93,6 +122,7 @@ export function useDevServers(pollInterval = 5000) {
     pausePolling,
     resumePolling,
     refresh: fetchServers,
+    isRemote: getBaseUrl() !== '',
   };
 }
 
