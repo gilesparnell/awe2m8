@@ -31,7 +31,10 @@
       "Bash(git pull:*)",
       "Bash(git reset:*)",
       "Bash(openclaw doctor:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(claude login:*)",
+      "Bash(unset CLAUDECODE && claude login --status)",
+      "Bash(unset CLAUDECODE && claude whoami 2>/dev/null || echo \"Not logged in or command unavailable\")"
     ]
   }
 }
