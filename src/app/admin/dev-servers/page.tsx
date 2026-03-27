@@ -270,6 +270,11 @@ export default function DevServersPage() {
                         {server.source === 'manual' ? 'manual' : 'detected'}
                       </span>
                     </div>
+                    {server.cwd && (
+                      <p className="text-xs text-gray-500 truncate max-w-md" title={server.cwd}>
+                        {server.cwd}
+                      </p>
+                    )}
                     <div className="flex items-center gap-4 mt-1 text-sm text-gray-400">
                       <span className="font-mono">:{server.port}</span>
                       {server.pid && (
