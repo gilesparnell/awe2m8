@@ -204,6 +204,14 @@ const server = http.createServer(async (req, res) => {
   json(res, { error: 'Not found' }, 404);
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`  Dev Scanner already running on port ${PORT}, skipping.`);
+    process.exit(0);
+  }
+  throw err;
+});
+
 server.listen(PORT, () => {
   console.log(`\n  🖥️  Dev Scanner running at http://localhost:${PORT}`);
   console.log(`  Your production dashboard can now detect local dev servers.\n`);

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:stable": "bash ./scripts/dev-stable.sh",
-    "dev:openclaw": "bash ./scripts/dev-stable.sh",
+    "dev": "node scripts/dev-scanner.mjs & next dev",
+    "dev:stable": "node scripts/dev-scanner.mjs & bash ./scripts/dev-stable.sh",
+    "dev:openclaw": "node scripts/dev-scanner.mjs & bash ./scripts/dev-stable.sh",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
