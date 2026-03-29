@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   ChevronLeft,
   Server,
   ExternalLink,
+  FolderOpen,
   Square,
   Play,
   Loader2,
@@ -38,6 +39,19 @@ export default function DevServersPage() {
   });
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const dirInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDirSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // webkitRelativePath gives "dirName/..." — extract the directory name
+      const relativePath = files[0].webkitRelativePath;
+      const dirName = relativePath.split('/')[0];
+      setFormData((prev) => ({ ...prev, cwd: dirName }));
+    }
+    // Reset so the same folder can be re-selected
+    e.target.value = '';
+  };
 
   const handleStop = async (pid: number, port: number) => {
     setActionLoading(port);
@@ -176,13 +190,31 @@ export default function DevServersPage() {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Project Directory</label>
-                <input
-                  type="text"
-                  value={formData.cwd}
-                  onChange={(e) => setFormData({ ...formData, cwd: e.target.value })}
-                  placeholder="/Users/you/projects/my-app"
-                  className="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none"
-                />
+                <div className="relative flex">
+                  <input
+                    type="text"
+                    value={formData.cwd}
+                    onChange={(e) => setFormData({ ...formData, cwd: e.target.value })}
+                    placeholder="/Users/you/projects/my-app"
+                    className="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => dirInputRef.current?.click()}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors"
+                    title="Browse for directory"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                  </button>
+                  <input
+                    ref={dirInputRef}
+                    type="file"
+                    // @ts-expect-error -- webkitdirectory is a non-standard but widely supported attribute
+                    webkitdirectory=""
+                    className="hidden"
+                    onChange={handleDirSelect}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">NPM Script</label>
