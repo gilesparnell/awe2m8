@@ -1,10 +1,17 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import NextAuth from 'next-auth';
+import { authConfig } from '@/lib/auth.config';
 
-export function middleware(_request: NextRequest) {
-  return NextResponse.next();
-}
+export const { auth: middleware } = NextAuth(authConfig);
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimisation)
+     * - favicon.ico (browser icon)
+     * - public assets
+     */
+    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.png$|.*\\.svg$).*)',
+  ],
 };
