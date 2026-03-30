@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getNotificationNumbers, saveNotificationNumbers } from '@/lib/twilio-helpers';
+import { getNotificationNumbers } from '@/lib/twilio-helpers';
 import { auth } from '@/lib/auth';
 
 export async function GET() {
@@ -20,24 +20,4 @@ export async function GET() {
     };
 
     return NextResponse.json({ notificationNumbers, envStatus });
-}
-
-export async function POST(request: Request) {
-    const session = await auth();
-    if (!session?.user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    try {
-        const { notificationNumbers } = await request.json();
-
-        if (!Array.isArray(notificationNumbers)) {
-            return NextResponse.json({ error: 'notificationNumbers must be an array' }, { status: 400 });
-        }
-
-        saveNotificationNumbers(notificationNumbers);
-        return NextResponse.json({ success: true, notificationNumbers });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
 }

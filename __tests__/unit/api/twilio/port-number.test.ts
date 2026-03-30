@@ -35,8 +35,8 @@ jest.mock('@/lib/auth', () => ({
 
 const mockNumberCustomers: Record<string, string> = {};
 jest.mock('@/lib/twilio-helpers', () => ({
-    getNumberCustomer: (sid: string) => mockNumberCustomers[sid] || '',
-    saveNumberCustomer: (sid: string, customer: string) => {
+    getNumberPurpose: (sid: string) => mockNumberCustomers[sid] || '',
+    saveNumberPurpose: (sid: string, customer: string) => {
         const cleaned = (customer || '').trim();
         if (!cleaned) {
             delete mockNumberCustomers[sid];
@@ -192,7 +192,7 @@ describe('Port Number API', () => {
 
             expect(data.success).toBe(true);
             const listed = data.numbers.find((n: any) => n.sid === 'PN_TEST_3');
-            expect(listed.customer).toBe('Customer One');
+            expect(listed.purpose).toBe('Customer One');
         });
 
         it('should list all subaccounts', async () => {
@@ -375,9 +375,9 @@ describe('Port Number API', () => {
             const request = new Request('http://localhost/api/twilio/port-number', {
                 method: 'POST',
                 body: JSON.stringify({
-                    action: 'update-customer',
+                    action: 'update-purpose',
                     phoneNumberSid: 'PN_TEST_99',
-                    customer: 'Example Customer',
+                    purpose: 'Example Customer',
                 }),
             });
 
@@ -385,7 +385,7 @@ describe('Port Number API', () => {
             const data = await response.json();
 
             expect(data.success).toBe(true);
-            expect(data.data.customer).toBe('Example Customer');
+            expect(data.data.purpose).toBe('Example Customer');
             expect(mockNumberCustomers.PN_TEST_99).toBe('Example Customer');
         });
 
@@ -396,9 +396,9 @@ describe('Port Number API', () => {
             const request = new Request('http://localhost/api/twilio/port-number', {
                 method: 'POST',
                 body: JSON.stringify({
-                    action: 'update-customer',
+                    action: 'update-purpose',
                     phoneNumberSid: 'PN_TEST_100',
-                    customer: '   ',
+                    purpose: '   ',
                 }),
             });
 
@@ -406,7 +406,7 @@ describe('Port Number API', () => {
             const data = await response.json();
 
             expect(data.success).toBe(true);
-            expect(data.data.customer).toBe('');
+            expect(data.data.purpose).toBe('');
             expect(mockNumberCustomers.PN_TEST_100).toBeUndefined();
         });
     });

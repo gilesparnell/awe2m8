@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { GHLTriggerPage } from '@/types';
 import { TriggerEditor } from '@/components/admin/ghl/TriggerEditor';
 import { useRouter, useParams } from 'next/navigation';
@@ -19,16 +17,13 @@ export default function EditTriggerPage() {
     useEffect(() => {
         const fetchTrigger = async () => {
             try {
-                const docSnap = await getDoc(doc(db, 'ghl_triggers', id));
-                if (docSnap.exists()) {
-                    setTrigger(docSnap.data() as GHLTriggerPage);
-                    setLoading(false);
-                } else {
-                    setGlobalError('Trigger not found');
-                    setLoading(false);
-                }
+                const res = await fetch(`/api/ghl-triggers/${id}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                setTrigger(data.trigger);
             } catch (err: any) {
                 setGlobalError(err.message || 'Failed to load trigger');
+            } finally {
                 setLoading(false);
             }
         };
@@ -37,20 +32,19 @@ export default function EditTriggerPage() {
     }, [id]);
 
     const handleSave = async (data: { name: string; description: string; code: string }) => {
-        setGlobalError('');
+        const res = await fetch(`/api/ghl-triggers/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
 
-        try {
-            await updateDoc(doc(db, 'ghl_triggers', id), {
-                name: data.name,
-                description: data.description,
-                code: data.code,
-                updatedAt: Date.now()
-            });
+        const result = await res.json();
 
-            router.push('/admin/ghl-workflow-triggers');
-        } catch (err: any) {
-            throw new Error(err.message || 'Failed to update trigger');
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to update trigger');
         }
+
+        router.push('/admin/ghl-workflow-triggers');
     };
 
     if (loading) {

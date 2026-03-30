@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import { authConfig } from './auth.config';
-import { isAdminEmail, getAdminUser, updateLastLogin } from './firebase-admin';
+import { isAdminEmail, getAdminUser, updateLastLogin } from './admin-users';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,

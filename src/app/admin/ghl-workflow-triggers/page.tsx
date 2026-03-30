@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { GHLTriggerPage } from '@/types';
 import { Plus, Copy, Edit2, Trash2, ChevronLeft, AlertCircle, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -18,32 +16,28 @@ export default function GHLTriggersPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        setLoading(true);
-        const triggersQuery = query(
-            collection(db, 'ghl_triggers'),
-            orderBy('createdAt', 'desc')
-        );
-
-        const unsubscribe = onSnapshot(
-            triggersQuery,
-            (snapshot) => {
-                const data = snapshot.docs.map((doc) => doc.data() as GHLTriggerPage);
-                setTriggers(data);
-                setLoading(false);
-            },
-            (err) => {
-                console.error('Error fetching triggers:', err);
-                setError('Failed to load triggers');
+        const fetchTriggers = async () => {
+            try {
+                const res = await fetch('/api/ghl-triggers');
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                setTriggers(data.triggers);
+            } catch (err: any) {
+                setError(err.message || 'Failed to load triggers');
+            } finally {
                 setLoading(false);
             }
-        );
+        };
 
-        return () => unsubscribe();
+        fetchTriggers();
     }, []);
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteDoc(doc(db, 'ghl_triggers', id));
+            const res = await fetch(`/api/ghl-triggers/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            setTriggers((prev) => prev.filter((t) => t.id !== id));
             setDeleteId(null);
         } catch (err: any) {
             setError(err.message || 'Failed to delete trigger');

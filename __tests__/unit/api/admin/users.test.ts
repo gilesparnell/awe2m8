@@ -1,12 +1,13 @@
 
 import { GET, POST, DELETE } from '@/app/api/admin/users/route';
 import { auth } from '@/lib/auth';
-import { listAdminUsers, addAdminUser, deleteAdminUser } from '@/lib/firebase-admin';
+import { listAdminUsers, addAdminUser, deleteAdminUser } from '@/lib/admin-users';
 import { NextResponse } from 'next/server';
 
 // Mock dependencies
 jest.mock('@/lib/auth');
-jest.mock('@/lib/firebase-admin');
+jest.mock('@/lib/prisma', () => ({ prisma: {} }));
+jest.mock('@/lib/admin-users');
 
 const mockAuth = auth as jest.Mock;
 const mockListUsers = listAdminUsers as jest.Mock;

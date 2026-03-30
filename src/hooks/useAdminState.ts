@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ModuleType } from '@/types';
-import { db, auth } from '@/lib/firebase';
-import { doc, setDoc, deleteDoc, collection, getDocs, getDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
 
 export const useAdminState = () => {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -31,52 +28,37 @@ export const useAdminState = () => {
 
     // Load existing pages for edit mode
     useEffect(() => {
-        let unsubscribe: () => void;
-
         if (mode === 'edit') {
             setLoading(true);
-            // Wait for auth to initialize before fetching
-            unsubscribe = onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    loadExistingPages();
-                } else {
-                    // If no user, we can't fetch. The AuthProvider handles the sign-in.
-                    // We just wait. Potentially add a timeout/error if it takes too long.
-                    console.log('Waiting for Firebase Auth...');
-                }
-            });
+            loadExistingPages();
         }
-
-        return () => {
-            if (unsubscribe) unsubscribe();
-        };
     }, [mode]);
 
     const loadExistingPages = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, 'clients'));
-            const pages = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setExistingPages(pages);
+            const res = await fetch('/api/clients');
+            if (!res.ok) throw new Error('Failed to fetch clients');
+            const data = await res.json();
+            setExistingPages(data.clients);
         } catch (err: any) {
             console.error('Failed to load pages:', err);
             setError(`Failed to load pages: ${err.message || 'Unknown error'}`);
+        } finally {
+            setLoading(false);
         }
     };
 
     const loadPageForEditing = async (pageId: string) => {
         setLoading(true);
         try {
-            const docRef = doc(db, 'clients', pageId);
-            const docSnap = await getDoc(docRef);
+            const res = await fetch(`/api/clients/${pageId}`);
+            if (!res.ok) throw new Error('Failed to fetch client');
+            const data = await res.json();
 
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setClientName(data.clientName);
-                setNiche(data.niche);
-                setGeneratedModules(data.modules);
+            if (data.success && data.client) {
+                setClientName(data.client.clientName);
+                setNiche(data.client.niche);
+                setGeneratedModules(data.client.modules);
                 setGeneratedPageId(pageId);
                 setStep('review');
             }
@@ -153,14 +135,18 @@ export const useAdminState = () => {
             const pageId = generatedPageId || clientName.toLowerCase().replace(/[^a-z0-9]/g, '-');
             setGeneratedPageId(pageId);
 
-            await setDoc(doc(db, 'clients', pageId), {
-                id: pageId,
-                clientName,
-                niche,
-                modules: generatedModules,
-                createdAt: Date.now(),
-                updatedAt: Date.now()
+            const res = await fetch('/api/clients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: pageId,
+                    clientName,
+                    niche,
+                    modules: generatedModules,
+                }),
             });
+
+            if (!res.ok) throw new Error('Failed to save');
 
             setStep('preview');
         } catch (err) {
@@ -213,8 +199,8 @@ export const useAdminState = () => {
 
         setLoading(true);
         try {
-            await deleteDoc(doc(db, 'clients', pageId));
-            // Reload pages list
+            const res = await fetch(`/api/clients/${pageId}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete');
             await loadExistingPages();
             setSelectedPageId('');
         } catch (err) {

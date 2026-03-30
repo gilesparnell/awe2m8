@@ -26,12 +26,6 @@ jest.mock('twilio', () => {
     };
 });
 
-// Mock Firebase Admin (if used)
-jest.mock('@/lib/firebase-admin', () => ({
-    getAdminDb: jest.fn(),
-    isAdminEmail: jest.fn().mockResolvedValue(true),
-}));
-
 // Mock NextResponse
 jest.mock('next/server', () => ({
     NextResponse: {

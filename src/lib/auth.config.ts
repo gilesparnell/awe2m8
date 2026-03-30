@@ -16,7 +16,7 @@ export const authConfig = {
             const pathname = nextUrl.pathname;
 
             // Public routes that don't require auth
-            if (pathname === '/login' || pathname.startsWith('/api/auth') || pathname === '/api/debug-auth') {
+            if (pathname === '/login' || pathname.startsWith('/api/auth')) {
                 return true;
             }
 

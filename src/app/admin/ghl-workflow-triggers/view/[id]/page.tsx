@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 import { GHLTriggerPage } from '@/types';
 import { ChevronLeft } from 'lucide-react';
 import { useParams } from 'next/navigation';
@@ -21,16 +19,13 @@ export default function ViewTriggerPage() {
     useEffect(() => {
         const fetchTrigger = async () => {
             try {
-                const docSnap = await getDoc(doc(db, 'ghl_triggers', id));
-                if (docSnap.exists()) {
-                    setTrigger(docSnap.data() as GHLTriggerPage);
-                    setLoading(false);
-                } else {
-                    setError('Trigger not found');
-                    setLoading(false);
-                }
+                const res = await fetch(`/api/ghl-triggers/${id}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                setTrigger(data.trigger);
             } catch (err: any) {
                 setError(err.message || 'Failed to load trigger');
+            } finally {
                 setLoading(false);
             }
         };

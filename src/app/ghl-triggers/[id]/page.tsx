@@ -1,26 +1,22 @@
 import { notFound } from 'next/navigation';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import type { GHLTriggerPage } from '@/types';
+import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
 
     try {
-        const docSnap = await getDoc(doc(db, 'ghl_triggers', id));
+        const trigger = await prisma.ghlTrigger.findUnique({ where: { id } });
 
-        if (!docSnap.exists()) {
+        if (!trigger) {
             return {
                 title: 'Not Found | GHL Trigger',
             };
         }
 
-        const data = docSnap.data() as GHLTriggerPage;
-
         return {
-            title: data.name,
-            description: data.description || 'GHL Workflow Trigger',
+            title: trigger.name,
+            description: trigger.description || 'GHL Workflow Trigger',
             robots: 'noindex, nofollow',
         };
     } catch {
@@ -38,17 +34,15 @@ export default async function GHLTriggerPage({
     const { id } = await params;
 
     try {
-        const docSnap = await getDoc(doc(db, 'ghl_triggers', id));
+        const trigger = await prisma.ghlTrigger.findUnique({ where: { id } });
 
-        if (!docSnap.exists()) {
+        if (!trigger) {
             notFound();
         }
 
-        const data = docSnap.data() as GHLTriggerPage;
-
         return (
             <iframe
-                srcDoc={data.code}
+                srcDoc={trigger.code}
                 className="w-full h-screen border-0"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
                 allow="microphone; camera; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write"

@@ -30,7 +30,7 @@ const mockNumbersResponseSource = {
             phoneNumber: '+1234567890',
             friendlyName: 'My Number',
             accountSid: 'AC_SOURCE',
-            customer: 'Acme Corp'
+            purpose: 'Acme Corp'
         }
     ]
 };
@@ -91,11 +91,11 @@ describe('NumberManager Component', () => {
                 });
             }
 
-            if (body.action === 'update-customer') {
+            if (body.action === 'update-purpose') {
                 return Promise.resolve({
                     json: () => Promise.resolve({
                         success: true,
-                        data: { sid: body.phoneNumberSid, customer: body.customer?.trim() || '' }
+                        data: { sid: body.phoneNumberSid, purpose: body.purpose?.trim() || '' }
                     }),
                     ok: true
                 });
@@ -143,7 +143,7 @@ describe('NumberManager Component', () => {
 
         // Check for number
         expect(screen.getByText('+1234567890')).toBeInTheDocument();
-        expect(screen.getByText(/Customer: Acme Corp/i)).toBeInTheDocument();
+        expect(screen.getByText(/Purpose: Acme Corp/i)).toBeInTheDocument();
     });
 
     it('opens dropdown and executes move on click', async () => {
@@ -193,9 +193,9 @@ describe('NumberManager Component', () => {
             expect(screen.getByText('+1234567890')).toBeInTheDocument();
         });
 
-        fireEvent.click(screen.getByTitle('Edit Customer'));
+        fireEvent.click(screen.getByTitle('Edit Purpose'));
 
-        const input = screen.getByPlaceholderText('Optional customer');
+        const input = screen.getByPlaceholderText('Optional purpose');
         fireEvent.change(input, { target: { value: 'Beta Client' } });
 
         fireEvent.click(screen.getByTitle('Save Customer'));
@@ -203,12 +203,12 @@ describe('NumberManager Component', () => {
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith('/api/twilio/port-number', expect.objectContaining({
                 method: 'POST',
-                body: expect.stringContaining('"action":"update-customer"')
+                body: expect.stringContaining('"action":"update-purpose"')
             }));
         });
 
         await waitFor(() => {
-            expect(screen.getByText(/Customer: Beta Client/i)).toBeInTheDocument();
+            expect(screen.getByText(/Purpose: Beta Client/i)).toBeInTheDocument();
         });
     });
 
@@ -219,12 +219,12 @@ describe('NumberManager Component', () => {
             expect(screen.getByText('+1234567890')).toBeInTheDocument();
         });
 
-        fireEvent.change(screen.getByPlaceholderText('Search numbers by customer'), { target: { value: 'Acme' } });
+        fireEvent.change(screen.getByPlaceholderText('Search numbers by purpose'), { target: { value: 'Acme' } });
         expect(screen.getByText('+1234567890')).toBeInTheDocument();
 
-        fireEvent.change(screen.getByPlaceholderText('Search numbers by customer'), { target: { value: 'Missing Customer' } });
+        fireEvent.change(screen.getByPlaceholderText('Search numbers by purpose'), { target: { value: 'Missing Customer' } });
         expect(screen.queryByText('+1234567890')).not.toBeInTheDocument();
-        expect(screen.getByText(/No matching customers/i)).toBeInTheDocument();
+        expect(screen.getByText(/No matching purposes/i)).toBeInTheDocument();
     });
 
     it('searches and creates a new number for selected subaccount', async () => {

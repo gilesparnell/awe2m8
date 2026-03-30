@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  dev-server start <project_path> [session_name]
+  dev-server stop <project_path> [session_name]
+  dev-server restart <project_path> [session_name]
+  dev-server status <project_path> [session_name]
+  dev-server logs <project_path> [session_name]
+  dev-server attach <project_path> [session_name]
+
+Notes:
+- Runs your dev server in tmux so it survives editor/app restarts.
+- Auto-detects npm/pnpm/yarn/bun from lockfiles.
+USAGE
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+  exit 1
+fi
+
+action="$1"
+project_path="$2"
+custom_session="${3:-}"
+
+if [[ ! -d "$project_path" ]]; then
+  echo "Project path not found: $project_path" >&2
+  exit 1
+fi
+
+project_abs="$(cd "$project_path" && pwd)"
+package_json="$project_abs/package.json"
+log_file="$project_abs/.dev-server.log"
+
+if [[ ! -f "$package_json" ]]; then
+  echo "No package.json found in: $project_abs" >&2
+  exit 1
+fi
+
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "tmux is required. Install with: brew install tmux" >&2
+  exit 1
+fi
+
+sanitize() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//'
+}
+
+default_session="dev-$(sanitize "$(basename "$project_abs")")"
+session_name="${custom_session:-$default_session}"
+
+has_dev_script() {
+  node -e "const p=require(process.argv[1]); process.exit(p.scripts&&p.scripts.dev?0:1)" "$package_json" >/dev/null 2>&1
+}
+
+detect_runner() {
+  local runner=""
+
+  if [[ -f "$project_abs/pnpm-lock.yaml" ]] && command -v pnpm >/dev/null 2>&1; then
+    runner="pnpm dev"
+  elif [[ -f "$project_abs/yarn.lock" ]] && command -v yarn >/dev/null 2>&1; then
+    runner="yarn dev"
+  elif [[ -f "$project_abs/bun.lockb" || -f "$project_abs/bun.lock" ]] && command -v bun >/dev/null 2>&1; then
+    runner="bun run dev"
+  elif command -v npm >/dev/null 2>&1; then
+    runner="npm run dev"
+  fi
+
+  if [[ -z "$runner" ]]; then
+    echo "No compatible package manager found (npm/pnpm/yarn/bun)." >&2
+    return 1
+  fi
+
+  if ! has_dev_script; then
+    echo "No 'dev' script found in $package_json" >&2
+    return 1
+  fi
+
+  echo "$runner"
+}
+
+start_server() {
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    echo "Session already running: $session_name"
+    return 0
+  fi
+
+  local run_cmd
+  run_cmd="$(detect_runner)"
+
+  : > "$log_file"
+
+  tmux new-session -d -s "$session_name" "cd '$project_abs' && echo '[dev-server] started at '$(date) >> '$log_file' && $run_cmd >> '$log_file' 2>&1"
+  echo "Started: $session_name"
+  echo "Project: $project_abs"
+  echo "Command: $run_cmd"
+  echo "Logs: $log_file"
+}
+
+stop_server() {
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux kill-session -t "$session_name"
+    echo "Stopped: $session_name"
+  else
+    echo "Not running: $session_name"
+  fi
+}
+
+status_server() {
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    echo "Running: $session_name"
+    echo "Project: $project_abs"
+    echo "Logs: $log_file"
+  else
+    echo "Not running: $session_name"
+  fi
+}
+
+logs_server() {
+  if [[ -f "$log_file" ]]; then
+    tail -n 120 -f "$log_file"
+  elif tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux capture-pane -p -t "$session_name"
+  else
+    echo "No logs found and session is not running."
+    exit 1
+  fi
+}
+
+attach_server() {
+  tmux attach -t "$session_name"
+}
+
+case "$action" in
+  start)
+    start_server
+    ;;
+  stop)
+    stop_server
+    ;;
+  restart)
+    stop_server
+    start_server
+    ;;
+  status)
+    status_server
+    ;;
+  logs)
+    logs_server
+    ;;
+  attach)
+    attach_server
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

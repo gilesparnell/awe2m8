@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { listAdminUsers, addAdminUser, deleteAdminUser } from '@/lib/firebase-admin';
+import { listAdminUsers, addAdminUser, deleteAdminUser } from '@/lib/admin-users';
 
 // GET - List all admin users
 export async function GET() {
