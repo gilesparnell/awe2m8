@@ -8,13 +8,7 @@ interface SuccessScreenProps {
 }
 
 export const SuccessScreen: React.FC<SuccessScreenProps> = ({ mode, pageId, onReset }) => {
-    const [origin, setOrigin] = React.useState('');
-
-    React.useEffect(() => {
-        setOrigin(window.location.origin);
-    }, []);
-
-    const liveUrl = `${origin}/${pageId}`;
+    const liveUrl = `https://demos.parnellsystems.com/${pageId}`;
 
     return (
         <div className="text-center space-y-8 animate-in zoom-in duration-300">
