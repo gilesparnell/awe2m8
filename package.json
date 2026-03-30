@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/dev-scanner.mjs & next dev",
     "dev:stable": "node scripts/dev-scanner.mjs & bash ./scripts/dev-stable.sh",
+    "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
