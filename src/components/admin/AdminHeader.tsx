@@ -12,7 +12,7 @@ export function AdminHeader() {
                     <div className="flex-shrink-0">
                         <Link href="/admin" className="flex items-center gap-2 group">
                             <span className="text-xl font-extrabold tracking-tight text-white group-hover:text-green-400 transition-colors">
-                                AWE2M8 <span className="text-green-500">Admin</span>
+                                Parnell Systems <span className="text-green-500">Admin</span>
                             </span>
                         </Link>
                     </div>

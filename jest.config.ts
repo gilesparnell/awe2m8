@@ -1,7 +1,7 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-    displayName: 'awe2m8',
+    displayName: 'parnell-systems',
     testEnvironment: 'node',
     transform: {
         '^.+\\.(ts|tsx)$': ['ts-jest', {

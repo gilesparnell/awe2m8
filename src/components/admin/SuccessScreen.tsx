@@ -37,7 +37,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ mode, pageId, onRe
                     className="flex items-center justify-center gap-2 text-green-400 font-mono bg-black p-3 rounded-lg hover:text-green-300 transition-colors text-sm break-all"
                 >
                     <Globe className="w-4 h-4 flex-shrink-0" />
-                    demos.awe2m8.ai/{pageId}
+                    demos.parnellsystems.com/{pageId}
                 </a>
             </div>
 

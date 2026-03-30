@@ -15,7 +15,7 @@ export default function AdminDashboard() {
                     </div>
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                            AWE2M8
+                            Parnell Systems
                         </span>{' '}
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
                             Command Center

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     try {
         // Use specific phone number for SMS sending
-        // Phone: +61485009296 (Australian number for AWE2M8)
+        // Phone: +61485009296 (Australian number for Parnell Systems)
         // This number must belong to the account specified by smsAccountSid
         const fromNumber = '+61485009296';
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
         const results = await Promise.all(notifyNumbers.map((number: string) =>
             client.messages.create({
-                body: '🔔 Test SMS from AWE2M8 Twilio Admin. Your configuration is working correctly!',
+                body: '🔔 Test SMS from Parnell Systems Twilio Admin. Your configuration is working correctly!',
                 from: fromNumber,
                 to: number
             })

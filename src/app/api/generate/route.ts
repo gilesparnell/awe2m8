@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             messages: [
                 {
                     role: "system",
-                    content: `You are a world-class copywriter for AWE2M8, an AI Automation Agency. 
+                    content: `You are a world-class copywriter for Parnell Systems, an AI Automation Agency. 
           Generate high-converting content for a client demo page.
           Client: ${clientName} (${niche}).
           Website: ${url}

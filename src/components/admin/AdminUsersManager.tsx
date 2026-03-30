@@ -123,7 +123,7 @@ export function AdminUsersManager({ currentUserEmail }: AdminUsersManagerProps) 
                 Admin Users
               </h1>
               <p className="text-gray-400 mt-1">
-                Manage who can access the AWE2M8 Command Center
+                Manage who can access the Parnell Systems Command Center
               </p>
             </div>
             <button

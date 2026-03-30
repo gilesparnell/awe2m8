@@ -21,7 +21,7 @@ export default async function LoginPage({
           <div className="text-center mb-8">
             <h1 className="text-3xl font-extrabold tracking-tight mb-2">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                AWE2M8
+                Parnell Systems
               </span>{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
                 Portal
