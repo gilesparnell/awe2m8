@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Intelligence — Plan Progress</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         #0f1117;
+    --surface:    #151821;
+    --border:     #1e293b;
+    --text1:      #e2e8f0;
+    --text2:      #94a3b8;
+    --text3:      #475569;
+    --mono:       'SF Mono', Menlo, monospace;
+
+    --green-bg:     #0a1f14; --green-border:  #059669; --green-text:  #34d399;
+    --amber-bg:     #1a1208; --amber-border:  #d97706; --amber-text:  #fbbf24;
+    --blue-bg:      #0f1a2e; --blue-border:   #3b82f6; --blue-text:   #60a5fa;
+    --purple-bg:    #1a1035; --purple-border: #6d28d9; --purple-text: #a78bfa;
+    --teal-bg:      #051a18; --teal-border:   #0d9488; --teal-text:   #2dd4bf;
+    --slate-bg:     #111827; --slate-border:  #374151; --slate-text:  #9ca3af;
+    --rose-bg:      #1a0808; --rose-border:   #e11d48; --rose-text:   #fb7185;
+    --coral-bg:     #1a0f08; --coral-border:  #ea580c; --coral-text:  #fb923c;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text1);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  .page-title { text-align: center; font-size: 18px; font-weight: 600; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .page-subtitle { text-align: center; font-size: 13px; color: var(--text3); margin-bottom: 12px; }
+  .page-date { text-align: center; font-size: 11px; color: var(--text3); font-family: var(--mono); margin-bottom: 40px; }
+
+  .diagram { max-width: 1100px; margin: 0 auto; }
+
+  .progress-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin-bottom: 36px; }
+  .progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .progress-label { font-size: 13px; font-weight: 600; color: var(--text2); }
+  .progress-pct { font-size: 22px; font-weight: 700; color: var(--green-text); font-family: var(--mono); }
+  .progress-bar-track { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .progress-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+  .progress-stat { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .stat-dot.done { background: var(--green-text); }
+  .stat-dot.progress { background: var(--amber-text); }
+  .stat-dot.todo { background: var(--slate-text); }
+
+  .workstreams { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 36px; }
+  .ws-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .ws-band { padding: 16px 20px 12px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .ws-id { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .ws-name { font-size: 14px; font-weight: 700; }
+  .ws-pct { font-size: 18px; font-weight: 700; font-family: var(--mono); }
+  .ws-bar-track { height: 3px; background: var(--border); margin: 0 20px; }
+  .ws-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+  .ws-tasks { padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 6px; }
+  .task { font-size: 11px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+  .task-icon { flex-shrink: 0; font-size: 12px; margin-top: 1px; }
+  .task-text { color: var(--text2); }
+  .task.done .task-text { color: var(--green-text); text-decoration: line-through; opacity: 0.7; }
+  .task.progress .task-text { color: var(--amber-text); }
+
+  .ws-green  { border-color: var(--green-border); }
+  .ws-green .ws-band { background: var(--green-bg); }
+  .ws-green .ws-id, .ws-green .ws-name, .ws-green .ws-pct { color: var(--green-text); }
+  .ws-green .ws-bar-fill { background: var(--green-text); }
+
+  .ws-amber  { border-color: var(--amber-border); }
+  .ws-amber .ws-band { background: var(--amber-bg); }
+  .ws-amber .ws-id, .ws-amber .ws-name, .ws-amber .ws-pct { color: var(--amber-text); }
+  .ws-amber .ws-bar-fill { background: var(--amber-text); }
+
+  .ws-blue   { border-color: var(--blue-border); }
+  .ws-blue .ws-band { background: var(--blue-bg); }
+  .ws-blue .ws-id, .ws-blue .ws-name, .ws-blue .ws-pct { color: var(--blue-text); }
+  .ws-blue .ws-bar-fill { background: var(--blue-text); }
+
+  .ws-purple { border-color: var(--purple-border); }
+  .ws-purple .ws-band { background: var(--purple-bg); }
+  .ws-purple .ws-id, .ws-purple .ws-name, .ws-purple .ws-pct { color: var(--purple-text); }
+  .ws-purple .ws-bar-fill { background: var(--purple-text); }
+
+  .ws-teal   { border-color: var(--teal-border); }
+  .ws-teal .ws-band { background: var(--teal-bg); }
+  .ws-teal .ws-id, .ws-teal .ws-name, .ws-teal .ws-pct { color: var(--teal-text); }
+  .ws-teal .ws-bar-fill { background: var(--teal-text); }
+
+  .ws-slate  { border-color: var(--slate-border); }
+  .ws-slate .ws-band { background: var(--slate-bg); }
+  .ws-slate .ws-id, .ws-slate .ws-name, .ws-slate .ws-pct { color: var(--slate-text); }
+  .ws-slate .ws-bar-fill { background: var(--slate-text); }
+
+  .ws-coral  { border-color: var(--coral-border); }
+  .ws-coral .ws-band { background: var(--coral-bg); }
+  .ws-coral .ws-id, .ws-coral .ws-name, .ws-coral .ws-pct { color: var(--coral-text); }
+  .ws-coral .ws-bar-fill { background: var(--coral-text); }
+
+  .legend { display: flex; gap: 20px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+  .legend-item { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+
+  .nav-links { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .nav-link { font-size: 12px; font-weight: 600; color: var(--blue-text); background: var(--blue-bg); border: 1px solid var(--blue-border); padding: 6px 16px; border-radius: 6px; text-decoration: none; transition: opacity 0.2s; }
+  .nav-link:hover { opacity: 0.8; }
+  .nav-link.teal { color: var(--teal-text); background: var(--teal-bg); border-color: var(--teal-border); }
+  .nav-link.purple { color: var(--purple-text); background: var(--purple-bg); border-color: var(--purple-border); }
+
+  .next-items { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 28px; margin-bottom: 24px; }
+  .next-items h3 { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+  .next-items ol { padding-left: 18px; }
+  .next-items li { font-size: 12px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
+  .next-items li strong { color: var(--rose-text); font-weight: 700; }
+  .next-items li em { color: var(--amber-text); font-style: normal; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="page-title">Platform Intelligence</div>
+  <div class="page-subtitle">Plan Progress &middot; Internal Operations Dashboard</div>
+  <div class="page-date">Last updated: 2026-04-13 &middot; v0.1.0</div>
+
+  <div class="nav-links">
+    <a class="nav-link" href="../index.html">&larr; Project Docs</a>
+    <a class="nav-link teal" href="https://github.com/gilesparnell/parnellsystems-platform" target="_blank" rel="noopener">&#128194; GitHub Repo</a>
+    <a class="nav-link purple" href="https://github.com/gilesparnell/parnellsystems-platform/tree/main/docs/plans" target="_blank" rel="noopener">&#128506; Plans Folder</a>
+  </div>
+
+  <!-- ── OVERALL PROGRESS ── -->
+  <!-- 30 done, 2 in progress, 14 todo / 46 total = ~67% -->
+  <div class="progress-summary">
+    <div class="progress-header">
+      <span class="progress-label">Overall Plan Completion</span>
+      <span class="progress-pct">~67%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" style="width: 67%; background: linear-gradient(90deg, var(--green-text), var(--teal-text))"></div>
+    </div>
+    <div class="progress-stats">
+      <div class="progress-stat"><span class="stat-dot done"></span> 30 tasks done</div>
+      <div class="progress-stat"><span class="stat-dot progress"></span> 2 in progress</div>
+      <div class="progress-stat"><span class="stat-dot todo"></span> 14 remaining</div>
+      <div class="progress-stat"><span class="stat-dot" style="background:var(--coral-text)"></span> Last commit: 2026-03-30</div>
+    </div>
+  </div>
+
+  <!-- ── WORKSTREAM CARDS ── -->
+  <div class="workstreams">
+
+    <!-- W1: Foundation / Identity Migration — 6/7 = 86% -->
+    <div class="ws-card ws-green">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W1 &middot; Foundation</div>
+          <div class="ws-name">Identity &amp; Repo Rename</div>
+        </div>
+        <div class="ws-pct">86%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:86%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Repo renamed awe2m8 &rarr; parnellsystems-platform</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Google Workspace + parnellsystems.com domain</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Vercel project internal.parnellsystems.com</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">GitHub Actions updated for new repo</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Google OAuth credentials re-issued</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">UI rebrand across app (AWE2M8 &rarr; Parnell Systems)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">One-week DNS/SSL stability verification</span></div>
+      </div>
+    </div>
+
+    <!-- W2: Firebase → Supabase Migration — 5 done, 1 progress, 2 todo of 8 = 69% -->
+    <div class="ws-card ws-amber">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W2 &middot; Core Database</div>
+          <div class="ws-name">Firebase &rarr; Supabase</div>
+        </div>
+        <div class="ws-pct">69%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:69%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Supabase project &amp; Postgres schema</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Prisma v7 + PrismaPg adapter</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">AdminUser collection migrated (Wave 2)</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Activity feed migrated (Wave 3)</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Agents &amp; Tasks w/ sub-collections (Wave 4)</span></div>
+        <div class="task progress"><span class="task-icon">&#9672;</span> <span class="task-text">Remove Firebase SDK + delete config files</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Migrate Clients &amp; GHL Triggers (Wave 5)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Full Firebase cleanup &amp; validation (Wave 6)</span></div>
+      </div>
+    </div>
+
+    <!-- W3: Dev Server Manager — 6/8 = 75% -->
+    <div class="ws-card ws-amber">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W3 &middot; Admin Tools</div>
+          <div class="ws-name">Dev Server Manager</div>
+        </div>
+        <div class="ws-pct">75%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:75%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Port scanner + process list</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Start/stop API routes with security guards</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Polling hook (5s refresh)</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Dev Server Manager card on /admin</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Folder browser for project selection</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Auto-start scanner on dev server launch</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Edge case tests (port conflicts, crashed procs)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">TDD coverage for scanner logic</span></div>
+      </div>
+    </div>
+
+    <!-- W4: Mission Control — 4 done, 1 progress, 3 todo = 56% -->
+    <div class="ws-card ws-coral">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W4 &middot; Mission Control</div>
+          <div class="ws-name">Agent Squad Dashboard</div>
+        </div>
+        <div class="ws-pct">56%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:56%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">11 clan agents wired in UI</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Mission Control v3 (Dashboard/Activity/Board/Team)</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Squad Showcase with avatars</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Agent status bar + hierarchical sidebar</span></div>
+        <div class="task progress"><span class="task-icon">&#9672;</span> <span class="task-text">Cost tracking (infra exists, logs $0.00 &mdash; CRITICAL)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Real API cost logging per agent spawn</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Daily budget tracking &amp; alerts</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Health monitoring dashboard</span></div>
+      </div>
+    </div>
+
+    <!-- W5: Auth & Security — 5/7 = 71% -->
+    <div class="ws-card ws-amber">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W5 &middot; Auth &amp; Security</div>
+          <div class="ws-name">NextAuth &amp; Access Control</div>
+        </div>
+        <div class="ws-pct">71%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:71%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Firebase Auth &rarr; NextAuth v5 (Google OAuth)</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">OAuth credentials on parnellsystems.com</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Admin user management via Prisma</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Auth middleware on protected routes</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Admin users seeded into Supabase</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Audit logging for admin actions</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">2FA for sensitive operations</span></div>
+      </div>
+    </div>
+
+    <!-- W6: API / Integration — 4 done, 1 progress, 3 todo = 56% -->
+    <div class="ws-card ws-coral">
+      <div class="ws-band">
+        <div>
+          <div class="ws-id">W6 &middot; Integration</div>
+          <div class="ws-name">Twilio / OpenAI / GHL</div>
+        </div>
+        <div class="ws-pct">56%</div>
+      </div>
+      <div class="ws-bar-track"><div class="ws-bar-fill" style="width:56%"></div></div>
+      <div class="ws-tasks">
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Twilio number provisioning in Postgres</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Demo links point at demos.parnellsystems.com</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">GHL trigger confirmation UI</span></div>
+        <div class="task done"><span class="task-icon">&#10003;</span> <span class="task-text">Agent status mapping fixed (completed &ne; running)</span></div>
+        <div class="task progress"><span class="task-icon">&#9672;</span> <span class="task-text">OpenAI SDK still in use (AI SDK migration pending)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Wrap AI calls in lib/ai.ts service layer</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Migrate to Vercel AI SDK (Anthropic primary)</span></div>
+        <div class="task"><span class="task-icon">&#9675;</span> <span class="task-text">Resend for transactional email</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── IMMEDIATE NEXT ── -->
+  <div class="next-items">
+    <h3>Top Immediate Next Items</h3>
+    <ol>
+      <li><strong>[CRITICAL]</strong> Fix cost tracking $0.00 bug &mdash; Mission Control cannot enforce budgets until real API costs are logged per agent spawn. <em>~2&ndash;3h.</em></li>
+      <li>Complete Firebase cleanup (Wave 6) &mdash; remove <code>firebase</code> / <code>firebase-admin</code> packages, delete config files, verify zero imports. <em>~1h.</em></li>
+      <li>Migrate Clients &amp; GHL Triggers (Wave 5) &mdash; last Firestore collections to move. <em>~3&ndash;4h.</em></li>
+      <li>Vercel AI SDK migration &mdash; wrap OpenAI calls in <code>lib/ai.ts</code>, switch Anthropic primary. <em>~4&ndash;6h.</em></li>
+      <li>Mission Control health monitoring &amp; budget alerts. <em>~3&ndash;4h.</em></li>
+    </ol>
+  </div>
+
+  <!-- ── LEGEND ── -->
+  <div class="legend">
+    <div class="legend-item"><span class="stat-dot done"></span> Done</div>
+    <div class="legend-item"><span class="stat-dot progress"></span> In Progress</div>
+    <div class="legend-item"><span class="stat-dot todo"></span> Not Started</div>
+  </div>
+
+</div>
+</body>
+</html>
