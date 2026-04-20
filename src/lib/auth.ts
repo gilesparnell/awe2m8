@@ -37,8 +37,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return '/login?error=AccessDenied';
         }
 
-        // Update last login timestamp
-        await updateLastLogin(user.email);
+        // Update last login timestamp and sync name from Google profile
+        await updateLastLogin(user.email, user.name);
         console.log(`[Auth] Login successful and timestamp updated for ${user.email}`);
       } catch (error: any) {
         console.error('[Auth] Critical error during sign-in check:', error);
