@@ -16,10 +16,15 @@ export async function getAdminUser(email: string): Promise<AdminUser | null> {
   })
 }
 
-export async function updateLastLogin(email: string): Promise<void> {
+export async function updateLastLogin(
+  email: string,
+  googleName?: string | null,
+): Promise<void> {
   await prisma.adminUser.update({
     where: { email: email.toLowerCase() },
-    data: { lastLogin: new Date() },
+    data: googleName
+      ? { lastLogin: new Date(), name: googleName }
+      : { lastLogin: new Date() },
   })
 }
 
